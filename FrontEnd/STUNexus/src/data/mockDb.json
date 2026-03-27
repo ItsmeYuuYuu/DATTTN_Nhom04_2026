@@ -1,0 +1,128 @@
+{
+  "QuanTriVien": [
+    {
+      "MaQTV": "ADMIN01",
+      "TaiKhoan": "admin",
+      "MatKhau": "123456",
+      "HoTen": "Quản Trị Viên Hệ Thống"
+    }
+  ],
+  "GiangVien": [
+    {
+      "MaGV": "GV01",
+      "TaiKhoan": "gv01",
+      "MatKhau": "123456",
+      "HoTen": "Nguyễn Văn A",
+      "Email": "nva@stu.edu.vn",
+      "SoDienThoai": "0123456789",
+      "TrangThai": true
+    },
+    {
+      "MaGV": "GV02",
+      "TaiKhoan": "gv02",
+      "MatKhau": "123456",
+      "HoTen": "Trần Thị B",
+      "Email": "ttb@stu.edu.vn",
+      "SoDienThoai": "0987654321",
+      "TrangThai": true
+    }
+  ],
+  "SinhVien": [
+    {
+      "MaSV": "SV001",
+      "TaiKhoan": "sv001",
+      "MatKhau": "123456",
+      "HoTen": "Lê Văn C",
+      "NgaySinh": "2000-01-01",
+      "Email": "lvc@stu.edu.vn",
+      "SoDienThoai": "0912345678",
+      "AnhDaiDien": null
+    },
+    {
+      "MaSV": "SV002",
+      "TaiKhoan": "sv002",
+      "MatKhau": "123456",
+      "HoTen": "Phạm Thị D",
+      "NgaySinh": "2001-02-02",
+      "Email": "ptd@stu.edu.vn",
+      "SoDienThoai": "0923456789",
+      "AnhDaiDien": null
+    }
+  ],
+  "MonHoc": [
+    {
+      "MaMon": "MH01",
+      "TenMon": "Lập trình Web"
+    },
+    {
+      "MaMon": "MH02",
+      "TenMon": "Cơ sở dữ liệu"
+    }
+  ],
+  "LopHoc": [
+    {
+      "MaLop": "LH01",
+      "TenLop": "Lập trình Web - K20",
+      "MaMon": "MH01",
+      "MaGV": "GV01"
+    },
+    {
+      "MaLop": "LH02",
+      "TenLop": "Cơ sở dữ liệu - K20",
+      "MaMon": "MH02",
+      "MaGV": "GV02"
+    }
+  ],
+  "ChiTietLopHoc": [
+    {
+      "MaLop": "LH01",
+      "MaSV": "SV001"
+    },
+    {
+      "MaLop": "LH01",
+      "MaSV": "SV002"
+    },
+    {
+      "MaLop": "LH02",
+      "MaSV": "SV001"
+    }
+  ],
+  "BuoiHoc": [
+    {
+      "MaBuoiHoc": 1,
+      "MaLop": "LH01",
+      "NgayHoc": "2026-03-27",
+      "GioBatDau": "07:30",
+      "GioKetThuc": "09:30",
+      "GhiChu": "Buổi học đầu tiên",
+      "ToaDoGoc_Lat": 10.738,
+      "ToaDoGoc_Long": 106.678
+    }
+  ],
+  "DiemDanh": [
+    {
+      "MaDiemDanh": 1,
+      "MaBuoiHoc": 1,
+      "MaSV": "SV001",
+      "TrangThai": "Đi trễ",
+      "ThoiGianQuet": "2026-03-27T07:45:00",
+      "GhiChu": "Kẹt xe",
+      "NguoiCapNhat": "Nguyễn Văn A",
+      "FingerprintID": null,
+      "ToaDoSV_Lat": 10.7381,
+      "ToaDoSV_Long": 106.6781
+    },
+    {
+      "MaDiemDanh": 2,
+      "MaBuoiHoc": 1,
+      "MaSV": "SV002",
+      "TrangThai": "Có mặt",
+      "ThoiGianQuet": "2026-03-27T07:25:00",
+      "GhiChu": null,
+      "NguoiCapNhat": "Nguyễn Văn A",
+      "FingerprintID": null,
+      "ToaDoSV_Lat": 10.738,
+      "ToaDoSV_Long": 106.678
+    }
+  ]
+}
