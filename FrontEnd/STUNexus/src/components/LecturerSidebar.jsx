@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { FaChalkboardTeacher, FaSignOutAlt, FaChartPie } from 'react-icons/fa';
+import { FaUserGraduate, FaSignOutAlt, FaChartPie, FaBook } from 'react-icons/fa';
 import { AuthContext } from '../context/AuthContext';
 
 const LecturerSidebar = () => {
@@ -20,15 +20,19 @@ const LecturerSidebar = () => {
       
       <div className="sidebar-nav">
         <div className="px-4 py-2 mt-2 text-uppercase text-muted fw-bold" style={{fontSize: '0.75rem', letterSpacing: '1px'}}>
-          Công Việc
+          Không Gian Quản Lý
         </div>
-        <NavLink to="/lecturer/classes" className={({isActive}) => `nav-item-link ${isActive ? 'active' : ''}`}>
-          <FaChalkboardTeacher />
-          <span>Lớp Giảng Dạy</span>
-        </NavLink>
         <NavLink to="/lecturer/dashboard" className={({isActive}) => `nav-item-link ${isActive ? 'active' : ''}`}>
           <FaChartPie />
-          <span>Thống kê điểm danh</span>
+          <span>Thống kê & Báo cáo</span>
+        </NavLink>
+        <NavLink to="/lecturer/students" className={({isActive}) => `nav-item-link ${isActive ? 'active' : ''}`}>
+          <FaUserGraduate />
+          <span>Quản lý Sinh Viên</span>
+        </NavLink>
+        <NavLink to="/lecturer/subjects" className={({isActive}) => `nav-item-link ${isActive ? 'active' : ''}`}>
+          <FaBook />
+          <span>Quản lý Môn / Lớp Học</span>
         </NavLink>
       </div>
 

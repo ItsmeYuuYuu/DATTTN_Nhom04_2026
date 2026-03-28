@@ -42,10 +42,7 @@ function App() {
           }>
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="students" element={<StudentManagement />} />
             <Route path="lecturers" element={<LecturerManagement />} />
-            <Route path="classes" element={<ClassManagement />} />
-            <Route path="subjects" element={<SubjectManagement />} />
           </Route>
 
           {/* Lecturer Routes */}
@@ -57,6 +54,9 @@ function App() {
             <Route index element={<Navigate to="/lecturer/dashboard" replace />} />
             <Route path="dashboard" element={<LecturerDashboard />} />
             <Route path="classes" element={<LecturerClasses />} />
+            <Route path="students" element={<StudentManagement />} />
+            <Route path="subjects" element={<SubjectManagement />} />
+            <Route path="subjects/:monId/classes" element={<ClassManagement />} />
             <Route path="sessions/:classId" element={<SessionsManagement />} />
             <Route path="qr-attendance/:classId" element={<QRAttendance />} />
             <Route path="manual/:classId" element={<ManualAttendance />} />

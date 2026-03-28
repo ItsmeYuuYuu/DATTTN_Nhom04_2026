@@ -27,18 +27,6 @@ const Sidebar = () => {
           <FaChalkboardTeacher />
           <span>Quản lý Giảng viên</span>
         </NavLink>
-        <NavLink to="/admin/students" className={({isActive}) => `nav-item-link ${isActive ? 'active' : ''}`}>
-          <FaUserGraduate />
-          <span>Quản lý Sinh viên</span>
-        </NavLink>
-        <NavLink to="/admin/classes" className={({isActive}) => `nav-item-link ${isActive ? 'active' : ''}`}>
-          <FaLayerGroup />
-          <span>Quản lý Lớp học</span>
-        </NavLink>
-        <NavLink to="/admin/subjects" className={({isActive}) => `nav-item-link ${isActive ? 'active' : ''}`}>
-          <FaBook />
-          <span>Quản lý Môn học</span>
-        </NavLink>
       </div>
 
       <div className="sidebar-footer">
