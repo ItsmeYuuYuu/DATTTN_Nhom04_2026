@@ -1,16 +1,10 @@
 import React, { useContext } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { FaUserGraduate, FaSignOutAlt, FaChartPie, FaBook } from 'react-icons/fa';
+import { NavLink } from 'react-router-dom';
+import { FaUserGraduate, FaChartPie, FaBook } from 'react-icons/fa';
 import { AuthContext } from '../context/AuthContext';
 
 const LecturerSidebar = () => {
-  const { logout } = useContext(AuthContext);
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  const { user } = useContext(AuthContext);
 
   return (
     <div className="sidebar">
@@ -34,12 +28,6 @@ const LecturerSidebar = () => {
           <FaBook />
           <span>Quản lý Môn / Lớp Học</span>
         </NavLink>
-      </div>
-
-      <div className="sidebar-footer">
-        <button onClick={handleLogout} className="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2">
-          <FaSignOutAlt /> Đăng xuất
-        </button>
       </div>
     </div>
   );

@@ -21,10 +21,12 @@ import LecturerClasses from './pages/lecturer/LecturerClasses';
 import SessionsManagement from './pages/lecturer/SessionsManagement';
 import QRAttendance from './pages/lecturer/QRAttendance';
 import ManualAttendance from './pages/lecturer/ManualAttendance';
+import LecturerProfile from './pages/lecturer/LecturerProfile';
 
 import StudentDashboard from './pages/student/StudentDashboard';
 import StudentCheckin from './pages/student/StudentCheckin';
 import StudentComplaints from './pages/student/StudentComplaints';
+import StudentProfile from './pages/student/StudentProfile';
 
 function App() {
   return (
@@ -60,6 +62,7 @@ function App() {
             <Route path="sessions/:classId" element={<SessionsManagement />} />
             <Route path="qr-attendance/:classId" element={<QRAttendance />} />
             <Route path="manual/:classId" element={<ManualAttendance />} />
+            <Route path="profile" element={<LecturerProfile />} />
           </Route>
 
           {/* Student Routes */}
@@ -78,6 +81,7 @@ function App() {
               </div>
             } />
             <Route path="checkin/:classId" element={<StudentCheckin />} />
+            <Route path="profile" element={<StudentProfile />} />
           </Route>
         </Routes>
       </BrowserRouter>

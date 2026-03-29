@@ -62,13 +62,11 @@ const Login = () => {
           </form>
           
           <div className="mt-4 text-center p-3 bg-light rounded-3 border">
-            <h6 className="fw-bold text-dark mb-2 text-start small border-bottom pb-2">📋 Tài khoản truy cập mẫu:</h6>
-            <div className="d-flex justify-content-between text-muted small px-2">
-              <span className="fw-bold text-danger">Admin: <span className="fw-normal">admin / 123456</span></span>
-              <span className="fw-bold text-success">Giảng viên: <span className="fw-normal">gv01 / 123456</span></span>
-            </div>
-            <div className="d-flex justify-content-between text-muted small px-2 mt-1">
-              <span className="fw-bold text-primary">Sinh viên: <span className="fw-normal">sv001 / 123456</span></span>
+            <h6 className="fw-bold text-dark mb-2 text-start small border-bottom pb-2">📋 Tài khoản truy cập mẫu (Từ SQL):</h6>
+            <div className="d-flex flex-column text-muted small px-2 text-start">
+              <span className="fw-bold text-danger mb-2">Admin: <span className="fw-normal text-dark user-select-all">admin_super / hash_password_123</span></span>
+              <span className="fw-bold text-success mb-2">Giảng viên: <span className="fw-normal text-dark user-select-all">thanh.nv / pass_gv_1</span></span>
+              <span className="fw-bold text-primary">Sinh viên: <span className="fw-normal text-dark user-select-all">201101 / pass_sv_1</span></span>
             </div>
           </div>
         </div>

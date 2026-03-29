@@ -1,17 +1,11 @@
 import React, { useContext } from 'react';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { FaHome, FaHistory, FaExclamationCircle, FaSignOutAlt } from 'react-icons/fa';
+import { Outlet, NavLink } from 'react-router-dom';
+import { FaHome, FaHistory, FaExclamationCircle } from 'react-icons/fa';
 import Header from '../components/Header';
 import { AuthContext } from '../context/AuthContext';
 
 const StudentLayout = () => {
-  const { logout } = useContext(AuthContext);
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  const { user } = useContext(AuthContext);
 
   return (
     <div className="d-flex flex-column vh-100 bg-light" style={{paddingBottom: '70px'}}>
@@ -37,10 +31,6 @@ const StudentLayout = () => {
           <FaExclamationCircle className="fs-5 mb-1" />
           <span className="fw-medium" style={{fontSize: '0.65rem'}}>Phản hồi</span>
         </NavLink>
-        <button onClick={handleLogout} className="btn btn-link text-decoration-none d-flex flex-column align-items-center p-2 rounded-3 text-muted border-0 bg-transparent" style={{minWidth: '70px'}}>
-          <FaSignOutAlt className="fs-5 mb-1" />
-          <span className="fw-medium" style={{fontSize: '0.65rem'}}>Đăng xuất</span>
-        </button>
       </nav>
     </div>
   );

@@ -1,93 +1,191 @@
 {
   "QuanTriVien": [
     {
-      "MaQTV": "QTV01",
-      "TaiKhoan": "admin",
-      "MatKhau": "123456",
+      "MaQTV": "AD01",
+      "TaiKhoan": "admin_super",
+      "MatKhau": "hash_password_123",
       "HoTen": "Nguyễn Quản Trị"
+    },
+    {
+      "MaQTV": "AD02",
+      "TaiKhoan": "it_support",
+      "MatKhau": "hash_password_456",
+      "HoTen": "Trần Kỹ Thuật"
     }
   ],
   "GiangVien": [
     {
-      "MaGV": "GV01",
-      "TaiKhoan": "gv01",
-      "MatKhau": "123456",
-      "HoTen": "TS. Lê Giảng Viên",
-      "Email": "gv01@stu.edu.vn",
+      "MaGV": "GV001",
+      "TaiKhoan": "thanh.nv",
+      "MatKhau": "pass_gv_1",
+      "HoTen": "Nguyễn Văn Thành",
+      "Email": "thanh.nv@university.edu.vn",
       "SoDienThoai": "0901234567",
+      "TrangThai": 1
+    },
+    {
+      "MaGV": "GV002",
+      "TaiKhoan": "lan.pt",
+      "MatKhau": "pass_gv_2",
+      "HoTen": "Phạm Thị Lan",
+      "Email": "lan.pt@university.edu.vn",
+      "SoDienThoai": "0912345678",
+      "TrangThai": 1
+    },
+    {
+      "MaGV": "GV003",
+      "TaiKhoan": "dung.hoang",
+      "MatKhau": "pass_gv_3",
+      "HoTen": "Hoàng Anh Dũng",
+      "Email": "dung.ha@university.edu.vn",
+      "SoDienThoai": "0988888888",
       "TrangThai": 1
     }
   ],
   "SinhVien": [
     {
       "MaSV": "SV001",
-      "TaiKhoan": "sv001",
-      "MatKhau": "123456",
-      "HoTen": "Trần Sinh Viên",
-      "NgaySinh": "2003-01-01",
-      "Email": "sv001@stu.edu.vn",
-      "SoDienThoai": "0987654321",
+      "TaiKhoan": "201101",
+      "MatKhau": "pass_sv_1",
+      "HoTen": "Lê Minh Anh",
+      "NgaySinh": "2002-05-15",
+      "Email": "201101@student.edu.vn",
+      "SoDienThoai": "0345000001",
       "AnhDaiDien": null
     },
     {
       "MaSV": "SV002",
-      "TaiKhoan": "sv002",
-      "MatKhau": "123456",
-      "HoTen": "Nguyễn Mai Hoa",
-      "NgaySinh": "2003-05-12",
-      "Email": "sv002@stu.edu.vn",
-      "SoDienThoai": "0912345678",
+      "TaiKhoan": "201102",
+      "MatKhau": "pass_sv_2",
+      "HoTen": "Trần Thu Thảo",
+      "NgaySinh": "2002-11-20",
+      "Email": "201102@student.edu.vn",
+      "SoDienThoai": "0345000002",
+      "AnhDaiDien": null
+    },
+    {
+      "MaSV": "SV003",
+      "TaiKhoan": "201103",
+      "MatKhau": "pass_sv_3",
+      "HoTen": "Nguyễn Hoàng Nam",
+      "NgaySinh": "2002-01-10",
+      "Email": "201103@student.edu.vn",
+      "SoDienThoai": "0345000003",
+      "AnhDaiDien": null
+    },
+    {
+      "MaSV": "SV004",
+      "TaiKhoan": "201104",
+      "MatKhau": "pass_sv_4",
+      "HoTen": "Phạm Bảo Châu",
+      "NgaySinh": "2003-08-25",
+      "Email": "201104@student.edu.vn",
+      "SoDienThoai": "0345000004",
+      "AnhDaiDien": null
+    },
+    {
+      "MaSV": "SV005",
+      "TaiKhoan": "201105",
+      "MatKhau": "pass_sv_5",
+      "HoTen": "Vũ Đức Trọng",
+      "NgaySinh": "2002-03-30",
+      "Email": "201105@student.edu.vn",
+      "SoDienThoai": "0345000005",
       "AnhDaiDien": null
     }
   ],
   "MonHoc": [
     {
-      "MaMon": "THCB01",
-      "TenMon": "Tin học cơ bản"
+      "MaMon": "CS101",
+      "TenMon": "Cơ sở dữ liệu"
     },
     {
-      "MaMon": "LTWEB",
+      "MaMon": "CS102",
       "TenMon": "Lập trình Web"
+    },
+    {
+      "MaMon": "BA201",
+      "TenMon": "Kinh tế vĩ mô"
     }
   ],
   "LopHoc": [
     {
-      "MaLop": "LPT_WEB_01",
-      "TenLop": "Lập trình Web - Ca 1",
-      "MaMon": "LTWEB",
-      "MaGV": "GV01"
+      "MaLop": "L01",
+      "TenLop": "Lớp CSDL - Sáng Thứ 2",
+      "MaMon": "CS101",
+      "MaGV": "GV001"
+    },
+    {
+      "MaLop": "L02",
+      "TenLop": "Lớp Web - Chiều Thứ 4",
+      "MaMon": "CS102",
+      "MaGV": "GV002"
+    },
+    {
+      "MaLop": "L03",
+      "TenLop": "Lớp Kinh tế - Sáng Thứ 6",
+      "MaMon": "BA201",
+      "MaGV": "GV003"
     }
   ],
   "ChiTietLopHoc": [
     {
-      "MaLop": "LPT_WEB_01",
+      "MaLop": "L01",
       "MaSV": "SV001"
     },
     {
-      "MaLop": "LPT_WEB_01",
+      "MaLop": "L01",
       "MaSV": "SV002"
+    },
+    {
+      "MaLop": "L01",
+      "MaSV": "SV003"
+    },
+    {
+      "MaLop": "L02",
+      "MaSV": "SV001"
+    },
+    {
+      "MaLop": "L02",
+      "MaSV": "SV004"
+    },
+    {
+      "MaLop": "L02",
+      "MaSV": "SV005"
+    },
+    {
+      "MaLop": "L03",
+      "MaSV": "SV002"
+    },
+    {
+      "MaLop": "L03",
+      "MaSV": "SV003"
+    },
+    {
+      "MaLop": "L03",
+      "MaSV": "SV005"
     }
   ],
   "BuoiHoc": [
     {
       "MaBuoiHoc": 1,
-      "MaLop": "LPT_WEB_01",
-      "NgayHoc": "2026-03-27",
+      "MaLop": "L01",
+      "NgayHoc": "2023-10-02",
       "GioBatDau": "07:30:00",
-      "GioKetThuc": "09:30:00",
-      "GhiChu": "Buổi học lý thuyết",
-      "ToaDoGoc_Lat": 10.738,
-      "ToaDoGoc_Long": 106.678
+      "GioKetThuc": "11:30:00",
+      "GhiChu": "Chương 1: Tổng quan",
+      "ToaDoGoc_Lat": 10.7719,
+      "ToaDoGoc_Long": 106.6983
     },
     {
       "MaBuoiHoc": 2,
-      "MaLop": "LPT_WEB_01",
-      "NgayHoc": "2026-03-29",
+      "MaLop": "L01",
+      "NgayHoc": "2023-10-09",
       "GioBatDau": "07:30:00",
-      "GioKetThuc": "09:30:00",
-      "GhiChu": "Thực hành",
-      "ToaDoGoc_Lat": 10.738,
-      "ToaDoGoc_Long": 106.678
+      "GioKetThuc": "11:30:00",
+      "GhiChu": "Chương 2: Mô hình ER",
+      "ToaDoGoc_Lat": 10.7719,
+      "ToaDoGoc_Long": 106.6983
     }
   ],
   "DiemDanh": [
@@ -96,12 +194,72 @@
       "MaBuoiHoc": 1,
       "MaSV": "SV001",
       "TrangThai": "Có mặt",
-      "ThoiGianQuet": "2026-03-27T07:45:00",
-      "GhiChu": "",
+      "ThoiGianQuet": "2023-10-02T07:25:00",
+      "GhiChu": "Đúng giờ",
       "NguoiCapNhat": null,
-      "FingerprintID": "fp1234abc",
-      "ToaDoSV_Lat": 10.7381,
-      "ToaDoSV_Long": 106.6781
+      "FingerprintID": null,
+      "ToaDoSV_Lat": 10.7718,
+      "ToaDoSV_Long": 106.6982
+    },
+    {
+      "MaDiemDanh": 2,
+      "MaBuoiHoc": 1,
+      "MaSV": "SV002",
+      "TrangThai": "Đi trễ",
+      "ThoiGianQuet": "2023-10-02T07:45:00",
+      "GhiChu": "Trễ 15p",
+      "NguoiCapNhat": null,
+      "FingerprintID": null,
+      "ToaDoSV_Lat": 10.7720,
+      "ToaDoSV_Long": 106.6984
+    },
+    {
+      "MaDiemDanh": 3,
+      "MaBuoiHoc": 1,
+      "MaSV": "SV003",
+      "TrangThai": "Vắng không phép",
+      "ThoiGianQuet": null,
+      "GhiChu": "Không liên lạc được",
+      "NguoiCapNhat": null,
+      "FingerprintID": null,
+      "ToaDoSV_Lat": null,
+      "ToaDoSV_Long": null
+    },
+    {
+      "MaDiemDanh": 4,
+      "MaBuoiHoc": 2,
+      "MaSV": "SV001",
+      "TrangThai": "Có mặt",
+      "ThoiGianQuet": "2023-10-09T07:20:00",
+      "GhiChu": "Quét vân tay",
+      "NguoiCapNhat": null,
+      "FingerprintID": null,
+      "ToaDoSV_Lat": 10.7719,
+      "ToaDoSV_Long": 106.6983
+    },
+    {
+      "MaDiemDanh": 5,
+      "MaBuoiHoc": 2,
+      "MaSV": "SV002",
+      "TrangThai": "Vắng có phép",
+      "ThoiGianQuet": null,
+      "GhiChu": "Nghỉ ốm",
+      "NguoiCapNhat": null,
+      "FingerprintID": null,
+      "ToaDoSV_Lat": null,
+      "ToaDoSV_Long": null
+    },
+    {
+      "MaDiemDanh": 6,
+      "MaBuoiHoc": 2,
+      "MaSV": "SV003",
+      "TrangThai": "Có mặt",
+      "ThoiGianQuet": "2023-10-09T07:28:00",
+      "GhiChu": "Đúng giờ",
+      "NguoiCapNhat": null,
+      "FingerprintID": null,
+      "ToaDoSV_Lat": 10.7717,
+      "ToaDoSV_Long": 106.6981
     }
   ]
 }

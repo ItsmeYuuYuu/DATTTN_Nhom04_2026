@@ -1,0 +1,132 @@
+import React, { useState, useContext } from 'react';
+import { AuthContext } from '../../context/AuthContext';
+import { getTable, updateTable } from '../../services/mockService';
+import { FaSave, FaKey, FaShieldAlt, FaUserTie } from 'react-icons/fa';
+
+const LecturerProfile = () => {
+  const { user, updateUserSession } = useContext(AuthContext);
+
+  const [formData, setFormData] = useState({
+    Email: user?.Email || '',
+    SoDienThoai: user?.SoDienThoai || ''
+  });
+
+  const [passData, setPassData] = useState({
+    oldPass: '',
+    newPass: '',
+    confirmPass: ''
+  });
+
+  const [message, setMessage] = useState({ text: '', type: '' });
+
+  const saveProfile = (e) => {
+    e.preventDefault();
+    updateUserSession({ Email: formData.Email, SoDienThoai: formData.SoDienThoai });
+    
+    const lecturers = getTable('GiangVien');
+    const updated = lecturers.map(l => l.MaGV === user.MaGV ? { ...l, Email: formData.Email, SoDienThoai: formData.SoDienThoai } : l);
+    updateTable('GiangVien', updated);
+    
+    setMessage({ text: 'Cập nhật thông tin thành công.', type: 'success' });
+    setTimeout(() => setMessage({text:'', type:''}), 3000);
+  };
+
+  const changePassword = (e) => {
+    e.preventDefault();
+    if(passData.oldPass !== user.MatKhau) {
+      setMessage({ text: 'Mật khẩu cũ không chính xác!', type: 'danger' }); return;
+    }
+    if(passData.newPass !== passData.confirmPass) {
+      setMessage({ text: 'Mật khẩu xác nhận không khớp!', type: 'danger' }); return;
+    }
+    if(passData.newPass.length < 5) {
+      setMessage({ text: 'Mật khẩu mới phải từ 5 ký tự trở lên.', type: 'danger' }); return;
+    }
+
+    updateUserSession({ MatKhau: passData.newPass });
+    const lecturers = getTable('GiangVien');
+    const updated = lecturers.map(l => l.MaGV === user.MaGV ? { ...l, MatKhau: passData.newPass } : l);
+    updateTable('GiangVien', updated);
+    
+    setPassData({oldPass: '', newPass: '', confirmPass: ''});
+    setMessage({ text: 'Đổi mật khẩu bảo mật thành công!', type: 'success' });
+    setTimeout(() => setMessage({text:'', type:''}), 4000);
+  };
+
+  return (
+    <div className="container-fluid pb-5">
+      <div className="d-flex align-items-center gap-3 mb-4 mt-2">
+        <h3 className="m-0 fw-bold text-dark">Hồ Sơ Cán Bộ Giảng Dạy</h3>
+      </div>
+      
+      {message.text && (
+        <div className={`alert alert-${message.type} border-0 shadow-sm py-3 rounded-3 fw-medium mb-4 bg-${message.type} bg-opacity-10 text-${message.type}`}>
+          {message.text}
+        </div>
+      )}
+
+      <div className="row g-4">
+        {/* Cột trái: Thông tin Cá nhân */}
+        <div className="col-12 col-lg-5">
+          <div className="card border-0 shadow-sm rounded-4 h-100 bg-white p-4">
+            <div className="text-center mb-4">
+              <div className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow mx-auto mb-3" style={{width: '90px', height: '90px', fontSize: '2.5rem'}}>
+                <FaUserTie />
+              </div>
+              <h5 className="fw-bold mb-1 text-dark">{user?.HoTen}</h5>
+              <p className="text-muted small mb-0">Mã Cán Bộ: {user?.MaGV}</p>
+            </div>
+            <hr />
+            <form onSubmit={saveProfile}>
+              <div className="mb-3">
+                <label className="form-label small fw-bold text-muted">Email công vụ</label>
+                <input type="email" className="form-control bg-light border-0 py-2" value={formData.Email} onChange={(e) => setFormData({...formData, Email: e.target.value})} />
+              </div>
+              <div className="mb-4">
+                <label className="form-label small fw-bold text-muted">Điện thoại liên lạc</label>
+                <input type="text" className="form-control bg-light border-0 py-2" value={formData.SoDienThoai} onChange={(e) => setFormData({...formData, SoDienThoai: e.target.value})} />
+              </div>
+              <button type="submit" className="btn btn-primary w-100 fw-bold py-2 rounded-pill gap-2 d-flex align-items-center justify-content-center shadow-sm">
+                <FaSave /> Lưu Thay Đổi
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* Cột phải: Form đổi mật khẩu */}
+        <div className="col-12 col-lg-7">
+          <div className="card border-0 shadow-sm rounded-4 h-100 bg-white p-4">
+            <div className="d-flex align-items-center gap-2 mb-4">
+              <FaShieldAlt className="text-danger fs-4"/>
+              <h5 className="fw-bold text-dark mb-0">Đổi Mật Khẩu Đăng Nhập</h5>
+            </div>
+            <p className="small text-muted mb-4 pb-2 border-bottom">Để bảo vệ tài khoản quản lý lớp học, vui lòng sử dụng mật khẩu mạnh kết hợp chữ và số. Tránh dùng chung mật khẩu với các dịch vụ khác.</p>
+            <form onSubmit={changePassword}>
+              <div className="mb-3">
+                <label className="form-label small fw-bold text-muted">Mật khẩu thẻ hiện tại <span className="text-danger">*</span></label>
+                <input type="password" required className="form-control bg-light border-0 py-2" value={passData.oldPass} onChange={(e) => setPassData({...passData, oldPass: e.target.value})} />
+              </div>
+              <div className="row g-3 mb-4">
+                <div className="col-md-6">
+                  <label className="form-label small fw-bold text-muted">Mật khẩu khai báo mới <span className="text-danger">*</span></label>
+                  <input type="password" required className="form-control bg-light border-0 py-2" value={passData.newPass} onChange={(e) => setPassData({...passData, newPass: e.target.value})} />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label small fw-bold text-muted">Xác nhận lại mật khẩu mới <span className="text-danger">*</span></label>
+                  <input type="password" required className="form-control bg-light border-0 py-2" value={passData.confirmPass} onChange={(e) => setPassData({...passData, confirmPass: e.target.value})} />
+                </div>
+              </div>
+              <div className="d-flex justify-content-end">
+                <button type="submit" className="btn btn-danger px-4 fw-bold py-2 rounded-pill gap-2 d-flex align-items-center shadow-sm">
+                  <FaKey /> Cập Nhật Mật Khẩu
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LecturerProfile;

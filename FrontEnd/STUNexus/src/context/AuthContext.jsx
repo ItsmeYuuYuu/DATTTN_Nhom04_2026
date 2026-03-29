@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import mockData from '../data/mockDb.json';
+import { getTable } from '../services/mockService';
 
 export const AuthContext = createContext();
 
@@ -17,7 +17,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = (username, password) => {
     // 1. Check Admin
-    const admin = mockData.QuanTriVien.find(u => u.TaiKhoan === username && u.MatKhau === password);
+    const admins = getTable('QuanTriVien');
+    const admin = admins.find(u => u.TaiKhoan === username && u.MatKhau === password);
     if (admin) {
       const userData = { ...admin, role: 'admin' };
       setUser(userData);
@@ -26,7 +27,8 @@ export const AuthProvider = ({ children }) => {
     }
     
     // 2. Check Lecturer
-    const lecturer = mockData.GiangVien.find(u => u.TaiKhoan === username && u.MatKhau === password);
+    const lecturers = getTable('GiangVien');
+    const lecturer = lecturers.find(u => u.TaiKhoan === username && u.MatKhau === password);
     if (lecturer) {
       const userData = { ...lecturer, role: 'lecturer' };
       setUser(userData);
@@ -35,7 +37,8 @@ export const AuthProvider = ({ children }) => {
     }
 
     // 3. Check Student
-    const student = mockData.SinhVien.find(u => u.TaiKhoan === username && u.MatKhau === password);
+    const students = getTable('SinhVien');
+    const student = students.find(u => u.TaiKhoan === username && u.MatKhau === password);
     if (student) {
       const userData = { ...student, role: 'student' };
       setUser(userData);
@@ -51,8 +54,14 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('stu_user');
   };
 
+  const updateUserSession = (newUserData) => {
+    const updated = { ...user, ...newUserData };
+    setUser(updated);
+    localStorage.setItem('stu_user', JSON.stringify(updated));
+  }
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUserSession, loading }}>
       {children}
     </AuthContext.Provider>
   );

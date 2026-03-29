@@ -1,7 +1,7 @@
 import rawDb from '../data/mockDb.json';
 
 const DB_KEY = 'stunexus_db';
-const DB_VERSION = 2; // Cập nhật version để reset Dữ liệu ảo chuẩn theo SQL
+const DB_VERSION = 3; // Cập nhật mockDb version khớp với data mới nhất bên SQL
 
 // Khởi tạo hoặc lấy DB từ LocalStorage
 export const getDb = () => {
