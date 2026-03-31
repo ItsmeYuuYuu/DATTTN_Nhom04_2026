@@ -5,6 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DiemDanhLopHoc.Controllers
 {
+    // Controller này phụ trách các API quản lý Lớp học theo đúng tài liệu nhóm:
+    // - GET /api/lophoc
+    // - POST /api/lophoc
+    // - POST /api/lophoc/{maLop}/add-student
+    // - GET /api/lophoc/{maLop}/students
+    // Hiện tại project đang dùng many-to-many implicit giữa LopHoc và SinhVien,
+    // nên việc thêm/xem sinh viên của lớp sẽ thao tác qua navigation collection MaSvs.
     [Route("api/lophoc")]
     [ApiController]
     public class LopHocController : ControllerBase
@@ -16,9 +23,8 @@ namespace DiemDanhLopHoc.Controllers
             _context = context;
         }
 
-        // --- DTOs ---
-
-        // DTO trả về danh sách lớp học (kèm tên môn và tên giảng viên)
+        // DTO trả về danh sách lớp học.
+        // Mục tiêu: trả đúng dữ liệu FE cần, gồm mã lớp, tên lớp, mã môn, tên môn, mã GV, tên GV.
         public class LopHocDto
         {
             public string MaLop { get; set; } = null!;
@@ -29,7 +35,8 @@ namespace DiemDanhLopHoc.Controllers
             public string? TenGiangVien { get; set; }
         }
 
-        // DTO nhận dữ liệu khi tạo lớp mới
+        // DTO nhận dữ liệu khi tạo mới lớp học.
+        // Theo tài liệu hiện tại, tạo lớp cần MaLop, TenLop, MaMon, MaGV.
         public class TaoLopHocRequest
         {
             public string MaLop { get; set; } = null!;
@@ -38,26 +45,31 @@ namespace DiemDanhLopHoc.Controllers
             public string? MaGv { get; set; }
         }
 
-        // DTO nhận mã sinh viên khi thêm vào lớp
+        // DTO nhận dữ liệu khi thêm 1 sinh viên vào lớp.
         public class ThemSinhVienRequest
         {
             public string MaSv { get; set; } = null!;
         }
 
-        // DTO trả về thông tin sinh viên trong lớp
-        public class SinhVienDto
+        // DTO trả về danh sách sinh viên thuộc 1 lớp.
+        // Chỉ trả dữ liệu cần thiết, không để lộ MatKhau.
+        public class SinhVienTrongLopDto
         {
             public string MaSv { get; set; } = null!;
+            public string TaiKhoan { get; set; } = null!;
             public string HoTen { get; set; } = null!;
+            public DateTime? NgaySinh { get; set; }
             public string? Email { get; set; }
             public string? SoDienThoai { get; set; }
+            public string? AnhDaiDien { get; set; }
         }
 
-        // --- 1. GET /api/lophoc: Lấy danh sách lớp học kèm TenMon và HoTen giảng viên ---
+        // API lấy danh sách lớp học.
+        // Dùng Include để lấy luôn dữ liệu môn học và giảng viên theo yêu cầu tài liệu,
+        // sau đó Select sang DTO để tránh trả thẳng entity và tránh vòng lặp JSON.
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            // Include navigation để lấy TenMon và HoTen giảng viên, dùng Select để tránh vòng lặp tuần hoàn
             var danhSach = await _context.LopHocs
                 .Include(l => l.MaMonNavigation)
                 .Include(l => l.MaGvNavigation)
@@ -72,29 +84,67 @@ namespace DiemDanhLopHoc.Controllers
                 })
                 .ToListAsync();
 
-            return Ok(danhSach);
+            return Ok(new
+            {
+                success = true,
+                message = "Lấy danh sách lớp học thành công.",
+                data = danhSach
+            });
         }
 
-        // --- 2. POST /api/lophoc: Tạo lớp học mới ---
+        // API tạo mới lớp học.
+        // Validate các điều kiện cơ bản:
+        // - không để trống các trường bắt buộc
+        // - không trùng MaLop
+        // - MaMon phải tồn tại
+        // - MaGv phải tồn tại
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] TaoLopHocRequest request)
         {
-            // Kiểm tra mã lớp đã tồn tại chưa
-            var daTonTai = await _context.LopHocs.AnyAsync(l => l.MaLop == request.MaLop);
-            if (daTonTai) return BadRequest(new { Message = "Mã lớp học đã tồn tại trong hệ thống!" });
-
-            // Kiểm tra môn học hợp lệ (nếu có truyền lên)
-            if (request.MaMon != null)
+            if (string.IsNullOrWhiteSpace(request.MaLop) ||
+                string.IsNullOrWhiteSpace(request.TenLop) ||
+                string.IsNullOrWhiteSpace(request.MaMon) ||
+                string.IsNullOrWhiteSpace(request.MaGv))
             {
-                var monHocTonTai = await _context.MonHocs.AnyAsync(m => m.MaMon == request.MaMon);
-                if (!monHocTonTai) return BadRequest(new { Message = "Mã môn học không tồn tại!" });
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Vui lòng nhập đầy đủ MaLop, TenLop, MaMon và MaGv.",
+                    data = (object?)null
+                });
             }
 
-            // Kiểm tra giảng viên hợp lệ (nếu có truyền lên)
-            if (request.MaGv != null)
+            var daTonTai = await _context.LopHocs.AnyAsync(l => l.MaLop == request.MaLop);
+            if (daTonTai)
             {
-                var giangVienTonTai = await _context.GiangViens.AnyAsync(g => g.MaGv == request.MaGv);
-                if (!giangVienTonTai) return BadRequest(new { Message = "Mã giảng viên không tồn tại!" });
+                return Conflict(new
+                {
+                    success = false,
+                    message = "Mã lớp học đã tồn tại trong hệ thống.",
+                    data = (object?)null
+                });
+            }
+
+            var monHocTonTai = await _context.MonHocs.AnyAsync(m => m.MaMon == request.MaMon);
+            if (!monHocTonTai)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Mã môn học không tồn tại.",
+                    data = (object?)null
+                });
+            }
+
+            var giangVienTonTai = await _context.GiangViens.AnyAsync(g => g.MaGv == request.MaGv);
+            if (!giangVienTonTai)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Mã giảng viên không tồn tại.",
+                    data = (object?)null
+                });
             }
 
             var lopHocMoi = new LopHoc
@@ -108,57 +158,136 @@ namespace DiemDanhLopHoc.Controllers
             _context.LopHocs.Add(lopHocMoi);
             await _context.SaveChangesAsync();
 
-            return Ok(new { Message = "Tạo lớp học thành công!", Data = request });
+            var ketQua = new LopHocDto
+            {
+                MaLop = lopHocMoi.MaLop,
+                TenLop = lopHocMoi.TenLop,
+                MaMon = lopHocMoi.MaMon,
+                TenMon = await _context.MonHocs
+                    .Where(m => m.MaMon == lopHocMoi.MaMon)
+                    .Select(m => m.TenMon)
+                    .FirstOrDefaultAsync(),
+                MaGv = lopHocMoi.MaGv,
+                TenGiangVien = await _context.GiangViens
+                    .Where(g => g.MaGv == lopHocMoi.MaGv)
+                    .Select(g => g.HoTen)
+                    .FirstOrDefaultAsync()
+            };
+
+            return StatusCode(StatusCodes.Status201Created, new
+            {
+                success = true,
+                message = "Tạo lớp học thành công.",
+                data = ketQua
+            });
         }
 
-        // --- 3. POST /api/lophoc/{maLop}/add-student: Thêm sinh viên vào lớp ---
+        // API thêm 1 sinh viên vào lớp học.
+        // Vì project đang dùng many-to-many implicit, EF Core sẽ tự thêm bản ghi vào bảng ChiTietLopHoc
+        // khi thêm SinhVien vào collection MaSvs của LopHoc.
         [HttpPost("{maLop}/add-student")]
         public async Task<IActionResult> AddStudent(string maLop, [FromBody] ThemSinhVienRequest request)
         {
-            // Lấy lớp học kèm danh sách sinh viên hiện tại để kiểm tra trùng
+            if (string.IsNullOrWhiteSpace(request.MaSv))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "MaSv không được để trống.",
+                    data = (object?)null
+                });
+            }
+
             var lopHoc = await _context.LopHocs
                 .Include(l => l.MaSvs)
                 .FirstOrDefaultAsync(l => l.MaLop == maLop);
 
-            if (lopHoc == null) return NotFound(new { Message = "Không tìm thấy lớp học!" });
+            if (lopHoc == null)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = "Không tìm thấy lớp học.",
+                    data = (object?)null
+                });
+            }
 
-            // Kiểm tra sinh viên tồn tại
-            var sinhVien = await _context.SinhViens.FirstOrDefaultAsync(s => s.MaSv == request.MaSv);
-            if (sinhVien == null) return NotFound(new { Message = "Không tìm thấy sinh viên!" });
+            var sinhVien = await _context.SinhViens
+                .FirstOrDefaultAsync(s => s.MaSv == request.MaSv);
 
-            // Kiểm tra sinh viên đã có trong lớp chưa
+            if (sinhVien == null)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = "Không tìm thấy sinh viên.",
+                    data = (object?)null
+                });
+            }
+
             var daCoTrongLop = lopHoc.MaSvs.Any(s => s.MaSv == request.MaSv);
-            if (daCoTrongLop) return BadRequest(new { Message = "Sinh viên đã có trong lớp học này!" });
+            if (daCoTrongLop)
+            {
+                return Conflict(new
+                {
+                    success = false,
+                    message = "Sinh viên đã có trong lớp học này.",
+                    data = (object?)null
+                });
+            }
 
-            // EF Core tự động thêm dòng vào bảng ChiTietLopHoc qua navigation collection
             lopHoc.MaSvs.Add(sinhVien);
             await _context.SaveChangesAsync();
 
-            return Ok(new { Message = "Thêm sinh viên vào lớp thành công!" });
+            return Ok(new
+            {
+                success = true,
+                message = "Thêm sinh viên vào lớp thành công.",
+                data = new
+                {
+                    maLop = lopHoc.MaLop,
+                    maSv = sinhVien.MaSv
+                }
+            });
         }
 
-        // --- 4. GET /api/lophoc/{maLop}/students: Lấy danh sách sinh viên của lớp ---
+        // API lấy danh sách sinh viên của một lớp học.
+        // Truy vấn qua quan hệ nhiều-nhiều hiện có để lấy đúng danh sách Sinh viên thuộc lớp.
         [HttpGet("{maLop}/students")]
         public async Task<IActionResult> GetStudents(string maLop)
         {
-            // Kiểm tra lớp tồn tại
             var lopTonTai = await _context.LopHocs.AnyAsync(l => l.MaLop == maLop);
-            if (!lopTonTai) return NotFound(new { Message = "Không tìm thấy lớp học!" });
+            if (!lopTonTai)
+            {
+                return NotFound(new
+                {
+                    success = false,
+                    message = "Không tìm thấy lớp học.",
+                    data = (object?)null
+                });
+            }
 
-            // Truy vấn sinh viên qua quan hệ nhiều-nhiều (bảng ChiTietLopHoc)
             var danhSachSinhVien = await _context.LopHocs
                 .Where(l => l.MaLop == maLop)
                 .SelectMany(l => l.MaSvs)
-                .Select(s => new SinhVienDto
+                .Select(s => new SinhVienTrongLopDto
                 {
                     MaSv = s.MaSv,
+                    TaiKhoan = s.TaiKhoan,
                     HoTen = s.HoTen,
+                    NgaySinh = s.NgaySinh,
                     Email = s.Email,
-                    SoDienThoai = s.SoDienThoai
+                    SoDienThoai = s.SoDienThoai,
+                    AnhDaiDien = s.AnhDaiDien
                 })
                 .ToListAsync();
 
-            return Ok(danhSachSinhVien);
+            return Ok(new
+            {
+                success = true,
+                message = "Lấy danh sách sinh viên của lớp thành công.",
+                data = danhSachSinhVien
+            });
         }
     }
 }

@@ -31,8 +31,9 @@ app.UseExceptionHandler(errorApp =>
 
         await context.Response.WriteAsJsonAsync(new
         {
-            statusCode = 500,
-            message
+            success = false,
+            message,
+            data = (object?)null
         });
     });
 });
