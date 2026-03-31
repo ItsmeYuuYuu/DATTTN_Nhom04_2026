@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosClient = axios.create({
-    baseURL: 'http://localhost:5207/api', // Port BE từ launchSettings.json
+    baseURL: 'https://diemdanhlophoc.onrender.com/api', // Port BE từ launchSettings.json
     headers: {
         'Content-Type': 'application/json',
     },
