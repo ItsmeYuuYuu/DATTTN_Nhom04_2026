@@ -1,7 +1,23 @@
 [
   {
+    "ContainingType": "DiemDanhLopHoc.Controllers.AuthController",
+    "Method": "Login",
+    "RelativePath": "api/Auth/login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "DiemDanhLopHoc.DTOs.LoginRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "DiemDanhLopHoc.Controllers.GiangVienController",
-    "Method": "Get",
+    "Method": "GetAll",
     "RelativePath": "api/giangvien",
     "HttpMethod": "GET",
     "IsController": true,
@@ -19,7 +35,7 @@
     "Parameters": [
       {
         "Name": "request",
-        "Type": "DiemDanhLopHoc.DTOs.NguoiDungDTOs\u002BGiangVienCreateRequest",
+        "Type": "DiemDanhLopHoc.Models.GiangVien",
         "IsRequired": true
       }
     ],
@@ -168,66 +184,13 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "DiemDanhLopHoc.Controllers.SinhVienController",
+    "ContainingType": "DiemDanhLopHoc.Controllers.SinhViensController",
     "Method": "GetAll",
-    "RelativePath": "api/sinhvien",
+    "RelativePath": "api/SinhViens",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "DiemDanhLopHoc.Controllers.SinhVienController",
-    "Method": "Create",
-    "RelativePath": "api/sinhvien",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "request",
-        "Type": "DiemDanhLopHoc.Controllers.SinhVienController\u002BTaoSinhVienDto",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "DiemDanhLopHoc.Controllers.SinhVienController",
-    "Method": "Update",
-    "RelativePath": "api/sinhvien/{maSv}",
-    "HttpMethod": "PUT",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "maSv",
-        "Type": "System.String",
-        "IsRequired": true
-      },
-      {
-        "Name": "request",
-        "Type": "DiemDanhLopHoc.Controllers.SinhVienController\u002BCapNhatSinhVienDto",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "DiemDanhLopHoc.Controllers.SinhVienController",
-    "Method": "Delete",
-    "RelativePath": "api/sinhvien/{maSv}",
-    "HttpMethod": "DELETE",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "maSv",
-        "Type": "System.String",
-        "IsRequired": true
-      }
-    ],
     "ReturnTypes": []
   }
 ]

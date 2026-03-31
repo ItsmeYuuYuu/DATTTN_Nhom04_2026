@@ -5,6 +5,37 @@
     "version": "1.0"
   },
   "paths": {
+    "/api/Auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/giangvien": {
       "get": {
         "tags": [
@@ -24,17 +55,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/GiangVienCreateRequest"
+                "$ref": "#/components/schemas/GiangVien"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/GiangVienCreateRequest"
+                "$ref": "#/components/schemas/GiangVien"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/GiangVienCreateRequest"
+                "$ref": "#/components/schemas/GiangVien"
               }
             }
           }
@@ -272,100 +303,10 @@
         }
       }
     },
-    "/api/sinhvien": {
+    "/api/SinhViens": {
       "get": {
         "tags": [
-          "SinhVien"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "SinhVien"
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TaoSinhVienDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TaoSinhVienDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/TaoSinhVienDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/sinhvien/{maSv}": {
-      "put": {
-        "tags": [
-          "SinhVien"
-        ],
-        "parameters": [
-          {
-            "name": "maSv",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CapNhatSinhVienDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CapNhatSinhVienDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/CapNhatSinhVienDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "SinhVien"
-        ],
-        "parameters": [
-          {
-            "name": "maSv",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
+          "SinhViens"
         ],
         "responses": {
           "200": {
@@ -377,25 +318,116 @@
   },
   "components": {
     "schemas": {
-      "CapNhatSinhVienDto": {
+      "BuoiHoc": {
         "type": "object",
         "properties": {
-          "hoTen": {
+          "maBuoiHoc": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maLop": {
             "type": "string",
             "nullable": true
           },
-          "email": {
+          "ngayHoc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "gioBatDau": {
+            "type": "string",
+            "format": "date-span",
+            "nullable": true
+          },
+          "gioKetThuc": {
+            "type": "string",
+            "format": "date-span",
+            "nullable": true
+          },
+          "ghiChu": {
             "type": "string",
             "nullable": true
           },
-          "soDienThoai": {
-            "type": "string",
+          "toaDoGocLat": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "toaDoGocLong": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "maLopNavigation": {
+            "$ref": "#/components/schemas/LopHoc"
+          },
+          "diemDanhs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiemDanh"
+            },
             "nullable": true
           }
         },
         "additionalProperties": false
       },
-      "GiangVienCreateRequest": {
+      "DiemDanh": {
+        "type": "object",
+        "properties": {
+          "maDiemDanh": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maBuoiHoc": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "maSv": {
+            "type": "string",
+            "nullable": true
+          },
+          "trangThai": {
+            "type": "string",
+            "nullable": true
+          },
+          "thoiGianQuet": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ghiChu": {
+            "type": "string",
+            "nullable": true
+          },
+          "nguoiCapNhat": {
+            "type": "string",
+            "nullable": true
+          },
+          "fingerprintId": {
+            "type": "string",
+            "nullable": true
+          },
+          "toaDoSvLat": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "toaDoSvLong": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "maBuoiHocNavigation": {
+            "$ref": "#/components/schemas/BuoiHoc"
+          },
+          "maSvNavigation": {
+            "$ref": "#/components/schemas/SinhVien"
+          }
+        },
+        "additionalProperties": false
+      },
+      "GiangVien": {
         "type": "object",
         "properties": {
           "maGv": {
@@ -413,6 +445,102 @@
           "hoTen": {
             "type": "string",
             "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "soDienThoai": {
+            "type": "string",
+            "nullable": true
+          },
+          "trangThai": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "lopHocs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LopHoc"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LoginRequestDto": {
+        "type": "object",
+        "properties": {
+          "taiKhoan": {
+            "type": "string",
+            "nullable": true
+          },
+          "matKhau": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LopHoc": {
+        "type": "object",
+        "properties": {
+          "maLop": {
+            "type": "string",
+            "nullable": true
+          },
+          "tenLop": {
+            "type": "string",
+            "nullable": true
+          },
+          "maMon": {
+            "type": "string",
+            "nullable": true
+          },
+          "maGv": {
+            "type": "string",
+            "nullable": true
+          },
+          "maGvNavigation": {
+            "$ref": "#/components/schemas/GiangVien"
+          },
+          "maMonNavigation": {
+            "$ref": "#/components/schemas/MonHoc"
+          },
+          "buoiHocs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BuoiHoc"
+            },
+            "nullable": true
+          },
+          "maSvs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SinhVien"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MonHoc": {
+        "type": "object",
+        "properties": {
+          "maMon": {
+            "type": "string",
+            "nullable": true
+          },
+          "tenMon": {
+            "type": "string",
+            "nullable": true
+          },
+          "lopHocs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LopHoc"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -426,6 +554,59 @@
           },
           "tenMon": {
             "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "SinhVien": {
+        "type": "object",
+        "properties": {
+          "maSv": {
+            "type": "string",
+            "nullable": true
+          },
+          "taiKhoan": {
+            "type": "string",
+            "nullable": true
+          },
+          "matKhau": {
+            "type": "string",
+            "nullable": true
+          },
+          "hoTen": {
+            "type": "string",
+            "nullable": true
+          },
+          "ngaySinh": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "soDienThoai": {
+            "type": "string",
+            "nullable": true
+          },
+          "anhDaiDien": {
+            "type": "string",
+            "nullable": true
+          },
+          "diemDanhs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiemDanh"
+            },
+            "nullable": true
+          },
+          "maLops": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LopHoc"
+            },
             "nullable": true
           }
         },
@@ -447,28 +628,6 @@
             "nullable": true
           },
           "maGv": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "TaoSinhVienDto": {
-        "type": "object",
-        "properties": {
-          "maSv": {
-            "type": "string",
-            "nullable": true
-          },
-          "taiKhoan": {
-            "type": "string",
-            "nullable": true
-          },
-          "matKhau": {
-            "type": "string",
-            "nullable": true
-          },
-          "hoTen": {
             "type": "string",
             "nullable": true
           }
