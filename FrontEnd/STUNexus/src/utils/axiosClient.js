@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const axiosClient = axios.create({
-    // Prefer Vite env config; fallback to localhost for dev
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5207/api',
+    // Prefer Vite env config; fallback to deployed backend
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'https://diemdanhlophoc.onrender.com/api',
     headers: {
         'Content-Type': 'application/json',
     },
