@@ -15,7 +15,7 @@ const SubjectManagement = () => {
 
   const fetchSubjects = async () => {
     try {
-      const res = await axiosClient.get('/MonHocs');
+      const res = await axiosClient.get('/monhocs');
       setSubjects(res.data || []);
     } catch (err) {
       console.error('Lỗi tải môn học:', err);

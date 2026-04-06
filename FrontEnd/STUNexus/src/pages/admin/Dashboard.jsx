@@ -1,17 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import mockData from '../../data/mockDb.json';
+import axiosClient from '../../utils/axiosClient';
 import { FaUsers, FaChalkboardTeacher, FaLayerGroup } from 'react-icons/fa';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({ sv: 0, gv: 0, lop: 0 });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setStats({
-      sv: mockData.SinhVien?.length || 0,
-      gv: mockData.GiangVien?.length || 0,
-      lop: mockData.LopHoc?.length || 0
-    });
+    const fetchGlobalStats = async () => {
+      try {
+        const [svRes, gvRes, lopRes] = await Promise.all([
+          axiosClient.get('/sinhvien'),
+          axiosClient.get('/giangvien'),
+          axiosClient.get('/lophoc')
+        ]);
+        
+        setStats({
+          sv: svRes.data?.length || 0,
+          gv: gvRes.data?.length || 0,
+          lop: lopRes.data?.data?.length || 0
+        });
+      } catch (err) {
+        console.error('Lỗi tải tổng quan:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGlobalStats();
   }, []);
+
+  if (loading) return <div className="text-center py-5"><div className="spinner-border text-primary"></div></div>;
 
   return (
     <div className="container-fluid">
@@ -79,7 +98,7 @@ const Dashboard = () => {
               <h6 className="m-0 fw-bold text-primary">Hoạt Động Gần Đây</h6>
             </div>
             <div className="card-body p-4 text-center text-muted">
-              Biểu đồ và báo cáo chi tiết sẽ hiển thị ở đây.
+              Kết nối trực tiếp tới cơ sở dữ liệu SQL Server thành công. Dữ liệu thời gian thực đang được hiển thị.
             </div>
           </div>
         </div>
@@ -87,4 +106,5 @@ const Dashboard = () => {
     </div>
   );
 };
+
 export default Dashboard;

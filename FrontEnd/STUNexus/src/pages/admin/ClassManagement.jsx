@@ -14,20 +14,34 @@ const ClassManagement = () => {
   const [loading, setLoading] = useState(true);
 
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ maLop: '', tenLop: '' });
+  const [formData, setFormData] = useState({ 
+    maLop: '', 
+    tenLop: '', 
+    maGv: '', 
+    ngayBatDau: '', 
+    ngayKetThuc: '', 
+    gioBatDau: '', 
+    gioKetThuc: '', 
+    soBuoiHoc: 15 
+  });
+  const [lecturers, setLecturers] = useState([]);
 
   const fetchData = async () => {
     try {
       // Lấy thông tin môn học
-      const monRes = await axiosClient.get(`/MonHocs/${monId}`);
+      const monRes = await axiosClient.get(`/monhocs/${monId}`);
       setSubjectInfo(monRes.data);
 
       // Lấy danh sách lớp học -> filter theo mã môn
       const lopRes = await axiosClient.get('/lophoc');
       const allClasses = lopRes.data?.data || lopRes.data || [];
       setClasses(allClasses.filter(c => c.maMon === monId));
+
+      // Lấy danh sách giảng viên để chọn
+      const gvRes = await axiosClient.get('/giangvien');
+      setLecturers(gvRes.data || []);
     } catch (err) {
-      console.error('Lỗi tải lớp học:', err);
+      console.error('Lỗi tải dữ liệu:', err);
     } finally {
       setLoading(false);
     }
@@ -39,15 +53,17 @@ const ClassManagement = () => {
     e.preventDefault();
     try {
       await axiosClient.post('/lophoc', {
-        maLop: formData.maLop,
-        tenLop: formData.tenLop,
+        ...formData,
+        gioBatDau: formData.gioBatDau.length === 5 ? formData.gioBatDau + ':00' : formData.gioBatDau,
+        gioKetThuc: formData.gioKetThuc.length === 5 ? formData.gioKetThuc + ':00' : formData.gioKetThuc,
         maMon: monId,
-        maGv: user?.MaGV || user?.MaId
+        maGv: formData.maGv || user?.MaGV || user?.MaId
       });
+      alert('Tạo lớp học và lập lịch thành công!');
       setShowModal(false);
       fetchData();
     } catch (err) {
-      alert(err.response?.data?.message || 'Lỗi tạo lớp học!');
+      alert(err.response?.data?.message || 'Lỗi tạo lớp học! Vui lòng kiểm tra lại thông tin.');
     }
   };
 
@@ -58,7 +74,20 @@ const ClassManagement = () => {
   };
 
   const openAdd = () => {
-    setFormData({ maLop: `LPT_${Date.now().toString().slice(-5)}`, tenLop: `${subjectInfo?.tenMon || 'Lớp'} - Ca ` });
+    const today = new Date().toISOString().split('T')[0];
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 4);
+    
+    setFormData({ 
+      maLop: `LPT_${Date.now().toString().slice(-5)}`, 
+      tenLop: `${subjectInfo?.tenMon || 'Lớp'} - `,
+      maGv: user?.role === 'lecturer' ? user.MaGV : '',
+      ngayBatDau: today,
+      ngayKetThuc: nextMonth.toISOString().split('T')[0],
+      gioBatDau: '07:30',
+      gioKetThuc: '09:30',
+      soBuoiHoc: 15
+    });
     setShowModal(true);
   };
 
@@ -122,13 +151,49 @@ const ClassManagement = () => {
                 </div>
                 <form onSubmit={handleSave}>
                   <div className="modal-body p-4">
-                    <div className="mb-3">
-                      <label className="form-label small fw-bold text-muted">Mã Lớp Học <span className="text-danger">*</span></label>
-                      <input type="text" className="form-control bg-light border-0 py-2" value={formData.maLop} onChange={e => setFormData({...formData, maLop: e.target.value})} required />
-                    </div>
-                    <div className="mb-3">
-                      <label className="form-label small fw-bold text-muted">Tên Danh Nghĩa Lớp Học <span className="text-danger">*</span></label>
-                      <input type="text" className="form-control bg-light border-0 py-2" value={formData.tenLop} onChange={e => setFormData({...formData, tenLop: e.target.value})} required placeholder="VD: Lập trình Web - Ca 1 - Thứ 5" />
+                    <div className="row g-3">
+                      <div className="col-md-6">
+                        <label className="form-label small fw-bold text-muted">Mã Lớp Học <span className="text-danger">*</span></label>
+                        <input type="text" className="form-control bg-light border-0 py-2" value={formData.maLop} onChange={e => setFormData({...formData, maLop: e.target.value})} required />
+                      </div>
+                      <div className="col-md-6">
+                        <label className="form-label small fw-bold text-muted">Tên Danh Nghĩa Lớp <span className="text-danger">*</span></label>
+                        <input type="text" className="form-control bg-light border-0 py-2" value={formData.tenLop} onChange={e => setFormData({...formData, tenLop: e.target.value})} required placeholder="VD: Lớp Ca 1 - Thứ 2" />
+                      </div>
+                      
+                      {user?.role === 'admin' && (
+                        <div className="col-12">
+                          <label className="form-label small fw-bold text-muted">Giảng viên phụ trách <span className="text-danger">*</span></label>
+                          <select className="form-select bg-light border-0 py-2" value={formData.maGv} onChange={e => setFormData({...formData, maGv: e.target.value})} required>
+                            <option value="">-- Chọn Giảng Viên --</option>
+                            {lecturers.map(gv => (
+                              <option key={gv.maGv} value={gv.maGv}>{gv.hoLot} {gv.tenGv} ({gv.maGv})</option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+
+                      <div className="col-md-6">
+                        <label className="form-label small fw-bold text-muted">Ngày bắt đầu <span className="text-danger">*</span></label>
+                        <input type="date" className="form-control bg-light border-0 py-2" value={formData.ngayBatDau} onChange={e => setFormData({...formData, ngayBatDau: e.target.value})} min={new Date().toISOString().split('T')[0]} required />
+                      </div>
+                      <div className="col-md-6">
+                        <label className="form-label small fw-bold text-muted">Ngày Kết thúc (Dự kiến) <span className="text-danger">*</span></label>
+                        <input type="date" className="form-control bg-light border-0 py-2" value={formData.ngayKetThuc} onChange={e => setFormData({...formData, ngayKetThuc: e.target.value})} required />
+                      </div>
+
+                      <div className="col-md-4">
+                        <label className="form-label small fw-bold text-muted">Giờ vào học <span className="text-danger">*</span></label>
+                        <input type="time" className="form-control bg-light border-0 py-2" value={formData.gioBatDau} onChange={e => setFormData({...formData, gioBatDau: e.target.value})} required />
+                      </div>
+                      <div className="col-md-4">
+                        <label className="form-label small fw-bold text-muted">Giờ Tan học <span className="text-danger">*</span></label>
+                        <input type="time" className="form-control bg-light border-0 py-2" value={formData.gioKetThuc} onChange={e => setFormData({...formData, gioKetThuc: e.target.value})} required />
+                      </div>
+                      <div className="col-md-4">
+                        <label className="form-label small fw-bold text-muted">Số buổi học <span className="text-danger">*</span></label>
+                        <input type="number" className="form-control bg-light border-0 py-2" value={formData.soBuoiHoc} onChange={e => setFormData({...formData, soBuoiHoc: parseInt(e.target.value)})} required min="1" />
+                      </div>
                     </div>
                   </div>
                   <div className="modal-footer border-0 bg-light rounded-bottom-4">

@@ -1,10 +1,9 @@
 import React, { useState, useContext, useRef } from 'react';
 import { AuthContext } from '../../context/AuthContext';
-import { getTable, updateTable } from '../../services/mockService';
+import axiosClient from '../../utils/axiosClient';
 import { FaCamera, FaSave, FaKey, FaShieldAlt } from 'react-icons/fa';
 
-// NOTE: Trang này tạm dùng mockService vì Backend chưa có API đổi mật khẩu/avatar/profile SV.
-// Khi BE bổ sung, thay getTable/updateTable bằng axiosClient.put('/SinhViens/{id}', ...)
+// Kết nối trực tiếp tới Backend API
 
 const StudentProfile = () => {
   const { user, updateUserSession } = useContext(AuthContext);
@@ -24,49 +23,34 @@ const StudentProfile = () => {
   const [message, setMessage] = useState({ text: '', type: '' });
 
   const handleAvatarSelect = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if(file.size > 1024 * 1024) { // giới hạn 1MB
-         setMessage({text: 'Kích thước ảnh quá lớn. Vui lòng chọn ảnh < 1MB.', type: 'danger'});
-         return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result;
-        
-        // Update local session
-        updateUserSession({ AnhDaiDien: base64String });
-        
-        // Update DB
-        const students = getTable('SinhVien');
-        const updated = students.map(s => s.MaSV === user.MaSV ? { ...s, AnhDaiDien: base64String } : s);
-        updateTable('SinhVien', updated);
-        
-        setMessage({ text: 'Cập nhật ảnh đại diện thành công!', type: 'success' });
-        setTimeout(() => setMessage({text:'', type:''}), 3000);
-      };
-      reader.readAsDataURL(file);
-    }
+    alert('Chức năng cập nhật ảnh đại diện hiện đang được bảo trì. Vui lòng quay lại sau.');
   };
 
-  const saveProfile = (e) => {
+  const saveProfile = async (e) => {
     e.preventDefault();
-    updateUserSession({ Email: formData.Email, SoDienThoai: formData.SoDienThoai });
-    
-    // Update DB
-    const students = getTable('SinhVien');
-    const updated = students.map(s => s.MaSV === user.MaSV ? { ...s, Email: formData.Email, SoDienThoai: formData.SoDienThoai } : s);
-    updateTable('SinhVien', updated);
-    
-    setMessage({ text: 'Cập nhật thông tin liên lạc thành công.', type: 'success' });
+    try {
+      const parts = user.HoTen.trim().split(' ');
+      const tenSv = parts.pop();
+      const hoLot = parts.join(' ');
+
+      await axiosClient.put(`/sinhvien/${user.MaSV}`, {
+        hoLot: hoLot,
+        tenSv: tenSv,
+        lop: user.Lop || '',
+        email: formData.Email,
+        soDienThoai: formData.SoDienThoai
+      });
+
+      updateUserSession({ Email: formData.Email, SoDienThoai: formData.SoDienThoai });
+      setMessage({ text: 'Cập nhật thông tin liên lạc thành công.', type: 'success' });
+    } catch (err) {
+      setMessage({ text: err.response?.data?.message || 'Lỗi cập nhật hồ sơ.', type: 'danger' });
+    }
     setTimeout(() => setMessage({text:'', type:''}), 3000);
   };
 
-  const changePassword = (e) => {
+  const changePassword = async (e) => {
     e.preventDefault();
-    if(passData.oldPass !== user.MatKhau) {
-      setMessage({ text: 'Mật khẩu cũ không chính xác!', type: 'danger' }); return;
-    }
     if(passData.newPass !== passData.confirmPass) {
       setMessage({ text: 'Mật khẩu xác nhận không khớp!', type: 'danger' }); return;
     }
@@ -74,13 +58,18 @@ const StudentProfile = () => {
       setMessage({ text: 'Mật khẩu mới phải từ 5 ký tự trở lên.', type: 'danger' }); return;
     }
 
-    updateUserSession({ MatKhau: passData.newPass });
-    const students = getTable('SinhVien');
-    const updated = students.map(s => s.MaSV === user.MaSV ? { ...s, MatKhau: passData.newPass } : s);
-    updateTable('SinhVien', updated);
-    
-    setPassData({oldPass: '', newPass: '', confirmPass: ''});
-    setMessage({ text: 'Đổi mật khẩu thành công! Hãy lưu ý mật khẩu mới.', type: 'success' });
+    try {
+      await axiosClient.post('/auth/change-password', {
+        taiKhoan: user.TaiKhoan,
+        oldPassword: passData.oldPass,
+        newPassword: passData.newPass
+      });
+      
+      setPassData({oldPass: '', newPass: '', confirmPass: ''});
+      setMessage({ text: 'Đổi mật khẩu thành công! Hãy lưu ý mật khẩu mới.', type: 'success' });
+    } catch (err) {
+      setMessage({ text: err.response?.data?.message || 'Đổi mật khẩu thất bại.', type: 'danger' });
+    }
     setTimeout(() => setMessage({text:'', type:''}), 4000);
   };
 

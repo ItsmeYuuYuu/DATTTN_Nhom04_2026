@@ -1,20 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { FaUserPlus, FaSearch, FaEdit, FaTrash } from 'react-icons/fa';
+import * as XLSX from 'xlsx';
 import axiosClient from '../../utils/axiosClient';
 
 const StudentManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+  const [uploading, setUploading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState({ maSv: '', hoTen: '', taiKhoan: '', matKhau: '', ngaySinh: '', email: '', soDienThoai: '' });
+  
+  const [formData, setFormData] = useState({ 
+    maSv: '', 
+    hoLot: '', 
+    tenSv: '', 
+    taiKhoan: '', 
+    matKhau: '', 
+    lop: '', 
+    email: '', 
+    soDienThoai: '' 
+  });
 
   const fetchStudents = async () => {
     try {
-      const res = await axiosClient.get('/SinhViens');
-      setStudents(res.data || []);
+      const res = await axiosClient.get('/sinhvien');
+      setStudents(res.data.data || []);
     } catch (err) {
       console.error('Lỗi tải sinh viên:', err);
     } finally {
@@ -26,27 +37,119 @@ const StudentManagement = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    // BE SinhVienController hiện chưa có POST/PUT endpoint
-    alert('Backend chưa hỗ trợ API thêm/sửa sinh viên. Vui lòng liên hệ đội Backend bổ sung.');
-    setShowModal(false);
+    try {
+      if (editMode) {
+        await axiosClient.put(`/sinhvien/${formData.maSv}`, {
+          hoLot: formData.hoLot,
+          tenSv: formData.tenSv,
+          lop: formData.lop,
+          email: formData.email,
+          soDienThoai: formData.soDienThoai
+        });
+        alert('Cập nhật sinh viên thành công!');
+      } else {
+        await axiosClient.post('/sinhvien', {
+          maSv: formData.maSv,
+          taiKhoan: formData.taiKhoan,
+          matKhau: formData.matKhau,
+          hoLot: formData.hoLot,
+          tenSv: formData.tenSv,
+          lop: formData.lop,
+          email: formData.email,
+          soDienThoai: formData.soDienThoai
+        });
+        alert('Thêm sinh viên thành công!');
+      }
+      setShowModal(false);
+      fetchStudents();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Có lỗi xảy ra khi lưu dữ liệu.');
+    }
   };
 
   const handleDelete = async (id) => {
     if (window.confirm('Cảnh báo: Xoá thẻ sinh viên này sẽ vĩnh viễn xoá dữ liệu liên đới. Vẫn tiếp tục?')) {
-      alert('Backend chưa hỗ trợ API xoá sinh viên. Vui lòng liên hệ đội Backend.');
+      try {
+        await axiosClient.delete(`/sinhvien/${id}`);
+        alert('Đã xóa sinh viên thành công.');
+        fetchStudents();
+      } catch (err) {
+        alert(err.response?.data?.message || 'Không thể xóa sinh viên này.');
+      }
     }
   };
 
   const openAdd = () => {
-    setFormData({ maSv: '', hoTen: '', taiKhoan: '', matKhau: '', ngaySinh: '', email: '', soDienThoai: '' });
+    setFormData({ maSv: '', hoLot: '', tenSv: '', taiKhoan: '', matKhau: '', lop: '', email: '', soDienThoai: '' });
     setEditMode(false);
     setShowModal(true);
   };
 
   const openEdit = (sv) => {
-    setFormData({ maSv: sv.maSv, hoTen: sv.hoTen, taiKhoan: sv.taiKhoan, matKhau: '', ngaySinh: sv.ngaySinh ? sv.ngaySinh.split('T')[0] : '', email: sv.email || '', soDienThoai: sv.soDienThoai || '' });
+    // Tách tên tạm thời nếu BE trả về HoTen gộp (nhưng tốt nhất BE nên trả tách)
+    // Ở đây BE Controller.cs GetAll đang gộp: HoTen = s.HoLot + " " + s.TenSv
+    // Ta sẽ phỏng đoán: TenSv là chữ cuối cùng, còn lại là HoLot
+    const parts = sv.hoTen.trim().split(' ');
+    const tenSv = parts.pop();
+    const hoLot = parts.join(' ');
+
+    setFormData({ 
+      maSv: sv.maSv, 
+      hoLot: hoLot, 
+      tenSv: tenSv, 
+      taiKhoan: sv.taiKhoan, 
+      matKhau: '********', // Không sửa pass qua đây hoặc để trống
+      lop: sv.lop || '', 
+      email: sv.email || '', 
+      soDienThoai: sv.soDienThoai || '' 
+    });
     setEditMode(true);
     setShowModal(true);
+  };
+
+  const handleExcelUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      if (jsonData.length === 0) {
+        alert('File Excel không có dữ liệu!');
+        return;
+      }
+
+      const payload = jsonData.map(row => ({
+        maSv: String(row['Mã sinh viên'] || ''),
+        taiKhoan: String(row['Mã sinh viên'] || ''),
+        matKhau: '123456',
+        hoLot: String(row['Họ lót'] || ''),
+        tenSv: String(row['Tên'] || ''),
+        lop: String(row['Mã lớp'] || ''),
+        email: String(row['Email'] || ''),
+        soDienThoai: String(row['SĐT'] || row['Số điện thoại'] || '')
+      })).filter(x => x.maSv && x.tenSv && x.lop);
+
+      if (payload.length === 0) {
+        alert('Không tìm thấy dữ liệu hợp lệ. Cần các cột: Mã sinh viên, Họ lót, Tên, Mã lớp.');
+        return;
+      }
+
+      const res = await axiosClient.post('/sinhvien/import', payload);
+      alert(res.data.message);
+      fetchStudents();
+    } catch (err) {
+      console.error(err);
+      alert('Lỗi xử lý file Excel hoặc lỗi định dạng dữ liệu gửi lên.');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
   };
 
   const filtered = students.filter(item => 
@@ -58,9 +161,15 @@ const StudentManagement = () => {
     <div className="container-fluid">
       <div className="d-flex justify-content-between align-items-center mb-4 mt-2">
         <h3 className="m-0 fw-bold text-dark">Dữ liệu Sinh Viên Tổng</h3>
-        <button onClick={openAdd} className="btn btn-primary d-flex align-items-center gap-2 shadow-sm" style={{borderRadius: '8px', padding: '10px 20px'}}>
-          <FaUserPlus /> Ghi danh Sinh viên
-        </button>
+        <div className="d-flex gap-2">
+          <label className="btn btn-outline-success d-flex align-items-center gap-2 shadow-sm mb-0" style={{borderRadius: '8px', padding: '10px 20px', cursor: 'pointer'}}>
+            {uploading ? <div className="spinner-border spinner-border-sm"></div> : <FaUserPlus />} Thêm bằng file Excel
+            <input type="file" accept=".xlsx, .xls" hidden onChange={handleExcelUpload} disabled={uploading} />
+          </label>
+          <button onClick={openAdd} className="btn btn-primary d-flex align-items-center gap-2 shadow-sm" style={{borderRadius: '8px', padding: '10px 20px'}}>
+            <FaUserPlus /> Thêm từng sinh viên
+          </button>
+        </div>
       </div>
 
       <div className="card glass-panel border-0 shadow-sm mb-4">
@@ -79,7 +188,7 @@ const StudentManagement = () => {
           ) : (
           <div className="table-responsive">
             <table className="table table-custom table-hover w-100 align-middle">
-              <thead><tr><th>Mã Sinh Viên</th><th>Họ Tên</th><th>Email liên hệ</th><th>Tài khoản cổng</th><th className="text-end">Tác vụ</th></tr></thead>
+              <thead><tr><th>Mã Sinh Viên</th><th>Họ Tên</th><th>Lớp</th><th>Email liên hệ</th><th>Tài khoản cổng</th><th className="text-end">Tác vụ</th></tr></thead>
               <tbody>
                 {filtered.map(item => (
                   <tr key={item.maSv}>
@@ -92,6 +201,7 @@ const StudentManagement = () => {
                         <span className="fw-medium text-dark">{item.hoTen}</span>
                       </div>
                     </td>
+                    <td><span className="badge bg-light text-dark border">{item.lop || 'N/A'}</span></td>
                     <td><span className="text-muted">{item.email || 'Chưa cập nhật'}</span></td>
                     <td><span className="font-monospace text-muted">{item.taiKhoan}</span></td>
                     <td className="text-end">
@@ -126,22 +236,32 @@ const StudentManagement = () => {
                         <input type="text" className="form-control bg-light border-0" value={formData.maSv} onChange={e => setFormData({...formData, maSv: e.target.value})} required disabled={editMode} />
                       </div>
                       <div className="col-12 col-md-6">
-                        <label className="form-label small fw-bold text-muted">Họ và Tên SV <span className="text-danger">*</span></label>
-                        <input type="text" className="form-control bg-light border-0" value={formData.hoTen} onChange={e => setFormData({...formData, hoTen: e.target.value})} required />
+                        <label className="form-label small fw-bold text-muted">Họ và Tên lót <span className="text-danger">*</span></label>
+                        <input type="text" className="form-control bg-light border-0" value={formData.hoLot} onChange={e => setFormData({...formData, hoLot: e.target.value})} required />
+                      </div>
+                      <div className="col-12 col-md-6">
+                        <label className="form-label small fw-bold text-muted">Tên Sinh viên <span className="text-danger">*</span></label>
+                        <input type="text" className="form-control bg-light border-0" value={formData.tenSv} onChange={e => setFormData({...formData, tenSv: e.target.value})} required />
+                      </div>
+                      <div className="col-12 col-md-6">
+                        <label className="form-label small fw-bold text-muted">Lớp Sinh hoạt <span className="text-danger">*</span></label>
+                        <input type="text" className="form-control bg-light border-0" placeholder="VD: D10CQCN01" value={formData.lop} onChange={e => setFormData({...formData, lop: e.target.value})} required />
                       </div>
                       <div className="col-12 col-md-6">
                         <label className="form-label small fw-bold text-muted">Tài khoản truy cập <span className="text-danger">*</span></label>
-                        <input type="text" className="form-control bg-light border-0" value={formData.taiKhoan} onChange={e => setFormData({...formData, taiKhoan: e.target.value})} required />
+                        <input type="text" className="form-control bg-light border-0" value={formData.taiKhoan} onChange={e => setFormData({...formData, taiKhoan: e.target.value})} required disabled={editMode} />
                       </div>
+                      {!editMode && (
+                        <div className="col-12 col-md-6">
+                          <label className="form-label small fw-bold text-muted">Mật khẩu cấp phát <span className="text-danger">*</span></label>
+                          <input type="password" className="form-control bg-light border-0" value={formData.matKhau} onChange={e => setFormData({...formData, matKhau: e.target.value})} required />
+                        </div>
+                      )}
                       <div className="col-12 col-md-6">
-                        <label className="form-label small fw-bold text-muted">Mật khẩu cấp phát <span className="text-danger">*</span></label>
-                        <input type="text" className="form-control bg-light border-0" value={formData.matKhau} onChange={e => setFormData({...formData, matKhau: e.target.value})} required />
+                        <label className="form-label small fw-bold text-muted">Số điện thoại</label>
+                        <input type="text" className="form-control bg-light border-0" value={formData.soDienThoai} onChange={e => setFormData({...formData, soDienThoai: e.target.value})} />
                       </div>
-                      <div className="col-12 col-md-6">
-                        <label className="form-label small fw-bold text-muted">Ngày sinh</label>
-                        <input type="date" className="form-control bg-light border-0" value={formData.ngaySinh} onChange={e => setFormData({...formData, ngaySinh: e.target.value})}/>
-                      </div>
-                      <div className="col-12 col-md-6">
+                      <div className="col-12">
                         <label className="form-label small fw-bold text-muted">Email sinh viên</label>
                         <input type="email" className="form-control bg-light border-0" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
                       </div>

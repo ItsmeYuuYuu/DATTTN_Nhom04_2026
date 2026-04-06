@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../../context/AuthContext';
-import mockData from '../../data/mockDb.json';
+import axiosClient from '../../utils/axiosClient';
 import { FaUserGraduate, FaCalendarCheck, FaExclamationTriangle } from 'react-icons/fa';
 
 const LecturerDashboard = () => {
@@ -10,35 +10,16 @@ const LecturerDashboard = () => {
   useEffect(() => {
     if (!user) return;
     
-    // Lấy danh sách ID lớp phụ trách
-    const myClassIds = mockData.LopHoc.filter(l => l.MaGV === user.MaGV).map(l => l.MaLop);
-    
-    // Đếm lượng sinh viên tổng
-    const myStudentsRaw = mockData.ChiTietLopHoc.filter(c => myClassIds.includes(c.MaLop)).map(c => c.MaSV);
-    const uniqueStudents = [...new Set(myStudentsRaw)];
-    
-    // Đếm điểm danh chuyên cần
-    const sessionIds = mockData.BuoiHoc.filter(b => myClassIds.includes(b.MaLop)).map(b => b.MaBuoiHoc);
-    const attendances = mockData.DiemDanh.filter(d => sessionIds.includes(d.MaBuoiHoc));
-    
-    const coMatCount = attendances.filter(a => a.TrangThai === 'Có mặt').length;
-    const totalCount = attendances.length;
-    const avgAttendance = totalCount === 0 ? 0 : Math.round((coMatCount / totalCount) * 100);
-    
-    // Tính sinh viên vắng nhiều >= 3
-    const warningMap = {};
-    attendances.forEach(a => {
-      if (a.TrangThai.includes('Vắng') || a.TrangThai.includes('trễ')) {
-        warningMap[a.MaSV] = (warningMap[a.MaSV] || 0) + 1;
+    const fetchStats = async () => {
+      try {
+        const res = await axiosClient.get(`/diemdanh/lecturer-stats/${user.MaGV || user.MaId}`);
+        setStats(res.data);
+      } catch (err) {
+        console.error('Lỗi tải thống kê:', err);
       }
-    });
-    const warningStudents = Object.values(warningMap).filter(v => v >= 3).length;
+    };
 
-    setStats({
-      totalStudents: uniqueStudents.length,
-      avgAttendance,
-      warningStudents
-    });
+    fetchStats();
   }, [user]);
 
   return (
@@ -94,10 +75,15 @@ const LecturerDashboard = () => {
           <div className="bg-warning bg-opacity-10 d-inline-flex justify-content-center align-items-center rounded-circle mb-3" style={{width: '80px', height: '80px'}}>
             <FaExclamationTriangle className="text-warning fs-1" />
           </div>
-          <p className="text-muted fw-medium fs-5 mb-0">Không có sinh viên nào rơi vào ngưỡng cấm thi trong tuần này.</p>
+          <p className="text-muted fw-medium fs-5 mb-0">
+            {stats.warningStudents > 0 
+              ? `Hiện có ${stats.warningStudents} sinh viên đang vắng quá số buổi quy định.`
+              : 'Không có sinh viên nào rơi vào ngưỡng cấm thi trong tuần này.'}
+          </p>
         </div>
       </div>
     </div>
   );
 };
+
 export default LecturerDashboard;

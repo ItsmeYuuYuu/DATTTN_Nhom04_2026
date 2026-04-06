@@ -1,6 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { AuthContext } from '../../context/AuthContext';
-import mockData from '../../data/mockDb.json';
+import axiosClient from '../../utils/axiosClient';
 import { FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa';
 
 const StudentDashboard = () => {
@@ -11,21 +9,24 @@ const StudentDashboard = () => {
   useEffect(() => {
     if (!user) return;
     
-    // Logic lấy dữ liệu điểm danh giả lập kết nối DB
-    const myAttendance = mockData.DiemDanh.filter(d => d.MaSV === user.MaSV).map(d => {
-      const buoi = mockData.BuoiHoc.find(b => b.MaBuoiHoc === d.MaBuoiHoc);
-      const lop = mockData.LopHoc.find(l => l.MaLop === buoi?.MaLop);
-      const mon = mockData.MonHoc.find(m => m.MaMon === lop?.MaMon);
-      return { ...d, NgayHoc: buoi?.NgayHoc, TenMon: mon?.TenMon || 'Chưa rõ Môn' };
-    });
+    const fetchAttendance = async () => {
+      try {
+        const res = await axiosClient.get(`/diemdanh/student/${user.MaSV}`);
+        const history = res.data || [];
+        
+        // Cần lấy đủ danh sách buổi học của các lớp SV tham gia để tính Vắng (Tạm thời tính trên lịch sử đã có)
+        const coMat = history.filter(a => a.trangThai === 1).length;
+        const diTre = history.filter(a => a.trangThai === 2).length;
+        const vang = history.filter(a => a.trangThai === 3 || a.trangThai === 4).length;
+        
+        setStats({ coMat, vang, diTre, total: history.length || 1 });
+        setRecent(history.slice(0, 5)); // Lấy 5 buổi gần đây nhất
+      } catch (err) {
+        console.error('Lỗi tải thống kê điểm danh:', err);
+      }
+    };
 
-    const coMat = myAttendance.filter(a => a.TrangThai === 'Có mặt').length;
-    const vang = myAttendance.filter(a => a.TrangThai.includes('Vắng')).length;
-    const diTre = myAttendance.filter(a => a.TrangThai === 'Đi trễ').length;
-    
-    setStats({ coMat, vang, diTre, total: myAttendance.length || 1 });
-    // Lấy 5 buổi gần đây nhất
-    setRecent(myAttendance.slice(-5).reverse());
+    fetchAttendance();
   }, [user]);
 
   const percentage = Math.round((stats.coMat / stats.total) * 100);
@@ -90,16 +91,16 @@ const StudentDashboard = () => {
           {recent.map((item, i) => (
             <div key={i} className="bg-white p-3 rounded-4 shadow-sm border-0 d-flex justify-content-between align-items-center">
               <div>
-                <h6 className="fw-bold mb-1 text-dark text-truncate" style={{maxWidth: '180px'}}>{item.TenMon}</h6>
+                <h6 className="fw-bold mb-1 text-dark text-truncate" style={{maxWidth: '180px'}}>{item.tenMon}</h6>
                 <div className="d-flex align-items-center text-muted small">
-                  <i className="far fa-calendar-alt me-1"></i> {item.NgayHoc}
+                  <i className="far fa-calendar-alt me-1"></i> {item.ngayHoc}
                 </div>
               </div>
               <span className={`badge rounded-pill px-3 py-2 fw-bold ${
-                item.TrangThai === 'Có mặt' ? 'bg-success bg-opacity-10 text-success' : 
-                item.TrangThai === 'Đi trễ' ? 'bg-warning bg-opacity-10 text-warning' : 'bg-danger bg-opacity-10 text-danger'
+                item.trangThai === 1 ? 'bg-success bg-opacity-10 text-success' : 
+                item.trangThai === 2 ? 'bg-warning bg-opacity-10 text-warning' : 'bg-danger bg-opacity-10 text-danger'
               }`}>
-                {item.TrangThai}
+                {item.trangThai === 1 ? 'Có mặt' : item.trangThai === 2 ? 'Đi trễ' : 'Vắng'}
               </span>
             </div>
           ))}

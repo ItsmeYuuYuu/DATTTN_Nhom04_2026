@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const axiosClient = axios.create({
-    baseURL: 'https://diemdanhlophoc.onrender.com/api', // Port BE từ launchSettings.json
+    // Prefer Vite env config; fallback to localhost for dev
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5207/api',
     headers: {
         'Content-Type': 'application/json',
     },
@@ -35,3 +36,4 @@ axiosClient.interceptors.response.use(
 );
 
 export default axiosClient;
+

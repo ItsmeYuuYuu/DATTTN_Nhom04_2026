@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import axiosClient from '../../utils/axiosClient';
+import { AuthContext } from '../../context/AuthContext';
 import fpPromise from '@fingerprintjs/fingerprintjs';
 import { FaMapMarkerAlt, FaCheckCircle, FaExclamationTriangle, FaFingerprint, FaQrcode } from 'react-icons/fa';
 
 const StudentCheckin = () => {
-  const { classId } = useParams();
+  const { classId } = useParams(); // classId is MaBuoiHoc
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
+  const { user } = useContext(AuthContext);
   
   const [status, setStatus] = useState('checking'); // checking | success | error
   const [message, setMessage] = useState('Đang lấy thông tin định vị và thiết bị...');
@@ -28,24 +29,25 @@ const StudentCheckin = () => {
         }
 
         navigator.geolocation.getCurrentPosition(
-          (position) => {
+          async (position) => {
             const { latitude, longitude } = position.coords;
             setGps({ lat: latitude, lng: longitude });
             
-            // Toạ độ gốc giả định của lớp học (Trường STU)
-            const latGoc = 10.738;
-            const lngGoc = 106.678;
-            
-            const diffLat = Math.abs(latitude - latGoc);
-            const diffLng = Math.abs(longitude - lngGoc);
-            
-            // Sai số cho phép khoảng 1-2km cho mục đích thử nghiệm
-            if (diffLat > 0.05 || diffLng > 0.05) {
-              setStatus('error');
-              setMessage('Bạn đang ở quá xa vị trí lớp học. Yêu cầu có mặt tại phòng học!');
-            } else {
-              setStatus('success');
-              setMessage('Điểm danh thành công! Đã ghi nhận thiết bị hợp lệ.');
+            try {
+               // Gọi API Submit điểm danh thật
+               await axiosClient.post('/diemdanh/submit', {
+                  maBuoiHoc: parseInt(classId),
+                  maSv: user?.MaSV || user?.MaId,
+                  lat: latitude,
+                  long: longitude,
+                  deviceToken: deviceId
+               });
+               
+               setStatus('success');
+               setMessage('Điểm danh thành công! Đã ghi nhận thiết bị hợp lệ.');
+            } catch (err) {
+               setStatus('error');
+               setMessage(err.response?.data?.message || 'Điểm danh thất bại! Có thể bạn đã điểm danh rồi hoặc sai mã QR.');
             }
           },
           (err) => {

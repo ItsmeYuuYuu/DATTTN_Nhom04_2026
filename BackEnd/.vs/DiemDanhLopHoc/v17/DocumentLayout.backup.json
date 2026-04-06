@@ -1,0 +1,213 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\DATTTN_NHOM04_2026\\BackEnd\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|d:\\datttn_nhom04_2026\\backend\\diemdanhlophoc\\controllers\\buoihoccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|solutionrelative:diemdanhlophoc\\controllers\\buoihoccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|d:\\datttn_nhom04_2026\\backend\\diemdanhlophoc\\controllers\\lophoccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|solutionrelative:diemdanhlophoc\\controllers\\lophoccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|d:\\datttn_nhom04_2026\\backend\\diemdanhlophoc\\controllers\\sinhviencontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|solutionrelative:diemdanhlophoc\\controllers\\sinhviencontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|d:\\datttn_nhom04_2026\\backend\\diemdanhlophoc\\dtos\\buoihocdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|solutionrelative:diemdanhlophoc\\dtos\\buoihocdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|d:\\datttn_nhom04_2026\\backend\\diemdanhlophoc\\dtos\\diemdanhdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|solutionrelative:diemdanhlophoc\\dtos\\diemdanhdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|d:\\datttn_nhom04_2026\\backend\\diemdanhlophoc\\dtos\\lophocdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|solutionrelative:diemdanhlophoc\\dtos\\lophocdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|d:\\datttn_nhom04_2026\\backend\\diemdanhlophoc\\dtos\\monhocdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|solutionrelative:diemdanhlophoc\\dtos\\monhocdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|d:\\datttn_nhom04_2026\\backend\\diemdanhlophoc\\dtos\\nguoidungdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|solutionrelative:diemdanhlophoc\\dtos\\nguoidungdtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|d:\\datttn_nhom04_2026\\backend\\diemdanhlophoc\\controllers\\monhocscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|solutionrelative:diemdanhlophoc\\controllers\\monhocscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|d:\\datttn_nhom04_2026\\backend\\diemdanhlophoc\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|solutionrelative:diemdanhlophoc\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|d:\\datttn_nhom04_2026\\backend\\diemdanhlophoc\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{5FE97663-5EC8-46A6-B57E-98C17CF845D5}|DiemDanhLopHoc\\DiemDanhLopHoc.csproj|solutionrelative:diemdanhlophoc\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "BuoiHocController.cs",
+              "DocumentMoniker": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\Controllers\\BuoiHocController.cs",
+              "RelativeDocumentMoniker": "DiemDanhLopHoc\\Controllers\\BuoiHocController.cs",
+              "ToolTip": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\Controllers\\BuoiHocController.cs",
+              "RelativeToolTip": "DiemDanhLopHoc\\Controllers\\BuoiHocController.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABQAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-05T15:51:30.665Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "BuoiHocDTOs.cs",
+              "DocumentMoniker": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\DTOs\\BuoiHocDTOs.cs",
+              "RelativeDocumentMoniker": "DiemDanhLopHoc\\DTOs\\BuoiHocDTOs.cs",
+              "ToolTip": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\DTOs\\BuoiHocDTOs.cs",
+              "RelativeToolTip": "DiemDanhLopHoc\\DTOs\\BuoiHocDTOs.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-05T15:30:17.581Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "LopHocDTOs.cs",
+              "DocumentMoniker": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\DTOs\\LopHocDTOs.cs",
+              "RelativeDocumentMoniker": "DiemDanhLopHoc\\DTOs\\LopHocDTOs.cs",
+              "ToolTip": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\DTOs\\LopHocDTOs.cs",
+              "RelativeToolTip": "DiemDanhLopHoc\\DTOs\\LopHocDTOs.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-05T15:30:11.768Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "MonHocDTOs.cs",
+              "DocumentMoniker": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\DTOs\\MonHocDTOs.cs",
+              "RelativeDocumentMoniker": "DiemDanhLopHoc\\DTOs\\MonHocDTOs.cs",
+              "ToolTip": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\DTOs\\MonHocDTOs.cs",
+              "RelativeToolTip": "DiemDanhLopHoc\\DTOs\\MonHocDTOs.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-05T15:30:09.382Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "NguoiDungDTOs.cs",
+              "DocumentMoniker": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\DTOs\\NguoiDungDTOs.cs",
+              "RelativeDocumentMoniker": "DiemDanhLopHoc\\DTOs\\NguoiDungDTOs.cs",
+              "ToolTip": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\DTOs\\NguoiDungDTOs.cs",
+              "RelativeToolTip": "DiemDanhLopHoc\\DTOs\\NguoiDungDTOs.cs",
+              "ViewState": "AgIAAEQAAAAAAAAAAAAYwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-05T15:29:40.195Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "MonHocsController.cs",
+              "DocumentMoniker": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\Controllers\\MonHocsController.cs",
+              "RelativeDocumentMoniker": "DiemDanhLopHoc\\Controllers\\MonHocsController.cs",
+              "ToolTip": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\Controllers\\MonHocsController.cs",
+              "RelativeToolTip": "DiemDanhLopHoc\\Controllers\\MonHocsController.cs",
+              "ViewState": "AgIAACEAAAAAAAAAAAAowAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-05T11:35:05.068Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "LopHocController.cs",
+              "DocumentMoniker": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\Controllers\\LopHocController.cs",
+              "RelativeDocumentMoniker": "DiemDanhLopHoc\\Controllers\\LopHocController.cs",
+              "ToolTip": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\Controllers\\LopHocController.cs",
+              "RelativeToolTip": "DiemDanhLopHoc\\Controllers\\LopHocController.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAAFoAAABAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-05T11:34:56.711Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "SinhVienController.cs",
+              "DocumentMoniker": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\Controllers\\SinhVienController.cs",
+              "RelativeDocumentMoniker": "DiemDanhLopHoc\\Controllers\\SinhVienController.cs",
+              "ToolTip": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\Controllers\\SinhVienController.cs",
+              "RelativeToolTip": "DiemDanhLopHoc\\Controllers\\SinhVienController.cs",
+              "ViewState": "AgIAAFMAAAAAAAAAAAAowG4AAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-05T11:32:14.46Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "DiemDanhDTOs.cs",
+              "DocumentMoniker": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\DTOs\\DiemDanhDTOs.cs",
+              "RelativeDocumentMoniker": "DiemDanhLopHoc\\DTOs\\DiemDanhDTOs.cs",
+              "ToolTip": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\DTOs\\DiemDanhDTOs.cs",
+              "RelativeToolTip": "DiemDanhLopHoc\\DTOs\\DiemDanhDTOs.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-05T15:30:15.446Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\Program.cs",
+              "RelativeDocumentMoniker": "DiemDanhLopHoc\\Program.cs",
+              "ToolTip": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\Program.cs",
+              "RelativeToolTip": "DiemDanhLopHoc\\Program.cs",
+              "ViewState": "AgIAADQAAAAAAAAAAADwv0MAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-05T11:16:44.685Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\appsettings.json",
+              "RelativeDocumentMoniker": "DiemDanhLopHoc\\appsettings.json",
+              "ToolTip": "D:\\DATTTN_NHOM04_2026\\BackEnd\\DiemDanhLopHoc\\appsettings.json",
+              "RelativeToolTip": "DiemDanhLopHoc\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-04-05T11:14:09.262Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

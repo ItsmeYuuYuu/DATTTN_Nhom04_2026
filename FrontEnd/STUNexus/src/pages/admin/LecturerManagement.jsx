@@ -9,7 +9,15 @@ const LecturerManagement = () => {
   
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState({ maGv: '', hoTen: '', taiKhoan: '', matKhau: '', email: '', soDienThoai: '' });
+  const [formData, setFormData] = useState({ 
+    maGv: '', 
+    hoLot: '', 
+    tenGv: '', 
+    taiKhoan: '', 
+    matKhau: '', 
+    email: '', 
+    soDienThoai: '' 
+  });
 
   const fetchLecturers = async () => {
     try {
@@ -28,40 +36,56 @@ const LecturerManagement = () => {
     e.preventDefault();
     try {
       if (editMode) {
-        // BE chưa có PUT endpoint cho GiangVien, tạm thời báo lỗi
-        alert('Backend chưa hỗ trợ API cập nhật giảng viên. Vui lòng liên hệ đội Backend.');
+        // Tạm thời BE chưa có PUT, ta báo lỗi hoặc gọi API nếu đã bổ sung
+        alert('Backend chưa hỗ trợ API cập nhật giảng viên. Vui lòng bổ sung API PUT /api/giangvien/{id}.');
       } else {
-        await axiosClient.post('/giangvien', formData);
+        await axiosClient.post('/giangvien', {
+          maGv: formData.maGv,
+          taiKhoan: formData.taiKhoan,
+          matKhau: formData.matKhau,
+          hoLot: formData.hoLot,
+          tenGv: formData.tenGv,
+          email: formData.email,
+          soDienThoai: formData.soDienThoai
+        });
+        alert('Thêm giảng viên thành công!');
       }
       setShowModal(false);
       fetchLecturers();
     } catch (err) {
-      alert(err.response?.data?.message || err.response?.data || 'Lỗi xử lý dữ liệu!');
+      alert(err.response?.data?.message || 'Có lỗi xảy ra.');
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Hành động này không thể hoàn tác. Bạn có chắc xoá giảng viên này?')) {
-      alert('Backend chưa hỗ trợ API xoá giảng viên. Vui lòng liên hệ đội Backend.');
-    }
-  };
+
 
   const openAdd = () => {
-    setFormData({ maGv: '', hoTen: '', taiKhoan: '', matKhau: '', email: '', soDienThoai: '' });
+    setFormData({ maGv: '', hoLot: '', tenGv: '', taiKhoan: '', matKhau: '', email: '', soDienThoai: '' });
     setEditMode(false);
     setShowModal(true);
   };
 
   const openEdit = (gv) => {
-    setFormData({ maGv: gv.maGv, hoTen: gv.hoTen, taiKhoan: gv.taiKhoan, matKhau: '', email: gv.email || '', soDienThoai: gv.soDienThoai || '' });
+    // Tách tên tương tự Sinh viên
+    // BE trả về HoLot và TenGv riêng trong GiangVienResponseDto
+    setFormData({ 
+      maGv: gv.maGv, 
+      hoLot: gv.hoLot || '', 
+      tenGv: gv.tenGv || '', 
+      taiKhoan: gv.taiKhoan, 
+      matKhau: '********', 
+      email: gv.email || '', 
+      soDienThoai: gv.soDienThoai || '' 
+    });
     setEditMode(true);
     setShowModal(true);
   };
 
-  const filtered = lecturers.filter(item => 
-    (item.hoTen || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (item.maGv || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filtered = lecturers.filter(item => {
+    const fullName = `${item.hoLot} ${item.tenGv}`.toLowerCase();
+    return fullName.includes(searchTerm.toLowerCase()) || 
+           (item.maGv || '').toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   return (
     <div className="container-fluid">
@@ -93,7 +117,7 @@ const LecturerManagement = () => {
                 {filtered.map(item => (
                   <tr key={item.maGv}>
                     <td className="fw-semibold text-primary">{item.maGv}</td>
-                    <td className="fw-medium text-dark">{item.hoTen}</td>
+                    <td className="fw-medium text-dark">{item.hoLot} {item.tenGv}</td>
                     <td><span className="font-monospace text-muted">{item.taiKhoan}</span></td>
                     <td>
                       <span className={`badge ${item.trangThai ? 'bg-success' : 'bg-secondary'} bg-opacity-10 ${item.trangThai ? 'text-success border-success' : 'text-secondary border-secondary'} border border-opacity-25 px-3 py-2 rounded-pill`}>
@@ -101,8 +125,7 @@ const LecturerManagement = () => {
                       </span>
                     </td>
                     <td className="text-end">
-                      <button onClick={() => openEdit(item)} className="btn btn-sm btn-light border me-2 text-primary hover-primary"><FaEdit /></button>
-                      <button onClick={() => handleDelete(item.maGv)} className="btn btn-sm btn-light border text-danger hover-danger"><FaTrash /></button>
+                      <button onClick={() => openEdit(item)} className="btn btn-sm btn-light border text-primary hover-primary"><FaEdit /></button>
                     </td>
                   </tr>
                 ))}
@@ -132,12 +155,16 @@ const LecturerManagement = () => {
                         <input type="text" className="form-control bg-light border-0" value={formData.maGv} onChange={e => setFormData({...formData, maGv: e.target.value})} required disabled={editMode} placeholder="VD: GV06" />
                       </div>
                       <div className="col-12 col-md-6">
-                        <label className="form-label small fw-bold text-muted">Họ Tên <span className="text-danger">*</span></label>
-                        <input type="text" className="form-control bg-light border-0" value={formData.hoTen} onChange={e => setFormData({...formData, hoTen: e.target.value})} required placeholder="TS. Nguyễn Văn A" />
+                        <label className="form-label small fw-bold text-muted">Họ và tên lót <span className="text-danger">*</span></label>
+                        <input type="text" className="form-control bg-light border-0" value={formData.hoLot} onChange={e => setFormData({...formData, hoLot: e.target.value})} required placeholder="Nguyễn Văn" />
+                      </div>
+                      <div className="col-12 col-md-6">
+                        <label className="form-label small fw-bold text-muted">Tên <span className="text-danger">*</span></label>
+                        <input type="text" className="form-control bg-light border-0" value={formData.tenGv} onChange={e => setFormData({...formData, tenGv: e.target.value})} required placeholder="A" />
                       </div>
                       <div className="col-12 col-md-6">
                         <label className="form-label small fw-bold text-muted">Tài khoản truy cập <span className="text-danger">*</span></label>
-                        <input type="text" className="form-control bg-light border-0" value={formData.taiKhoan} onChange={e => setFormData({...formData, taiKhoan: e.target.value})} required />
+                        <input type="text" className="form-control bg-light border-0" value={formData.taiKhoan} onChange={e => setFormData({...formData, taiKhoan: e.target.value})} required disabled={editMode} />
                       </div>
                       <div className="col-12 col-md-6">
                         <label className="form-label small fw-bold text-muted">Mật khẩu cấp phát <span className="text-danger">*</span></label>

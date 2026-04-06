@@ -1,10 +1,9 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
-import { getTable, updateTable } from '../../services/mockService';
+import axiosClient from '../../utils/axiosClient';
 import { FaSave, FaKey, FaShieldAlt, FaUserTie } from 'react-icons/fa';
 
-// NOTE: Trang này tạm dùng mockService vì Backend chưa có API đổi mật khẩu/cập nhật profile.
-// Khi BE bổ sung, thay getTable/updateTable bằng axiosClient.put('/giangvien/{id}', ...)
+// Kết nối trực tiếp tới Backend API
 
 const LecturerProfile = () => {
   const { user, updateUserSession } = useContext(AuthContext);
@@ -22,23 +21,31 @@ const LecturerProfile = () => {
 
   const [message, setMessage] = useState({ text: '', type: '' });
 
-  const saveProfile = (e) => {
+  const saveProfile = async (e) => {
     e.preventDefault();
-    updateUserSession({ Email: formData.Email, SoDienThoai: formData.SoDienThoai });
-    
-    const lecturers = getTable('GiangVien');
-    const updated = lecturers.map(l => l.MaGV === user.MaGV ? { ...l, Email: formData.Email, SoDienThoai: formData.SoDienThoai } : l);
-    updateTable('GiangVien', updated);
-    
-    setMessage({ text: 'Cập nhật thông tin thành công.', type: 'success' });
+    try {
+      // Tách tên từ HoTen hiện tại trong session (BE cần HoLot và TenGv riêng)
+      const parts = user.HoTen.trim().split(' ');
+      const tenGv = parts.pop();
+      const hoLot = parts.join(' ');
+
+      await axiosClient.put(`/giangvien/${user.MaGV}`, {
+        hoLot: hoLot,
+        tenGv: tenGv,
+        email: formData.Email,
+        soDienThoai: formData.SoDienThoai
+      });
+      
+      updateUserSession({ Email: formData.Email, SoDienThoai: formData.SoDienThoai });
+      setMessage({ text: 'Cập nhật thông tin thành công.', type: 'success' });
+    } catch (err) {
+      setMessage({ text: err.response?.data?.message || 'Lỗi cập nhật hồ sơ.', type: 'danger' });
+    }
     setTimeout(() => setMessage({text:'', type:''}), 3000);
   };
 
-  const changePassword = (e) => {
+  const changePassword = async (e) => {
     e.preventDefault();
-    if(passData.oldPass !== user.MatKhau) {
-      setMessage({ text: 'Mật khẩu cũ không chính xác!', type: 'danger' }); return;
-    }
     if(passData.newPass !== passData.confirmPass) {
       setMessage({ text: 'Mật khẩu xác nhận không khớp!', type: 'danger' }); return;
     }
@@ -46,13 +53,18 @@ const LecturerProfile = () => {
       setMessage({ text: 'Mật khẩu mới phải từ 5 ký tự trở lên.', type: 'danger' }); return;
     }
 
-    updateUserSession({ MatKhau: passData.newPass });
-    const lecturers = getTable('GiangVien');
-    const updated = lecturers.map(l => l.MaGV === user.MaGV ? { ...l, MatKhau: passData.newPass } : l);
-    updateTable('GiangVien', updated);
-    
-    setPassData({oldPass: '', newPass: '', confirmPass: ''});
-    setMessage({ text: 'Đổi mật khẩu bảo mật thành công!', type: 'success' });
+    try {
+      await axiosClient.post('/auth/change-password', {
+        taiKhoan: user.TaiKhoan,
+        oldPassword: passData.oldPass,
+        newPassword: passData.newPass
+      });
+      
+      setPassData({oldPass: '', newPass: '', confirmPass: ''});
+      setMessage({ text: 'Đổi mật khẩu bảo mật thành công!', type: 'success' });
+    } catch (err) {
+      setMessage({ text: err.response?.data?.message || 'Đổi mật khẩu thất bại.', type: 'danger' });
+    }
     setTimeout(() => setMessage({text:'', type:''}), 4000);
   };
 
