@@ -67,9 +67,15 @@ const ClassManagement = () => {
     }
   };
 
-  const handleDelete = (id) => {
-    if(window.confirm('Cảnh báo: Đóng/Xoá lớp học này sẽ khiến mọi buổi học điểm danh bị lỗi. Xác nhận xoá?')){
-      alert('Backend chưa hỗ trợ API xoá lớp học. Vui lòng liên hệ đội Backend.');
+  const handleDelete = async (id) => {
+    if(window.confirm('Cảnh báo: Xoá lớp học này sẽ xoá vĩnh viễn toàn bộ dữ liệu lịch học, điểm danh, và danh sách sinh viên trực thuộc. Bạn có chắc chắn muốn xóa?')){
+      try {
+        const res = await axiosClient.delete(`/lophoc/${id}`);
+        alert(res.data?.message || 'Xóa lớp học thành công.');
+        fetchData(); // Refresh list
+      } catch (err) {
+        alert(err.response?.data?.message || 'Có lỗi xảy ra khi xóa lớp học.');
+      }
     }
   };
 
@@ -122,7 +128,10 @@ const ClassManagement = () => {
                 <p className="text-muted small mb-1">Mã Lớp: {c.maLop}</p>
                 {c.tenGiangVien && <p className="text-muted small mb-4">GV: {c.tenGiangVien}</p>}
                 
-                <div className="mt-auto">
+                <div className="mt-auto d-flex flex-column gap-2">
+                  <button onClick={() => navigate(`/lecturer/class-students/${c.maLop}`)} className="btn btn-outline-primary w-100 d-flex justify-content-center align-items-center gap-2 fw-semibold py-2 rounded-pill shadow-sm">
+                    Danh sách Sinh viên <FaUsers />
+                  </button>
                   <button onClick={() => navigate(`/lecturer/sessions/${c.maLop}`)} className="btn btn-primary w-100 d-flex justify-content-center align-items-center gap-2 fw-semibold py-2 rounded-pill shadow-sm">
                     Quản lý Điểm danh <FaArrowRight />
                   </button>

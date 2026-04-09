@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { FaUserPlus, FaSearch, FaEdit, FaTrash } from 'react-icons/fa';
+import { useParams, useNavigate } from 'react-router-dom';
+import { FaUserPlus, FaSearch, FaArrowLeft } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
 import axiosClient from '../../utils/axiosClient';
 
-const StudentManagement = () => {
+const ClassStudents = () => {
+  const { maLop } = useParams();
+  const navigate = useNavigate();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [editMode, setEditMode] = useState(false);
   
   const [formData, setFormData] = useState({ 
     maSv: '', 
@@ -23,7 +27,8 @@ const StudentManagement = () => {
 
   const fetchStudents = async () => {
     try {
-      const res = await axiosClient.get('/sinhvien');
+      setLoading(true);
+      const res = await axiosClient.get(`/lophoc/${maLop}/students`);
       setStudents(res.data.data || []);
     } catch (err) {
       console.error('Lỗi tải sinh viên:', err);
@@ -32,60 +37,77 @@ const StudentManagement = () => {
     }
   };
 
-  useEffect(() => { fetchStudents(); }, []);
+  useEffect(() => { fetchStudents(); }, [maLop]);
 
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      if (editMode) {
-        await axiosClient.put(`/sinhvien/${formData.maSv}`, {
-          hoLot: formData.hoLot,
-          tenSv: formData.tenSv,
-          lop: formData.lop,
-          email: formData.email,
-          soDienThoai: formData.soDienThoai
-        });
-        alert('Cập nhật sinh viên thành công!');
-      }
+      await axiosClient.post(`/lophoc/${maLop}/add-new-student`, {
+        maSv: formData.maSv,
+        taiKhoan: formData.taiKhoan,
+        matKhau: formData.matKhau,
+        hoLot: formData.hoLot,
+        tenSv: formData.tenSv,
+        lop: formData.lop,
+        email: formData.email,
+        soDienThoai: formData.soDienThoai
+      });
+      alert('Thêm sinh viên vào lớp thành công (hoặc sinh viên đã được liên kết)!');
       setShowModal(false);
       fetchStudents();
     } catch (err) {
-      alert(err.response?.data?.message || 'Có lỗi xảy ra khi lưu dữ liệu.');
+      alert(err.response?.data?.message || 'Có lỗi xảy ra khi thêm sinh viên.');
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Cảnh báo: Xoá thẻ sinh viên này sẽ vĩnh viễn xoá dữ liệu liên đới. Vẫn tiếp tục?')) {
-      try {
-        await axiosClient.delete(`/sinhvien/${id}`);
-        alert('Đã xóa sinh viên thành công.');
-        fetchStudents();
-      } catch (err) {
-        alert(err.response?.data?.message || 'Không thể xóa sinh viên này.');
-      }
-    }
-  };
-
-  const openEdit = (sv) => {
-    // Tách tên tạm thời nếu BE trả về HoTen gộp (nhưng tốt nhất BE nên trả tách)
-    // Ở đây BE Controller.cs GetAll đang gộp: HoTen = s.HoLot + " " + s.TenSv
-    // Ta sẽ phỏng đoán: TenSv là chữ cuối cùng, còn lại là HoLot
-    const parts = sv.hoTen.trim().split(' ');
-    const tenSv = parts.pop();
-    const hoLot = parts.join(' ');
-
-    setFormData({ 
-      maSv: sv.maSv, 
-      hoLot: hoLot, 
-      tenSv: tenSv, 
-      taiKhoan: sv.taiKhoan, 
-      matKhau: '********', // Không sửa pass qua đây hoặc để trống
-      lop: sv.lop || '', 
-      email: sv.email || '', 
-      soDienThoai: sv.soDienThoai || '' 
-    });
-    setEditMode(true);
+  const openAdd = () => {
+    setFormData({ maSv: '', hoLot: '', tenSv: '', taiKhoan: '', matKhau: '', lop: '', email: '', soDienThoai: '' });
     setShowModal(true);
+  };
+
+  const handleExcelUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      if (jsonData.length === 0) {
+        alert('File Excel không có dữ liệu!');
+        return;
+      }
+
+      const payload = jsonData.map(row => ({
+        maSv: String(row['Mã sinh viên'] || ''),
+        taiKhoan: String(row['Mã sinh viên'] || ''),
+        matKhau: '123456',
+        hoLot: String(row['Họ lót'] || ''),
+        tenSv: String(row['Tên'] || ''),
+        lop: String(row['Mã lớp'] || ''),
+        email: String(row['Email'] || ''),
+        soDienThoai: String(row['SĐT'] || row['Số điện thoại'] || '')
+      })).filter(x => x.maSv && x.tenSv && x.lop);
+
+      if (payload.length === 0) {
+        alert('Không tìm thấy dữ liệu hợp lệ. Cần các cột: Mã sinh viên, Họ lót, Tên, Mã lớp.');
+        return;
+      }
+
+      const res = await axiosClient.post(`/lophoc/${maLop}/import-students`, payload);
+      alert(res.data.message);
+      fetchStudents();
+    } catch (err) {
+      console.error(err);
+      alert('Lỗi xử lý file Excel hoặc dữ liệu gửi lên.');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
   };
 
   const filtered = students.filter(item => 
@@ -96,7 +118,19 @@ const StudentManagement = () => {
   return (
     <div className="container-fluid">
       <div className="d-flex justify-content-between align-items-center mb-4 mt-2">
-        <h3 className="m-0 fw-bold text-dark">Dữ liệu Sinh Viên Tổng</h3>
+        <div className="d-flex align-items-center gap-3">
+          <button className="btn btn-light rounded-circle shadow-sm" style={{width: '40px', height: '40px'}} onClick={() => navigate(-1)}><FaArrowLeft /></button>
+          <h3 className="m-0 fw-bold text-dark">Danh sách Sinh viên - Lớp <span className="text-primary">{maLop}</span></h3>
+        </div>
+        <div className="d-flex gap-2">
+          <label className="btn btn-outline-success d-flex align-items-center gap-2 shadow-sm mb-0" style={{borderRadius: '8px', padding: '10px 20px', cursor: 'pointer'}}>
+            {uploading ? <div className="spinner-border spinner-border-sm"></div> : <FaUserPlus />} Thêm bằng file Excel
+            <input type="file" accept=".xlsx, .xls" hidden onChange={handleExcelUpload} disabled={uploading} />
+          </label>
+          <button onClick={openAdd} className="btn btn-primary d-flex align-items-center gap-2 shadow-sm" style={{borderRadius: '8px', padding: '10px 20px'}}>
+            <FaUserPlus /> Thêm từng sinh viên
+          </button>
+        </div>
       </div>
 
       <div className="card glass-panel border-0 shadow-sm mb-4">
@@ -115,7 +149,7 @@ const StudentManagement = () => {
           ) : (
           <div className="table-responsive">
             <table className="table table-custom table-hover w-100 align-middle">
-              <thead><tr><th>Mã Sinh Viên</th><th>Họ Tên</th><th>Lớp</th><th>Email liên hệ</th><th>Tài khoản cổng</th><th className="text-end">Tác vụ</th></tr></thead>
+              <thead><tr><th>Mã Sinh Viên</th><th>Họ Tên</th><th>Tài khoản cổng</th><th>Email liên hệ</th><th>SĐT</th></tr></thead>
               <tbody>
                 {filtered.map(item => (
                   <tr key={item.maSv}>
@@ -128,16 +162,12 @@ const StudentManagement = () => {
                         <span className="fw-medium text-dark">{item.hoTen}</span>
                       </div>
                     </td>
-                    <td><span className="badge bg-light text-dark border">{item.lop || 'N/A'}</span></td>
-                    <td><span className="text-muted">{item.email || 'Chưa cập nhật'}</span></td>
                     <td><span className="font-monospace text-muted">{item.taiKhoan}</span></td>
-                    <td className="text-end">
-                      <button onClick={()=>openEdit(item)} className="btn btn-sm btn-light border me-2 text-primary hover-primary"><FaEdit /></button>
-                      <button onClick={()=>handleDelete(item.maSv)} className="btn btn-sm btn-light border text-danger hover-danger"><FaTrash /></button>
-                    </td>
+                    <td><span className="text-muted">{item.email || 'N/A'}</span></td>
+                    <td><span className="text-muted">{item.soDienThoai || 'N/A'}</span></td>
                   </tr>
                 ))}
-                {filtered.length === 0 && <tr><td colSpan="5" className="text-center py-5 text-muted">Không tìm thấy sinh viên nào.</td></tr>}
+                {filtered.length === 0 && <tr><td colSpan="5" className="text-center py-5 text-muted">Lớp học này chưa có sinh viên nào.</td></tr>}
               </tbody>
             </table>
           </div>
@@ -152,15 +182,22 @@ const StudentManagement = () => {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content border-0 shadow-lg rounded-4">
                 <div className="modal-header bg-light border-0 rounded-top-4">
-                  <h5 className="modal-title fw-bold text-dark">Chỉnh sửa Hồ Sơ Sinh viên</h5>
+                  <h5 className="modal-title fw-bold text-dark">Thêm Sinh Viên vào Lớp</h5>
                   <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
                 </div>
-                <form onSubmit={handleSave}>
+                <form onSubmit={handleSave} autoComplete="off">
                   <div className="modal-body p-4">
+                    <div className="alert alert-info py-2 small mb-3">
+                      Lưu ý: Nếu sinh viên đã có thông tin trên hệ thống, hệ thống sẽ tự động gán vào lớp mà không tạo trùng lặp.
+                    </div>
                     <div className="row g-3">
                       <div className="col-12 col-md-6">
                         <label className="form-label small fw-bold text-muted">MSSV <span className="text-danger">*</span></label>
-                        <input type="text" className="form-control bg-light border-0" value={formData.maSv} onChange={e => setFormData({...formData, maSv: e.target.value})} required disabled />
+                        <input type="text" autoComplete="new-text" className="form-control bg-light border-0" value={formData.maSv} onChange={e => setFormData({...formData, maSv: e.target.value})} required />
+                      </div>
+                      <div className="col-12 col-md-6">
+                        <label className="form-label small fw-bold text-muted">Tài khoản truy cập <span className="text-danger">*</span></label>
+                        <input type="text" autoComplete="new-account" className="form-control bg-light border-0" value={formData.taiKhoan} onChange={e => setFormData({...formData, taiKhoan: e.target.value})} required />
                       </div>
                       <div className="col-12 col-md-6">
                         <label className="form-label small fw-bold text-muted">Họ và Tên lót <span className="text-danger">*</span></label>
@@ -172,19 +209,19 @@ const StudentManagement = () => {
                       </div>
                       <div className="col-12 col-md-6">
                         <label className="form-label small fw-bold text-muted">Lớp Sinh hoạt <span className="text-danger">*</span></label>
-                        <input type="text" className="form-control bg-light border-0" placeholder="VD: D10CQCN01" value={formData.lop} onChange={e => setFormData({...formData, lop: e.target.value})} required />
+                        <input type="text" className="form-control bg-light border-0" placeholder="VD: D21_TH01" value={formData.lop} onChange={e => setFormData({...formData, lop: e.target.value})} required />
                       </div>
                       <div className="col-12 col-md-6">
-                        <label className="form-label small fw-bold text-muted">Tài khoản truy cập <span className="text-danger">*</span></label>
-                        <input type="text" className="form-control bg-light border-0" value={formData.taiKhoan} onChange={e => setFormData({...formData, taiKhoan: e.target.value})} required disabled />
+                        <label className="form-label small fw-bold text-muted">Mật khẩu cấp phát <span className="text-danger">*</span></label>
+                        <input type="password" autoComplete="new-password" className="form-control bg-light border-0" value={formData.matKhau} onChange={e => setFormData({...formData, matKhau: e.target.value})} required />
                       </div>
                       <div className="col-12 col-md-6">
                         <label className="form-label small fw-bold text-muted">Số điện thoại</label>
                         <input type="text" className="form-control bg-light border-0" value={formData.soDienThoai} onChange={e => setFormData({...formData, soDienThoai: e.target.value})} />
                       </div>
-                      <div className="col-12">
+                      <div className="col-12 col-md-6">
                         <label className="form-label small fw-bold text-muted">Email sinh viên</label>
-                        <input type="email" className="form-control bg-light border-0" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+                        <input type="email" autoComplete="new-email" className="form-control bg-light border-0" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
                       </div>
                     </div>
                   </div>
@@ -201,4 +238,5 @@ const StudentManagement = () => {
     </div>
   );
 };
-export default StudentManagement;
+
+export default ClassStudents;

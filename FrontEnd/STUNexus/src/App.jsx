@@ -15,6 +15,7 @@ import StudentManagement from './pages/admin/StudentManagement';
 import LecturerManagement from './pages/admin/LecturerManagement';
 import ClassManagement from './pages/admin/ClassManagement';
 import SubjectManagement from './pages/admin/SubjectManagement';
+import ClassStudents from './pages/admin/ClassStudents';
 
 import LecturerDashboard from './pages/lecturer/LecturerDashboard';
 import LecturerClasses from './pages/lecturer/LecturerClasses';
@@ -59,6 +60,7 @@ function App() {
             <Route path="students" element={<StudentManagement />} />
             <Route path="subjects" element={<SubjectManagement />} />
             <Route path="subjects/:monId/classes" element={<ClassManagement />} />
+            <Route path="class-students/:maLop" element={<ClassStudents />} />
             <Route path="sessions/:classId" element={<SessionsManagement />} />
             <Route path="qr-attendance/:classId" element={<QRAttendance />} />
             <Route path="manual/:classId" element={<ManualAttendance />} />
