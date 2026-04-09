@@ -7,6 +7,7 @@ const StudentManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   
@@ -46,6 +47,18 @@ const StudentManagement = () => {
           soDienThoai: formData.soDienThoai
         });
         alert('Cập nhật sinh viên thành công!');
+      } else {
+        await axiosClient.post('/sinhvien', {
+          maSv: formData.maSv,
+          taiKhoan: formData.taiKhoan,
+          matKhau: formData.matKhau,
+          hoLot: formData.hoLot,
+          tenSv: formData.tenSv,
+          lop: formData.lop,
+          email: formData.email,
+          soDienThoai: formData.soDienThoai
+        });
+        alert('Thêm sinh viên thành công!');
       }
       setShowModal(false);
       fetchStudents();
@@ -63,6 +76,45 @@ const StudentManagement = () => {
       } catch (err) {
         alert(err.response?.data?.message || 'Không thể xóa sinh viên này.');
       }
+    }
+  };
+
+  const openAdd = () => {
+    setFormData({ maSv: '', hoLot: '', tenSv: '', taiKhoan: '', matKhau: '', lop: '', email: '', soDienThoai: '' });
+    setEditMode(false);
+    setShowModal(true);
+  };
+
+  const handleExcelUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: 'array' });
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      if (jsonData.length === 0) { alert('File Excel không có dữ liệu!'); return; }
+      const payload = jsonData.map(row => ({
+        maSv: String(row['Mã sinh viên'] || ''),
+        taiKhoan: String(row['Mã sinh viên'] || ''),
+        matKhau: '123456',
+        hoLot: String(row['Họ lót'] || ''),
+        tenSv: String(row['Tên'] || ''),
+        lop: String(row['Mã lớp'] || ''),
+        email: String(row['Email'] || ''),
+        soDienThoai: String(row['SĐT'] || row['Số điện thoại'] || '')
+      })).filter(x => x.maSv && x.tenSv && x.lop);
+      if (payload.length === 0) { alert('Không tìm thấy dữ liệu hợp lệ. Cần cột: Mã sinh viên, Họ lót, Tên, Mã lớp.'); return; }
+      const res = await axiosClient.post('/sinhvien/import', payload);
+      alert(res.data.message);
+      fetchStudents();
+    } catch (err) {
+      console.error(err);
+      alert('Lỗi xử lý file Excel.');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
     }
   };
 
@@ -97,6 +149,15 @@ const StudentManagement = () => {
     <div className="container-fluid">
       <div className="d-flex justify-content-between align-items-center mb-4 mt-2">
         <h3 className="m-0 fw-bold text-dark">Dữ liệu Sinh Viên Tổng</h3>
+        <div className="d-flex gap-2">
+          <label className="btn btn-outline-success d-flex align-items-center gap-2 shadow-sm mb-0" style={{borderRadius: '8px', padding: '10px 20px', cursor: 'pointer'}}>
+            {uploading ? <div className="spinner-border spinner-border-sm"></div> : <FaUserPlus />} Thêm bằng file Excel
+            <input type="file" accept=".xlsx, .xls" hidden onChange={handleExcelUpload} disabled={uploading} />
+          </label>
+          <button onClick={openAdd} className="btn btn-primary d-flex align-items-center gap-2 shadow-sm" style={{borderRadius: '8px', padding: '10px 20px'}}>
+            <FaUserPlus /> Thêm từng sinh viên
+          </button>
+        </div>
       </div>
 
       <div className="card glass-panel border-0 shadow-sm mb-4">
@@ -152,7 +213,7 @@ const StudentManagement = () => {
             <div className="modal-dialog modal-dialog-centered">
               <div className="modal-content border-0 shadow-lg rounded-4">
                 <div className="modal-header bg-light border-0 rounded-top-4">
-                  <h5 className="modal-title fw-bold text-dark">Chỉnh sửa Hồ Sơ Sinh viên</h5>
+                  <h5 className="modal-title fw-bold text-dark">{editMode ? 'Chỉnh sửa Hồ Sơ Sinh viên' : 'Đăng ký Sinh viên mới'}</h5>
                   <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
                 </div>
                 <form onSubmit={handleSave}>
@@ -160,7 +221,7 @@ const StudentManagement = () => {
                     <div className="row g-3">
                       <div className="col-12 col-md-6">
                         <label className="form-label small fw-bold text-muted">MSSV <span className="text-danger">*</span></label>
-                        <input type="text" className="form-control bg-light border-0" value={formData.maSv} onChange={e => setFormData({...formData, maSv: e.target.value})} required disabled />
+                        <input type="text" className="form-control bg-light border-0" value={formData.maSv} onChange={e => setFormData({...formData, maSv: e.target.value})} required disabled={editMode} />
                       </div>
                       <div className="col-12 col-md-6">
                         <label className="form-label small fw-bold text-muted">Họ và Tên lót <span className="text-danger">*</span></label>
@@ -176,8 +237,14 @@ const StudentManagement = () => {
                       </div>
                       <div className="col-12 col-md-6">
                         <label className="form-label small fw-bold text-muted">Tài khoản truy cập <span className="text-danger">*</span></label>
-                        <input type="text" className="form-control bg-light border-0" value={formData.taiKhoan} onChange={e => setFormData({...formData, taiKhoan: e.target.value})} required disabled />
+                        <input type="text" className="form-control bg-light border-0" value={formData.taiKhoan} onChange={e => setFormData({...formData, taiKhoan: e.target.value})} required disabled={editMode} />
                       </div>
+                      {!editMode && (
+                        <div className="col-12 col-md-6">
+                          <label className="form-label small fw-bold text-muted">Mật khẩu cấp phát <span className="text-danger">*</span></label>
+                          <input type="password" autoComplete="new-password" className="form-control bg-light border-0" value={formData.matKhau} onChange={e => setFormData({...formData, matKhau: e.target.value})} required />
+                        </div>
+                      )}
                       <div className="col-12 col-md-6">
                         <label className="form-label small fw-bold text-muted">Số điện thoại</label>
                         <input type="text" className="form-control bg-light border-0" value={formData.soDienThoai} onChange={e => setFormData({...formData, soDienThoai: e.target.value})} />

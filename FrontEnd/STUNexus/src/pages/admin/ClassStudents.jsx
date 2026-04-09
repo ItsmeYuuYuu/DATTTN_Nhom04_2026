@@ -13,6 +13,8 @@ const ClassStudents = () => {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [foundStudent, setFoundStudent] = useState(null); // null = chưa tra, object = tìm thấy, false = không có
   
   const [formData, setFormData] = useState({ 
     maSv: '', 
@@ -62,7 +64,43 @@ const ClassStudents = () => {
 
   const openAdd = () => {
     setFormData({ maSv: '', hoLot: '', tenSv: '', taiKhoan: '', matKhau: '', lop: '', email: '', soDienThoai: '' });
+    setFoundStudent(null);
     setShowModal(true);
+  };
+
+  // Tra cứu sinh viên theo MSSV từ danh sách tổng
+  const handleMssvLookup = async (maSv) => {
+    setFormData(prev => ({ ...prev, maSv }));
+    if (maSv.length < 3) { setFoundStudent(null); return; }
+    setLookupLoading(true);
+    try {
+      const res = await axiosClient.get('/sinhvien');
+      const allStudents = res.data.data || [];
+      const found = allStudents.find(s => s.maSv === maSv);
+      if (found) {
+        // Tách họ lót và tên
+        const parts = (found.hoTen || '').trim().split(' ');
+        const tenSv = parts.pop();
+        const hoLot = parts.join(' ');
+        setFormData({
+          maSv: found.maSv,
+          hoLot: hoLot,
+          tenSv: tenSv,
+          taiKhoan: found.taiKhoan || found.maSv,
+          matKhau: '',
+          lop: found.lop || '',
+          email: found.email || '',
+          soDienThoai: found.soDienThoai || ''
+        });
+        setFoundStudent(found);
+      } else {
+        setFoundStudent(false);
+      }
+    } catch (err) {
+      setFoundStudent(false);
+    } finally {
+      setLookupLoading(false);
+    }
   };
 
   const handleExcelUpload = async (e) => {
@@ -191,38 +229,71 @@ const ClassStudents = () => {
                       Lưu ý: Nếu sinh viên đã có thông tin trên hệ thống, hệ thống sẽ tự động gán vào lớp mà không tạo trùng lặp.
                     </div>
                     <div className="row g-3">
-                      <div className="col-12 col-md-6">
+                      {/* Ô nhập MSSV - luôn hiển thị */}
+                      <div className="col-12">
                         <label className="form-label small fw-bold text-muted">MSSV <span className="text-danger">*</span></label>
-                        <input type="text" autoComplete="new-text" className="form-control bg-light border-0" value={formData.maSv} onChange={e => setFormData({...formData, maSv: e.target.value})} required />
+                        <div className="input-group">
+                          <input
+                            type="text"
+                            autoComplete="off"
+                            className="form-control bg-light border-0"
+                            placeholder="Nhập MSSV để tra cứu..."
+                            value={formData.maSv}
+                            onChange={e => handleMssvLookup(e.target.value)}
+                            required
+                          />
+                          {lookupLoading && (
+                            <span className="input-group-text bg-white border-0">
+                              <div className="spinner-border spinner-border-sm text-primary"></div>
+                            </span>
+                          )}
+                        </div>
+                        {foundStudent === false && formData.maSv.length >= 3 && (
+                          <div className="text-warning small mt-1">⚠️ MSSV không tìm thấy trong hệ thống. Sinh viên mới sẽ được tạo.</div>
+                        )}
+                        {foundStudent && (
+                          <div className="text-success small mt-1">✅ Tìm thấy: <strong>{foundStudent.hoTen}</strong> — Tự động điền thông tin bên dưới.</div>
+                        )}
                       </div>
-                      <div className="col-12 col-md-6">
-                        <label className="form-label small fw-bold text-muted">Tài khoản truy cập <span className="text-danger">*</span></label>
-                        <input type="text" autoComplete="new-account" className="form-control bg-light border-0" value={formData.taiKhoan} onChange={e => setFormData({...formData, taiKhoan: e.target.value})} required />
-                      </div>
-                      <div className="col-12 col-md-6">
-                        <label className="form-label small fw-bold text-muted">Họ và Tên lót <span className="text-danger">*</span></label>
-                        <input type="text" className="form-control bg-light border-0" value={formData.hoLot} onChange={e => setFormData({...formData, hoLot: e.target.value})} required />
-                      </div>
-                      <div className="col-12 col-md-6">
-                        <label className="form-label small fw-bold text-muted">Tên Sinh viên <span className="text-danger">*</span></label>
-                        <input type="text" className="form-control bg-light border-0" value={formData.tenSv} onChange={e => setFormData({...formData, tenSv: e.target.value})} required />
-                      </div>
-                      <div className="col-12 col-md-6">
-                        <label className="form-label small fw-bold text-muted">Lớp Sinh hoạt <span className="text-danger">*</span></label>
-                        <input type="text" className="form-control bg-light border-0" placeholder="VD: D21_TH01" value={formData.lop} onChange={e => setFormData({...formData, lop: e.target.value})} required />
-                      </div>
-                      <div className="col-12 col-md-6">
-                        <label className="form-label small fw-bold text-muted">Mật khẩu cấp phát <span className="text-danger">*</span></label>
-                        <input type="password" autoComplete="new-password" className="form-control bg-light border-0" value={formData.matKhau} onChange={e => setFormData({...formData, matKhau: e.target.value})} required />
-                      </div>
-                      <div className="col-12 col-md-6">
-                        <label className="form-label small fw-bold text-muted">Số điện thoại</label>
-                        <input type="text" className="form-control bg-light border-0" value={formData.soDienThoai} onChange={e => setFormData({...formData, soDienThoai: e.target.value})} />
-                      </div>
-                      <div className="col-12 col-md-6">
-                        <label className="form-label small fw-bold text-muted">Email sinh viên</label>
-                        <input type="email" autoComplete="new-email" className="form-control bg-light border-0" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-                      </div>
+
+                      {/* Chỉ hiển thị thông tin khi đã tra cứu (tìm thấy hoặc không tìm thấy) */}
+                      {formData.maSv.length >= 3 && (
+                        <>
+                          <div className="col-12 col-md-6">
+                            <label className="form-label small fw-bold text-muted">Họ và Tên lót <span className="text-danger">*</span></label>
+                            <input type="text" autoComplete="off" className="form-control bg-light border-0" value={formData.hoLot} onChange={e => setFormData({...formData, hoLot: e.target.value})} required disabled={!!foundStudent} />
+                          </div>
+                          <div className="col-12 col-md-6">
+                            <label className="form-label small fw-bold text-muted">Tên Sinh viên <span className="text-danger">*</span></label>
+                            <input type="text" autoComplete="off" className="form-control bg-light border-0" value={formData.tenSv} onChange={e => setFormData({...formData, tenSv: e.target.value})} required disabled={!!foundStudent} />
+                          </div>
+                          <div className="col-12 col-md-6">
+                            <label className="form-label small fw-bold text-muted">Lớp Sinh hoạt <span className="text-danger">*</span></label>
+                            <input type="text" autoComplete="off" className="form-control bg-light border-0" placeholder="VD: D21_TH01" value={formData.lop} onChange={e => setFormData({...formData, lop: e.target.value})} required disabled={!!foundStudent} />
+                          </div>
+                          <div className="col-12 col-md-6">
+                            <label className="form-label small fw-bold text-muted">Email sinh viên</label>
+                            <input type="email" autoComplete="off" className="form-control bg-light border-0" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} disabled={!!foundStudent} />
+                          </div>
+                          {/* Chỉ yêu cầu mật khẩu khi tạo sinh viên mới */}
+                          {!foundStudent && (
+                            <>
+                              <div className="col-12 col-md-6">
+                                <label className="form-label small fw-bold text-muted">Tài khoản truy cập <span className="text-danger">*</span></label>
+                                <input type="text" autoComplete="off" className="form-control bg-light border-0" value={formData.taiKhoan} onChange={e => setFormData({...formData, taiKhoan: e.target.value})} required />
+                              </div>
+                              <div className="col-12 col-md-6">
+                                <label className="form-label small fw-bold text-muted">Mật khẩu cấp phát <span className="text-danger">*</span></label>
+                                <input type="password" autoComplete="new-password" className="form-control bg-light border-0" value={formData.matKhau} onChange={e => setFormData({...formData, matKhau: e.target.value})} required />
+                              </div>
+                              <div className="col-12 col-md-6">
+                                <label className="form-label small fw-bold text-muted">Số điện thoại</label>
+                                <input type="text" autoComplete="off" className="form-control bg-light border-0" value={formData.soDienThoai} onChange={e => setFormData({...formData, soDienThoai: e.target.value})} />
+                              </div>
+                            </>
+                          )}
+                        </>
+                      )}
                     </div>
                   </div>
                   <div className="modal-footer border-0 bg-light rounded-bottom-4">

@@ -16,7 +16,8 @@ const LecturerManagement = () => {
     taiKhoan: '', 
     matKhau: '', 
     email: '', 
-    soDienThoai: '' 
+    soDienThoai: '',
+    trangThai: 1
   });
 
   const fetchLecturers = async () => {
@@ -36,8 +37,14 @@ const LecturerManagement = () => {
     e.preventDefault();
     try {
       if (editMode) {
-        // Tạm thời BE chưa có PUT, ta báo lỗi hoặc gọi API nếu đã bổ sung
-        alert('Backend chưa hỗ trợ API cập nhật giảng viên. Vui lòng bổ sung API PUT /api/giangvien/{id}.');
+        await axiosClient.put(`/giangvien/${formData.maGv}`, {
+          hoLot: formData.hoLot,
+          tenGv: formData.tenGv,
+          email: formData.email,
+          soDienThoai: formData.soDienThoai,
+          trangThai: Number(formData.trangThai)
+        });
+        alert('Cập nhật hồ sơ giảng viên thành công!');
       } else {
         await axiosClient.post('/giangvien', {
           maGv: formData.maGv,
@@ -66,8 +73,6 @@ const LecturerManagement = () => {
   };
 
   const openEdit = (gv) => {
-    // Tách tên tương tự Sinh viên
-    // BE trả về HoLot và TenGv riêng trong GiangVienResponseDto
     setFormData({ 
       maGv: gv.maGv, 
       hoLot: gv.hoLot || '', 
@@ -75,7 +80,8 @@ const LecturerManagement = () => {
       taiKhoan: gv.taiKhoan, 
       matKhau: '********', 
       email: gv.email || '', 
-      soDienThoai: gv.soDienThoai || '' 
+      soDienThoai: gv.soDienThoai || '',
+      trangThai: gv.trangThai !== undefined ? gv.trangThai : 1
     });
     setEditMode(true);
     setShowModal(true);
@@ -178,6 +184,28 @@ const LecturerManagement = () => {
                         <label className="form-label small fw-bold text-muted">Số Điện Thoại</label>
                         <input type="text" className="form-control bg-light border-0" value={formData.soDienThoai} onChange={e => setFormData({...formData, soDienThoai: e.target.value})} />
                       </div>
+                      {editMode && (
+                        <div className="col-12">
+                          <label className="form-label small fw-bold text-muted">Trạng thái tài khoản</label>
+                          <select
+                            className={`form-select border-0 fw-semibold ${
+                              Number(formData.trangThai) === 1
+                                ? 'bg-success bg-opacity-10 text-success'
+                                : 'bg-danger bg-opacity-10 text-danger'
+                            }`}
+                            value={formData.trangThai}
+                            onChange={e => setFormData({...formData, trangThai: e.target.value})}
+                          >
+                            <option value={1}>✅ Hoạt động — Giảng viên có thể đăng nhập</option>
+                            <option value={0}>🔒 Bị khóa — Chặn đăng nhập</option>
+                          </select>
+                          {Number(formData.trangThai) === 0 && (
+                            <div className="alert alert-warning py-2 small mt-2 mb-0">
+                              ⚠️ Giảng viên này sẽ không thể đăng nhập vào hệ thống sau khi lưu.
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="modal-footer border-0 bg-light rounded-bottom-4">

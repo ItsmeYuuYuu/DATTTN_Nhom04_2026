@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaUserGraduate, FaChartPie, FaBook } from 'react-icons/fa';
+import { FaUserGraduate, FaChartPie, FaBook, FaCalendarDay } from 'react-icons/fa';
 import { AuthContext } from '../context/AuthContext';
 
 const LecturerSidebar = () => {
@@ -23,6 +23,10 @@ const LecturerSidebar = () => {
         <NavLink to="/lecturer/students" className={({isActive}) => `nav-item-link ${isActive ? 'active' : ''}`}>
           <FaUserGraduate />
           <span>Quản lý Sinh Viên</span>
+        </NavLink>
+        <NavLink to="/lecturer/attendance-today" className={({isActive}) => `nav-item-link ${isActive ? 'active' : ''}`}>
+          <FaCalendarDay />
+          <span>Quản lý Điểm danh</span>
         </NavLink>
         <NavLink to="/lecturer/subjects" className={({isActive}) => `nav-item-link ${isActive ? 'active' : ''}`}>
           <FaBook />

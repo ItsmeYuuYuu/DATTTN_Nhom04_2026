@@ -19,6 +19,7 @@ import ClassStudents from './pages/admin/ClassStudents';
 
 import LecturerDashboard from './pages/lecturer/LecturerDashboard';
 import LecturerClasses from './pages/lecturer/LecturerClasses';
+import AttendanceToday from './pages/lecturer/AttendanceToday';
 import SessionsManagement from './pages/lecturer/SessionsManagement';
 import QRAttendance from './pages/lecturer/QRAttendance';
 import ManualAttendance from './pages/lecturer/ManualAttendance';
@@ -57,6 +58,7 @@ function App() {
             <Route index element={<Navigate to="/lecturer/dashboard" replace />} />
             <Route path="dashboard" element={<LecturerDashboard />} />
             <Route path="classes" element={<LecturerClasses />} />
+            <Route path="attendance-today" element={<AttendanceToday />} />
             <Route path="students" element={<StudentManagement />} />
             <Route path="subjects" element={<SubjectManagement />} />
             <Route path="subjects/:monId/classes" element={<ClassManagement />} />
