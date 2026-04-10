@@ -1,4 +1,6 @@
+import React, { useState, useEffect, useContext } from 'react';
 import axiosClient from '../../utils/axiosClient';
+import { AuthContext } from '../../context/AuthContext';
 import { FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa';
 
 const StudentDashboard = () => {

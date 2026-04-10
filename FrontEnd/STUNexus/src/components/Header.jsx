@@ -1,9 +1,9 @@
 import React, { useContext, useState, useRef, useEffect } from 'react';
-import { FaUserCircle, FaSignOutAlt } from 'react-icons/fa';
+import { FaUserCircle, FaSignOutAlt, FaBars } from 'react-icons/fa';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const Header = () => {
+const Header = ({ onMenuClick }) => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
@@ -38,8 +38,19 @@ const Header = () => {
 
   return (
     <header className="top-header glass-panel border-0 border-bottom rounded-0 position-relative" style={{zIndex: 1050}}>
-      <div className="header-left">
-        <h5 className="mb-0 text-dark fw-bold">Hệ thống Điểm danh</h5>
+      <div className="header-left d-flex align-items-center gap-3">
+        {user?.role === 'student' && (
+          <button 
+            className="btn btn-light bg-transparent border-0 d-flex align-items-center justify-content-center p-2 rounded-circle hover-bg-light"
+            onClick={onMenuClick}
+            style={{width: '40px', height: '40px'}}
+          >
+            <FaBars className="fs-5 text-dark" />
+          </button>
+        )}
+        {user?.role !== 'student' && (
+          <h5 className="mb-0 text-dark fw-bold">Hệ thống Điểm danh</h5>
+        )}
       </div>
       <div className="header-right d-flex align-items-center gap-4">
         

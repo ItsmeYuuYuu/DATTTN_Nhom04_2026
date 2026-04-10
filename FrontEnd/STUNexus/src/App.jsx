@@ -29,6 +29,8 @@ import StudentDashboard from './pages/student/StudentDashboard';
 import StudentCheckin from './pages/student/StudentCheckin';
 import StudentComplaints from './pages/student/StudentComplaints';
 import StudentProfile from './pages/student/StudentProfile';
+import StudentClasses from './pages/student/StudentClasses';
+import StudentScanner from './pages/student/StudentScanner';
 
 function App() {
   return (
@@ -85,6 +87,8 @@ function App() {
               </div>
             } />
             <Route path="checkin/:classId" element={<StudentCheckin />} />
+            <Route path="classes" element={<StudentClasses />} />
+            <Route path="qr-scan" element={<StudentScanner />} />
             <Route path="profile" element={<StudentProfile />} />
           </Route>
         </Routes>

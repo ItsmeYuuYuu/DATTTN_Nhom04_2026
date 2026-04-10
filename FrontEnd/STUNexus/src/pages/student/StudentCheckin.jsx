@@ -1,3 +1,5 @@
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
 import axiosClient from '../../utils/axiosClient';
 import { AuthContext } from '../../context/AuthContext';
 import fpPromise from '@fingerprintjs/fingerprintjs';
