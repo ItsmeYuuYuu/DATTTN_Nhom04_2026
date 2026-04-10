@@ -1,0 +1,8 @@
+d:\DATTTN_NHOM04_2026\BackEnd\DiemDanhLopHoc.Tests\bin\Debug\net9.0\.msCoverageSourceRootsMapping_DiemDanhLopHoc.Tests
+d:\DATTTN_NHOM04_2026\BackEnd\DiemDanhLopHoc.Tests\bin\Debug\net9.0\CoverletSourceRootsMapping_DiemDanhLopHoc.Tests
+d:\DATTTN_NHOM04_2026\BackEnd\DiemDanhLopHoc.Tests\obj\Debug\net9.0\DiemDanhLopHoc.Tests.csproj.AssemblyReference.cache
+d:\DATTTN_NHOM04_2026\BackEnd\DiemDanhLopHoc.Tests\obj\Debug\net9.0\DiemDanhLopHoc.Tests.GeneratedMSBuildEditorConfig.editorconfig
+d:\DATTTN_NHOM04_2026\BackEnd\DiemDanhLopHoc.Tests\obj\Debug\net9.0\DiemDanhLopHoc.Tests.AssemblyInfoInputs.cache
+d:\DATTTN_NHOM04_2026\BackEnd\DiemDanhLopHoc.Tests\obj\Debug\net9.0\DiemDanhLopHoc.Tests.AssemblyInfo.cs
+d:\DATTTN_NHOM04_2026\BackEnd\DiemDanhLopHoc.Tests\obj\Debug\net9.0\DiemDanhLopHoc.Tests.csproj.CoreCompileInputs.cache
+d:\DATTTN_NHOM04_2026\BackEnd\DiemDanhLopHoc.Tests\obj\Debug\net9.0\DiemDanhLopHoc.Tests.sourcelink.json
