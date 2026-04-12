@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import axiosClient from '../utils/axiosClient';
+import { initDeviceKey } from '../utils/cryptoUtils';
 
 export const AuthContext = createContext();
 
@@ -86,6 +87,30 @@ export const AuthProvider = ({ children }) => {
         const userData = decodeAndSetUser(token, role);
         
         if (userData) {
+          // Đăng ký thiết bị ngầm cho sinh viên
+          if (userData.role === 'student' && userData.MaSV) {
+            try {
+              const { publicKeyBase64, isNew } = await initDeviceKey(userData.MaSV);
+              if (isNew) {
+                // Gửi Public Key lên backend để đăng ký thiết bị
+                await axiosClient.post('/auth/register-device', {
+                  maSv: userData.MaSV,
+                  publicKeyBase64: publicKeyBase64
+                });
+                console.log('[Device] Đăng ký thiết bị thành công cho:', userData.MaSV);
+                
+                // Hiển thị thông báo thành công theo đặc tả Use Case
+                setTimeout(() => {
+                  alert("🔐 Thiết bị này đã được liên kết với tài khoản của bạn bằng chữ ký số để phục vụ điểm danh.");
+                }, 1000); // Delay một chút để trang Dashboard load xong
+              } else {
+                console.log('[Device] Đã có khóa thiết bị, bỏ qua đăng ký.');
+              }
+            } catch (cryptoErr) {
+              // Không chặn login nếu đăng ký thiết bị thất bại
+              console.warn('[Device] Đăng ký thiết bị thất bại (sẽ thử lại lần sau):', cryptoErr.message);
+            }
+          }
           return { success: true, role: userData.role };
         }
       }

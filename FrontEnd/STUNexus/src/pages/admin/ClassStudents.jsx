@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaUserPlus, FaSearch, FaArrowLeft } from 'react-icons/fa';
+import { FaUserPlus, FaSearch, FaArrowLeft, FaSync } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
 import axiosClient from '../../utils/axiosClient';
 
@@ -153,6 +153,18 @@ const ClassStudents = () => {
     (item.maSv || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleResetDevice = async (maSv, tenSv) => {
+    if (window.confirm(`Bạn có chắc chắn muốn reset thiết bị cho SV ${tenSv} (${maSv})?\n\nViệc này sẽ xóa liên kết thiết bị hiện tại, cho phép sinh viên dùng máy khác đăng nhập để nhận mã mới.`)) {
+      try {
+        const res = await axiosClient.post(`/auth/reset-device/${maSv}`);
+        alert(res.data.message || 'Đã reset thiết bị thành công!');
+      } catch (err) {
+        console.error(err);
+        alert(err.response?.data?.message || 'Lỗi khi reset thiết bị!');
+      }
+    }
+  };
+
   return (
     <div className="container-fluid">
       <div className="d-flex justify-content-between align-items-center mb-4 mt-2">
@@ -197,7 +209,16 @@ const ClassStudents = () => {
                         <div className="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3 fw-bold" style={{width: '35px', height: '35px'}}>
                           {(item.hoTen || 'S').charAt(0)}
                         </div>
-                        <span className="fw-medium text-dark">{item.hoTen}</span>
+                        <div className="d-flex flex-column">
+                          <span className="fw-medium text-dark">{item.hoTen}</span>
+                          <button 
+                              onClick={() => handleResetDevice(item.maSv, item.hoTen)}
+                              className="btn btn-link p-0 text-decoration-none text-danger small text-start mt-1 d-flex align-items-center gap-1"
+                              style={{fontSize: '0.75rem', opacity: 0.8}}
+                           >
+                              <FaSync /> Reset thiết bị
+                           </button>
+                        </div>
                       </div>
                     </td>
                     <td><span className="font-monospace text-muted">{item.taiKhoan}</span></td>

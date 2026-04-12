@@ -22,12 +22,18 @@ const Login = () => {
         else if (result.role === 'lecturer') navigate('/lecturer/dashboard');
         else if (result.role === 'student') navigate('/student/dashboard'); 
       } else {
+        // Đợi 5 giây trước khi báo lỗi (theo yêu cầu người dùng)
+        await new Promise(resolve => setTimeout(resolve, 5000));
         setError(result.message);
+        setIsLoading(false);
       }
     } catch (err) {
+      await new Promise(resolve => setTimeout(resolve, 5000));
       setError('Không thể kết nối tới máy chủ. Vui lòng kiểm tra Backend.');
-    } finally {
       setIsLoading(false);
+    } finally {
+      // Chỉ set false ở đây nếu thành công, nếu lỗi đã set ở trên kèm delay
+      // Để tránh việc setLoading(false) chạy trước timeout
     }
   };
 

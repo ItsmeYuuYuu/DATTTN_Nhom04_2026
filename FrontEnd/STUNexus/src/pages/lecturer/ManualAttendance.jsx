@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axiosClient from '../../utils/axiosClient';
-import { FaArrowLeft, FaSave, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
+import { FaArrowLeft, FaSave, FaCheck, FaExclamationTriangle, FaSync } from 'react-icons/fa';
 
 const ManualAttendance = () => {
-  const { classId } = useParams(); // URL là /manual/:classId -> classId ở đây thực chất là MaBuoiHoc
+  const { classId } = useParams();
   const navigate = useNavigate();
   const [students, setStudents] = useState([]);
-  const [sessionInfo, setSessionInfo] = useState({ date: '', time: '', tenLop: '' });
+  const [sessionInfo, setSessionInfo] = useState({ date: '', time: '', tenLop: '', trangThaiBh: 0 });
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
@@ -20,7 +20,8 @@ const ManualAttendance = () => {
       setSessionInfo({
         date: session.ngayHoc,
         time: `${session.gioBatDau} - ${session.gioKetThuc}`,
-        tenLop: session.tenLop
+        tenLop: session.tenLop,
+        trangThaiBh: session.trangThaiBh ?? 0
       });
 
       // 2. Lấy danh sách SV của lớp đó
@@ -37,7 +38,8 @@ const ManualAttendance = () => {
         return {
           ...s,
           trangThai: att ? att.trangThai : 1, // Mặc định 1 (Có mặt) nếu chưa có record
-          ghiChu: att ? att.ghiChu : ''
+          ghiChu: att ? att.ghiChu : '',
+          maThietBiLog: att ? att.maThietBiLog : null
         };
       });
 
@@ -96,19 +98,34 @@ const ManualAttendance = () => {
       
       <div className="card glass-panel border-0 shadow-sm mb-4">
         <div className="card-body p-4">
-          <div className="row mb-4 bg-light p-3 rounded-3 mx-0">
-            <div className="col-md-4"><strong>Ngày học:</strong> {sessionInfo.date}</div>
-            <div className="col-md-4"><strong>Giờ học:</strong> {sessionInfo.time}</div>
-            <div className="col-md-4"><strong>Sĩ số:</strong> {students.length}</div>
+          <div className="row mb-4 bg-light p-3 rounded-3 mx-0 align-items-center">
+            <div className="col-md-3"><strong>Ngày học:</strong> {sessionInfo.date}</div>
+            <div className="col-md-3"><strong>Giờ học:</strong> {sessionInfo.time}</div>
+            <div className="col-md-3"><strong>Sĩ số:</strong> {students.length}</div>
+            <div className="col-md-3">
+              <strong>Trạng thái: </strong>
+              {sessionInfo.trangThaiBh === 0 && <span className="badge bg-secondary ms-2">Chưa điểm danh</span>}
+              {sessionInfo.trangThaiBh === 1 && <span className="badge bg-success ms-2">Đang mở QR</span>}
+              {sessionInfo.trangThaiBh === 2 && <span className="badge bg-primary ms-2">Đã chốt sổ</span>}
+            </div>
           </div>
 
+          {/* Khi chưa điểm danh (TrangThaiBh = 0), không hiện bảng */}
+          {sessionInfo.trangThaiBh === 0 ? (
+            <div className="alert alert-secondary border-0 rounded-4 p-4 text-center">
+              <FaExclamationTriangle className="text-warning fs-3 mb-3 d-block mx-auto" />
+              <h6 className="fw-bold text-dark mb-1">Buổi học chưa mở điểm danh</h6>
+              <p className="text-muted small mb-0">Danh sách điểm danh sẽ xuất hiện sau khi giảng viên mở phiên QR hoặc chốt sổ tay.</p>
+            </div>
+          ) : (
           <div className="table-responsive">
             <table className="table table-custom table-hover w-100 align-middle">
               <thead>
                 <tr>
                   <th>Mã SV</th>
                   <th>Họ Tên</th>
-                  <th style={{width: '220px'}}>Trạng Thái Điểm Danh</th>
+                  <th style={{width: '200px'}}>Xác Thực</th>
+                  <th style={{width: '210px'}}>Trạng Thái Điểm Danh</th>
                   <th>Ghi Chú</th>
                 </tr>
               </thead>
@@ -125,10 +142,26 @@ const ManualAttendance = () => {
                       </div>
                     </td>
                     <td>
+                      {sv.trangThai === 5 ? (
+                        <span className="badge bg-danger p-2 w-100 d-flex align-items-center justify-content-center gap-1 shadow-sm" style={{borderRadius: '6px'}}>
+                          <FaExclamationTriangle /> GIAN LẬN
+                        </span>
+                      ) : sv.maThietBiLog ? (
+                        <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 p-2 w-100 d-flex align-items-center justify-content-center gap-1" style={{borderRadius: '6px'}}>
+                          <FaCheck /> Đã xác thực
+                        </span>
+                      ) : (
+                        <span className="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 p-2 w-100 d-flex align-items-center justify-content-center gap-1" style={{borderRadius: '6px'}}>
+                           Thủ công
+                        </span>
+                      )}
+                    </td>
+                    <td>
                       <select 
                         className={`form-select form-select-sm fw-bold border-0 shadow-sm ${
                           sv.trangThai === 1 ? 'bg-success bg-opacity-10 text-success' : 
-                          sv.trangThai === 2 ? 'bg-warning bg-opacity-10 text-warning' : 'bg-danger bg-opacity-10 text-danger'
+                          sv.trangThai === 2 ? 'bg-warning bg-opacity-10 text-warning' : 
+                          sv.trangThai === 5 ? 'bg-danger bg-opacity-10 text-danger' : 'bg-danger bg-opacity-10 text-danger'
                         }`}
                         value={sv.trangThai}
                         onChange={(e) => handleStatusChange(sv.maSv, e.target.value)}
@@ -138,13 +171,14 @@ const ManualAttendance = () => {
                         <option value="2">Đi trễ</option>
                         <option value="3">Vắng có phép</option>
                         <option value="4">Vắng không phép</option>
+                        {sv.trangThai === 5 && <option value="5">⚠️ Gian lận</option>}
                       </select>
                     </td>
                     <td>
                       <input 
                         type="text" 
                         className="form-control form-control-sm border-0 bg-light" 
-                        placeholder="Thêm ghi chú..."
+                        placeholder={sv.ghiChu || "Thêm ghi chú..."}
                         value={sv.ghiChu}
                         onChange={(e) => handleNoteChange(sv.maSv, e.target.value)}
                         style={{height: '38px', borderRadius: '8px'}}
@@ -158,6 +192,7 @@ const ManualAttendance = () => {
               </tbody>
             </table>
           </div>
+          )}
         </div>
       </div>
     </div>

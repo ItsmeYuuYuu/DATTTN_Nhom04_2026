@@ -2,8 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import axiosClient from '../../utils/axiosClient';
 import { AuthContext } from '../../context/AuthContext';
-import fpPromise from '@fingerprintjs/fingerprintjs';
-import { FaMapMarkerAlt, FaCheckCircle, FaExclamationTriangle, FaFingerprint, FaQrcode } from 'react-icons/fa';
+import { signPayload } from '../../utils/cryptoUtils';
+import { FaMapMarkerAlt, FaCheckCircle, FaExclamationTriangle, FaShieldAlt, FaQrcode } from 'react-icons/fa';
 
 const StudentCheckin = () => {
   const { classId } = useParams(); // classId is MaBuoiHoc
@@ -11,63 +11,68 @@ const StudentCheckin = () => {
   const token = searchParams.get('token');
   const { user } = useContext(AuthContext);
   
-  const [status, setStatus] = useState('checking'); // checking | success | error
-  const [message, setMessage] = useState('Đang lấy thông tin định vị và thiết bị...');
+  const [status, setStatus] = useState('checking');
+  const [message, setMessage] = useState('Đang chuẩn bị xác thực thiết bị...');
   const [gps, setGps] = useState(null);
-  const [fingerprint, setFingerprint] = useState(null);
+  const [signatureInfo, setSignatureInfo] = useState(null);
 
   useEffect(() => {
     const performCheckin = async () => {
       try {
-        // 1. Lấy Fingerprint hash
-        const fp = await fpPromise.load();
-        const result = await fp.get();
-        const deviceId = result.visitorId;
-        setFingerprint(deviceId);
+        const maSv = user?.MaSV || user?.MaId;
+        if (!maSv) throw new Error('Không xác định được tài khoản sinh viên.');
 
-        // 2. Lấy định vị GPS
-        if (!navigator.geolocation) {
-          throw new Error('Trình duyệt không hỗ trợ truy cập GPS');
-        }
+        setMessage('Đang lấy tọa độ GPS...');
+        if (!navigator.geolocation) throw new Error('Trình duyệt không hỗ trợ GPS.');
 
         navigator.geolocation.getCurrentPosition(
           async (position) => {
             const { latitude, longitude } = position.coords;
             setGps({ lat: latitude, lng: longitude });
-            
+            setMessage('Đang ký xác thực thiết bị...');
+
             try {
-               // Gọi API Submit điểm danh thật
-               await axiosClient.post('/diemdanh/submit', {
-                  maBuoiHoc: parseInt(classId),
-                  maSv: user?.MaSV || user?.MaId,
-                  lat: latitude,
-                  long: longitude,
-                  deviceToken: deviceId
-               });
-               
-               setStatus('success');
-               setMessage('Điểm danh thành công! Đã ghi nhận thiết bị hợp lệ.');
+              // Tạo Payload gộm: maSv|maBuoiHoc|lat|long|timestamp
+              // Timestamp bị ràng buộc thời gian, chữ ký này chỉ dùng được 1 lần
+              const timestamp = Date.now();
+              const rawPayload = `${maSv}|${classId}|${latitude.toFixed(6)}|${longitude.toFixed(6)}|${timestamp}`;
+
+              // Ký payload bằng Private Key (khóa cứng trong thiết bị, không thể copy)
+              const signature = await signPayload(maSv, rawPayload);
+              setSignatureInfo(signature.substring(0, 12));
+
+              setMessage('Đang gửi lên máy chủ...');
+
+              // Gửi cả payload gốc + chữ ký lên Backend
+              await axiosClient.post('/diemdanh/submit', {
+                maBuoiHoc: parseInt(classId),
+                maSv: maSv,
+                lat: latitude,
+                long: longitude,
+                rawPayload: rawPayload,
+                signature: signature
+              });
+
+              setStatus('success');
+              setMessage('Điểm danh thành công! Chữ ký số hợp lệ.');
             } catch (err) {
-               setStatus('error');
-               setMessage(err.response?.data?.message || 'Điểm danh thất bại! Có thể bạn đã điểm danh rồi hoặc sai mã QR.');
+              setStatus('error');
+              setMessage(err.response?.data?.message || err.message || 'Điểm danh thất bại!');
             }
           },
-          (err) => {
+          () => {
             setStatus('error');
-            setMessage('Không thể lấy vị trí. Vui lòng bật kết nối vị trí (GPS) cho trình duyệt!');
+            setMessage('Không thể lấy vị trí. Vui lòng bật GPS cho trình duyệt!');
           },
-          { enableHighAccuracy: true, timeout: 5000 }
+          { enableHighAccuracy: true, timeout: 8000 }
         );
-
       } catch (err) {
         setStatus('error');
-        setMessage(err.message || 'Xác thực thiết bị thất bại, vui lòng thử lại');
+        setMessage(err.message || 'Xác thực thiết bị thất bại.');
       }
     };
 
-    setTimeout(() => {
-      performCheckin();
-    }, 1500); // Fake delay for UX
+    setTimeout(() => { performCheckin(); }, 800);
   }, [classId, token]);
 
   return (
@@ -104,10 +109,10 @@ const StudentCheckin = () => {
                 </div>
               </div>
               <div className="d-flex align-items-center">
-                <div className="bg-white p-2 rounded-circle me-3 shadow-sm"><FaFingerprint className="text-success" /></div>
+                <div className="bg-white p-2 rounded-circle me-3 shadow-sm"><FaShieldAlt className="text-success" /></div>
                 <div>
-                  <div className="small fw-bold text-dark">Device Fingerprint</div>
-                  <div className="small text-muted">{fingerprint?.substring(0,10)}...</div>
+                  <div className="small fw-bold text-dark">Chữ ký số thiết bị</div>
+                  <div className="small text-muted font-monospace">{signatureInfo}... (ECDSA P-256)</div>
                 </div>
               </div>
             </div>
