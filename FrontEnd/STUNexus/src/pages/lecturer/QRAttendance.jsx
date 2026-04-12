@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { FaSync, FaArrowLeft, FaStopCircle } from 'react-icons/fa';
+import axiosClient from '../../utils/axiosClient';
 
 const QRAttendance = () => {
   const { classId } = useParams();
@@ -15,6 +16,10 @@ const QRAttendance = () => {
   };
 
   useEffect(() => {
+    // Cập nhật trạng thái buổi học lên Server: 1 = Đang mở QR, 2 = Đã chốt
+    axiosClient.put(`/buoihoc/${classId}/status`, { trangThaiBh: isActive ? 1 : 2 })
+      .catch(err => console.error('Lỗi cập nhật trạng thái buổi học:', err));
+
     if (!isActive) return;
     setToken(generateToken());
     setTimeLeft(15);
