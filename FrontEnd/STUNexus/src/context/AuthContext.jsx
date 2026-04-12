@@ -90,25 +90,27 @@ export const AuthProvider = ({ children }) => {
           // Đăng ký thiết bị ngầm cho sinh viên
           if (userData.role === 'student' && userData.MaSV) {
             try {
-              const { publicKeyBase64, isNew } = await initDeviceKey(userData.MaSV);
-              if (isNew) {
-                // Gửi Public Key lên backend để đăng ký thiết bị
+              const { publicKeyBase64 } = await initDeviceKey(userData.MaSV);
+              
+              // Luôn thử đồng bộ Public Key lên Server mỗi khi đăng nhập
+              try {
                 await axiosClient.post('/auth/register-device', {
                   maSv: userData.MaSV,
                   publicKeyBase64: publicKeyBase64
                 });
                 console.log('[Device] Đăng ký thiết bị thành công cho:', userData.MaSV);
                 
-                // Hiển thị thông báo thành công theo đặc tả Use Case
+                // Hiển thị thông báo, nghĩa là DB trên server từ trạng thái TRỐNG đã cập nhật thành công khóa này
                 setTimeout(() => {
                   alert("🔐 Thiết bị này đã được liên kết với tài khoản của bạn bằng chữ ký số để phục vụ điểm danh.");
-                }, 1000); // Delay một chút để trang Dashboard load xong
-              } else {
-                console.log('[Device] Đã có khóa thiết bị, bỏ qua đăng ký.');
+                }, 1000); 
+              } catch (regErr) {
+                // Nếu backend trả về 400 Bad Request, tức là DB ĐÃ có mã thiết bị (của máy này hoặc máy khác).
+                // Không báo lỗi, cho phép login. Nếu key không khớp lúc quét, backend sẽ bắt lỗi "Gian lận".
+                console.log('[Device] Server đã lưu khóa từ trước, bỏ qua đăng ký.');
               }
-            } catch (cryptoErr) {
-              // Không chặn login nếu đăng ký thiết bị thất bại
-              console.warn('[Device] Đăng ký thiết bị thất bại (sẽ thử lại lần sau):', cryptoErr.message);
+            } catch (initErr) {
+               console.warn('[Device] Khởi tạo khóa thiết bị thất bại:', initErr.message);
             }
           }
           return { success: true, role: userData.role };

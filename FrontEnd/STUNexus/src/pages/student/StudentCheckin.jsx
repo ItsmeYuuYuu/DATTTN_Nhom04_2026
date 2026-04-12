@@ -134,10 +134,10 @@ const StudentCheckin = () => {
                 </div>
               </div>
               <div className="d-flex align-items-center">
-                <div className="bg-white p-2 rounded-circle me-3 shadow-sm"><FaFingerprint className="text-danger" /></div>
+                <div className="bg-white p-2 rounded-circle me-3 shadow-sm"><FaShieldAlt className="text-danger" /></div>
                 <div>
-                  <div className="small fw-bold text-dark">Device Fingerprint</div>
-                  <div className="small text-muted">{fingerprint ? fingerprint.substring(0,10) + '...' : 'Đang lấy...'}</div>
+                  <div className="small fw-bold text-dark">Chữ ký số thiết bị</div>
+                  <div className="small text-muted">{signatureInfo ? signatureInfo + '...' : 'Không sinh được khóa'}</div>
                 </div>
               </div>
             </div>
