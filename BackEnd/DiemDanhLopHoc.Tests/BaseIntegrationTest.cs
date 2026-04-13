@@ -25,7 +25,7 @@ public class BaseIntegrationTest : IClassFixture<WebApplicationFactory<Program>>
         Client = Factory.CreateClient();
     }
 
-    protected async Task<AppDbContext> GetDbContextAsync()
+    protected AppDbContext GetDbContext()
     {
         var scope = Factory.Services.CreateScope();
         return scope.ServiceProvider.GetRequiredService<AppDbContext>();
