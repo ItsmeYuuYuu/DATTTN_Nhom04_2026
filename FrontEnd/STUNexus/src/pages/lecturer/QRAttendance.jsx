@@ -16,9 +16,37 @@ const QRAttendance = () => {
   };
 
   useEffect(() => {
-    // Cập nhật trạng thái buổi học lên Server: 1 = Đang mở QR, 2 = Đã chốt
-    axiosClient.put(`/buoihoc/${classId}/status`, { trangThaiBh: isActive ? 1 : 2 })
-      .catch(err => console.error('Lỗi cập nhật trạng thái buổi học:', err));
+    const updateSessionStatus = async (lat = null, lng = null) => {
+      try {
+        await axiosClient.put(`/buoihoc/${classId}/status`, { 
+          trangThaiBh: isActive ? 1 : 2,
+          lat: lat,
+          long: lng
+        });
+      } catch (err) {
+        console.error('Lỗi cập nhật trạng thái buổi học:', err);
+      }
+    };
+
+    if (isActive) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            updateSessionStatus(position.coords.latitude, position.coords.longitude);
+          },
+          (err) => {
+            console.warn('Giảng viên từ chối GPS hoặc lỗi thiết bị, không thể khóa vùng điểm danh:', err);
+            updateSessionStatus(); // Vẫn mở QR nhưng không kèm tọa độ (sẽ không kiểm tra khoảng cách)
+            alert('Cảnh báo: Bạn chưa cấp quyền vị trí. Sinh viên có thể điểm danh từ xa!');
+          },
+          { timeout: 5000, enableHighAccuracy: true }
+        );
+      } else {
+        updateSessionStatus();
+      }
+    } else {
+      updateSessionStatus(); // Chốt sổ, không cần GPS
+    }
 
     if (!isActive) return;
     setToken(generateToken());
