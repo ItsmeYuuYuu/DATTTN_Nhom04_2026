@@ -60,9 +60,10 @@ async function loadKeyPair(maSv) {
  * @returns {{ publicKeyBase64: string, isNew: boolean }}
  */
 export async function initDeviceKey(maSv) {
+  const globalKeyName = 'GLOBAL_DEVICE_KEY';
   try {
     // Kiểm tra khóa có sẵn chưa
-    const existing = await loadKeyPair(maSv);
+    const existing = await loadKeyPair(globalKeyName);
     if (existing?.privateKey && existing?.publicKey) {
       // Đã có khóa — xuất Public Key để kiểm tra
       const publicKeyBase64 = await exportPublicKey(existing.publicKey);
@@ -79,8 +80,8 @@ export async function initDeviceKey(maSv) {
       ['sign', 'verify']
     );
 
-    // Lưu vào IndexedDB
-    await saveKeyPair(maSv, keyPair);
+    // Lưu vào IndexedDB (Sử dụng chung một khóa toàn trình duyệt)
+    await saveKeyPair(globalKeyName, keyPair);
 
     const publicKeyBase64 = await exportPublicKey(keyPair.publicKey);
     return { publicKeyBase64, isNew: true };
@@ -98,8 +99,9 @@ export async function initDeviceKey(maSv) {
  * @returns {string} Chữ ký dạng Base64
  */
 export async function signPayload(maSv, rawPayload) {
+  const globalKeyName = 'GLOBAL_DEVICE_KEY';
   try {
-    const keyPair = await loadKeyPair(maSv);
+    const keyPair = await loadKeyPair(globalKeyName);
     if (!keyPair?.privateKey) {
       throw new Error('Không tìm thấy Private Key. Vui lòng đăng xuất và đăng nhập lại để đăng ký thiết bị.');
     }

@@ -37,7 +37,7 @@ const ManualAttendance = () => {
         const att = currentAttendance.find(a => a.maSv === s.maSv);
         return {
           ...s,
-          trangThai: att ? att.trangThai : 1, // Mặc định 1 (Có mặt) nếu chưa có record
+          trangThai: att ? att.trangThai : 4, // Mặc định 4 (Vắng không phép) nếu chưa có record
           ghiChu: att ? att.ghiChu : '',
           maThietBiLog: att ? att.maThietBiLog : null
         };
@@ -124,6 +124,7 @@ const ManualAttendance = () => {
                 <tr>
                   <th>Mã SV</th>
                   <th>Họ Tên</th>
+                  <th style={{width: '160px'}}>Thiết Bị</th>
                   <th style={{width: '200px'}}>Xác Thực</th>
                   <th style={{width: '210px'}}>Trạng Thái Điểm Danh</th>
                   <th>Ghi Chú</th>
@@ -142,6 +143,9 @@ const ManualAttendance = () => {
                       </div>
                     </td>
                     <td>
+                      {sv.maThietBiLog ? <span className="font-monospace small bg-light p-1 px-2 rounded border text-muted" title={sv.maThietBiLog} style={{cursor: 'help'}}>{sv.maThietBiLog.substring(0, 8)}...</span> : <span className="text-muted small align-middle">-</span>}
+                    </td>
+                    <td>
                       {sv.trangThai === 5 ? (
                         <span className="badge bg-danger p-2 w-100 d-flex align-items-center justify-content-center gap-1 shadow-sm" style={{borderRadius: '6px'}}>
                           <FaExclamationTriangle /> GIAN LẬN
@@ -152,7 +156,7 @@ const ManualAttendance = () => {
                         </span>
                       ) : (
                         <span className="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 p-2 w-100 d-flex align-items-center justify-content-center gap-1" style={{borderRadius: '6px'}}>
-                           Thủ công
+                           Chưa điểm danh
                         </span>
                       )}
                     </td>
