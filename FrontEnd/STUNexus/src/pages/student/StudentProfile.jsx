@@ -10,9 +10,32 @@ const StudentProfile = () => {
   const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
-    Email: user?.Email || '',
-    SoDienThoai: user?.SoDienThoai || ''
+    Email: '',
+    SoDienThoai: ''
   });
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user?.MaSV) return;
+      try {
+        const res = await axiosClient.get(`/sinhvien/${user.MaSV}`);
+        if (res.data.success) {
+           setFormData({
+             Email: res.data.data.email || '',
+             SoDienThoai: res.data.data.soDienThoai || ''
+           });
+        }
+      } catch (err) {
+        console.error("Lỗi lấy thông tin sinh viên:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [user]);
 
   const [passData, setPassData] = useState({
     oldPass: '',
@@ -42,6 +65,7 @@ const StudentProfile = () => {
       });
 
       updateUserSession({ Email: formData.Email, SoDienThoai: formData.SoDienThoai });
+      setIsEditing(false);
       setMessage({ text: 'Cập nhật thông tin liên lạc thành công.', type: 'success' });
     } catch (err) {
       setMessage({ text: err.response?.data?.message || 'Lỗi cập nhật hồ sơ.', type: 'danger' });
@@ -105,25 +129,40 @@ const StudentProfile = () => {
         <h5 className="fw-bold mb-1 text-dark">{user?.HoTen}</h5>
         <div className="badge bg-secondary bg-opacity-10 text-secondary border rounded-pill px-3 py-1 mb-2">Sinh Viên</div>
         <p className="text-muted small mb-0">MSSV: <span className="fw-medium text-dark">{user?.MaSV}</span></p>
-        <p className="text-muted small mb-0">Ngày sinh: <span className="fw-medium text-dark">{user?.NgaySinh || 'Chưa cập nhật'}</span></p>
       </div>
 
       {/* Box 2: Thông tin liên lạc (Nhiệm vụ Sửa) */}
       <div className="card border-0 shadow-sm rounded-4 mb-4 bg-white p-4">
         <h6 className="fw-bold text-dark mb-3">Thông tin liên hệ</h6>
-        <form onSubmit={saveProfile}>
-          <div className="mb-3">
-            <label className="form-label small text-muted">Email sinh viên</label>
-            <input type="email" className="form-control bg-light border-0" value={formData.Email} onChange={(e) => setFormData({...formData, Email: e.target.value})} placeholder="...@student.edu.vn" />
-          </div>
-          <div className="mb-4">
-            <label className="form-label small text-muted">Số điện thoại di động</label>
-            <input type="text" className="form-control bg-light border-0" value={formData.SoDienThoai} onChange={(e) => setFormData({...formData, SoDienThoai: e.target.value})} placeholder="09xx..." />
-          </div>
-          <button type="submit" className="btn btn-primary w-100 fw-bold rounded-pill gap-2 d-flex align-items-center justify-content-center shadow-sm">
-            <FaSave /> Cập Nhật Thông Tin
-          </button>
-        </form>
+        {loading ? (
+           <div className="text-center py-3"><div className="spinner-border text-primary spinner-border-sm"></div></div>
+        ) : (
+          <form onSubmit={saveProfile}>
+            <div className="mb-3">
+              <label className="form-label small text-muted">Email sinh viên</label>
+              <input type="email" className={`form-control ${isEditing ? 'bg-white border' : 'bg-light border-0'}`} readOnly={!isEditing} value={formData.Email} onChange={(e) => setFormData({...formData, Email: e.target.value})} placeholder="...@student.edu.vn" />
+            </div>
+            <div className="mb-4">
+              <label className="form-label small text-muted">Số điện thoại di động</label>
+              <input type="text" className={`form-control ${isEditing ? 'bg-white border' : 'bg-light border-0'}`} readOnly={!isEditing} value={formData.SoDienThoai} onChange={(e) => setFormData({...formData, SoDienThoai: e.target.value})} placeholder="09xx..." />
+            </div>
+            
+            {!isEditing ? (
+              <button type="button" onClick={() => setIsEditing(true)} className="btn btn-primary w-100 fw-bold rounded-pill shadow-sm">
+                Chỉnh sửa thông tin
+              </button>
+            ) : (
+               <div className="d-flex gap-2">
+                 <button type="button" onClick={() => {setIsEditing(false); setFormData({Email: user?.Email||'', SoDienThoai: user?.SoDienThoai||''})}} className="btn btn-light w-50 fw-bold rounded-pill">
+                   Hủy
+                 </button>
+                 <button type="submit" className="btn btn-primary w-50 fw-bold rounded-pill d-flex align-items-center justify-content-center gap-2 shadow-sm">
+                   <FaSave /> Lưu Thay Đổi
+                 </button>
+               </div>
+            )}
+          </form>
+        )}
       </div>
 
       {/* Box 3: Đổi Mật Khẩu */}

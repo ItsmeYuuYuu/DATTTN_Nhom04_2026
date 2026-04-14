@@ -31,6 +31,7 @@ import StudentComplaints from './pages/student/StudentComplaints';
 import StudentProfile from './pages/student/StudentProfile';
 import StudentClasses from './pages/student/StudentClasses';
 import StudentScanner from './pages/student/StudentScanner';
+import StudentHistory from './pages/student/StudentHistory';
 
 function App() {
   return (
@@ -80,12 +81,7 @@ function App() {
             <Route index element={<Navigate to="/student/dashboard" replace />} />
             <Route path="dashboard" element={<StudentDashboard />} />
             <Route path="complaints" element={<StudentComplaints />} />
-            <Route path="history" element={
-              <div className="p-4 mt-5 text-center text-muted">
-                <i className="fas fa-history fs-1 mb-3 opacity-50"></i>
-                <h5>Lịch sử chi tiết (Tính năng đang phát triển)</h5>
-              </div>
-            } />
+            <Route path="history" element={<StudentHistory />} />
             <Route path="checkin/:classId" element={<StudentCheckin />} />
             <Route path="classes" element={<StudentClasses />} />
             <Route path="qr-scan" element={<StudentScanner />} />
