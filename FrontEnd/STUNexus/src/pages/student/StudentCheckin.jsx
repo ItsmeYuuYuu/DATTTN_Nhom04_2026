@@ -14,7 +14,7 @@ const StudentCheckin = () => {
   const [status, setStatus] = useState('checking');
   const [message, setMessage] = useState('Đang chuẩn bị xác thực thiết bị...');
   const [gps, setGps] = useState(null);
-  const [signatureInfo, setSignatureInfo] = useState(null);
+  const [distance, setDistance] = useState(null);
 
   useEffect(() => {
     const performCheckin = async () => {
@@ -39,12 +39,11 @@ const StudentCheckin = () => {
 
               // Ký payload bằng Private Key (khóa cứng trong thiết bị, không thể copy)
               const signature = await signPayload(maSv, rawPayload);
-              setSignatureInfo(signature.substring(0, 12));
 
               setMessage('Đang gửi lên máy chủ...');
 
               // Gửi cả payload gốc + chữ ký lên Backend
-              await axiosClient.post('/diemdanh/submit', {
+              const res = await axiosClient.post('/diemdanh/submit', {
                 maBuoiHoc: parseInt(classId),
                 maSv: maSv,
                 lat: latitude,
@@ -54,10 +53,12 @@ const StudentCheckin = () => {
               });
 
               setStatus('success');
-              setMessage('Điểm danh thành công! Chữ ký số hợp lệ.');
+              setMessage('Điểm danh thành công!');
+              if (res.data.distance !== undefined) setDistance(res.data.distance);
             } catch (err) {
               setStatus('error');
               setMessage(err.response?.data?.message || err.message || 'Điểm danh thất bại!');
+              if (err.response?.data?.distance !== undefined) setDistance(err.response.data.distance);
             }
           },
           () => {
@@ -101,18 +102,13 @@ const StudentCheckin = () => {
             <p className="text-muted fw-medium">{message}</p>
             
             <div className="bg-success bg-opacity-10 p-3 rounded-4 text-start mt-4 border border-success border-opacity-25">
-              <div className="d-flex align-items-center mb-2">
+              <div className="d-flex align-items-center">
                 <div className="bg-white p-2 rounded-circle me-3 shadow-sm"><FaMapMarkerAlt className="text-success" /></div>
                 <div>
-                  <div className="small fw-bold text-dark">Toạ độ xác thực</div>
-                  <div className="small text-muted">{gps?.lat.toFixed(4)}, {gps?.lng.toFixed(4)}</div>
-                </div>
-              </div>
-              <div className="d-flex align-items-center">
-                <div className="bg-white p-2 rounded-circle me-3 shadow-sm"><FaShieldAlt className="text-success" /></div>
-                <div>
-                  <div className="small fw-bold text-dark">Chữ ký số thiết bị</div>
-                  <div className="small text-muted font-monospace">{signatureInfo}... (ECDSA P-256)</div>
+                  <div className="small fw-bold text-dark">Khoảng cách xác thực</div>
+                  <div className={`small fw-bold ${distance !== null && distance <= 30 ? 'text-success' : 'text-muted'}`}>
+                    {distance !== null ? `${distance} mét` : 'Đã xác thực vị trí'}
+                  </div>
                 </div>
               </div>
             </div>
@@ -126,18 +122,13 @@ const StudentCheckin = () => {
             <p className="text-danger fw-medium px-3">{message}</p>
             
             <div className="bg-danger bg-opacity-10 p-3 rounded-4 text-start mt-4 border border-danger border-opacity-25">
-              <div className="d-flex align-items-center mb-2">
+              <div className="d-flex align-items-center">
                 <div className="bg-white p-2 rounded-circle me-3 shadow-sm"><FaMapMarkerAlt className="text-danger" /></div>
                 <div>
-                  <div className="small fw-bold text-dark">Toạ độ thiết bị</div>
-                  <div className="small text-muted">{gps?.lat ? `${gps.lat.toFixed(4)}, ${gps.lng.toFixed(4)}` : 'Bị từ chối GPS'}</div>
-                </div>
-              </div>
-              <div className="d-flex align-items-center">
-                <div className="bg-white p-2 rounded-circle me-3 shadow-sm"><FaShieldAlt className="text-danger" /></div>
-                <div>
-                  <div className="small fw-bold text-dark">Chữ ký số thiết bị</div>
-                  <div className="small text-muted">{signatureInfo ? signatureInfo + '...' : 'Không sinh được khóa'}</div>
+                  <div className="small fw-bold text-dark">Lỗi xác thực không gian</div>
+                  <div className={`small fw-bold text-danger`}>
+                    {distance !== null ? `Bạn đang cách điểm quét ${distance} mét` : (gps ? 'Vị trí không hợp lệ' : 'Bị từ chối GPS')}
+                  </div>
                 </div>
               </div>
             </div>

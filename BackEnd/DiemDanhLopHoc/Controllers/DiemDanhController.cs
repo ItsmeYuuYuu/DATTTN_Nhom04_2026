@@ -61,14 +61,15 @@ namespace DiemDanhLopHoc.Controllers
             if (tonTai) return BadRequest(new { message = "Bạn đã điểm danh buổi học này rồi!" });
 
             // ==== KIỂM TRA ĐỊA LÝ (GPS) BÁN KÍNH 30 MÉT ====
+            double? calculatedDistance = null;
             if (buoiHoc.ToaDoGocLat.HasValue && buoiHoc.ToaDoGocLong.HasValue && request.Lat.HasValue && request.Long.HasValue)
             {
-                double distance = CalculateDistance(buoiHoc.ToaDoGocLat.Value, buoiHoc.ToaDoGocLong.Value, request.Lat.Value, request.Long.Value);
-                if (distance > 30)
+                calculatedDistance = CalculateDistance(buoiHoc.ToaDoGocLat.Value, buoiHoc.ToaDoGocLong.Value, request.Lat.Value, request.Long.Value);
+                if (calculatedDistance > 30)
                 {
                     // Ghi nhận Gian lận (5)
-                    await RecordAttendance(request.MaBuoiHoc, request.MaSv, 5, request.Signature, request.Lat, request.Long, $"Gian lận vị trí: Cách phòng học {Math.Round(distance)} mét.");
-                    return StatusCode(403, new { message = $"Bạn không ở trong phạm vi phòng học. (Cách xa {Math.Round(distance)} mét)." });
+                    await RecordAttendance(request.MaBuoiHoc, request.MaSv, 5, request.Signature, request.Lat, request.Long, $"Gian lận vị trí: Cách phòng học {Math.Round(calculatedDistance.Value)} mét.");
+                    return StatusCode(403, new { message = $"Bạn không ở trong phạm vi phòng học. (Cách xa {Math.Round(calculatedDistance.Value)} mét).", distance = Math.Round(calculatedDistance.Value) });
                 }
             }
 
@@ -114,7 +115,7 @@ namespace DiemDanhLopHoc.Controllers
 
             await RecordAttendance(request.MaBuoiHoc, request.MaSv, 1, request.Signature, request.Lat, request.Long);
 
-            return Ok(new { success = true, message = "Điểm danh thành công!" });
+            return Ok(new { success = true, message = "Điểm danh thành công!", distance = calculatedDistance.HasValue ? Math.Round(calculatedDistance.Value) : (double?)null });
         }
 
         // Hàm phụ dùng chung để ghi nhận điểm danh / gian lận

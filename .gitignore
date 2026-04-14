@@ -2,3 +2,21 @@
 node_modules/
 **/node_modules/
 
+# Visual Studio & Build Artifacts
+.vs/
+[Bb]in/
+[Oo]bj/
+*.userosscache
+*.sln.docstates
+
+# Test Results
+TestResults/
+*.trx
+*.coverage
+
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
