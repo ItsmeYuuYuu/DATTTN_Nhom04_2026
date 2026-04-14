@@ -15,6 +15,7 @@ const StudentCheckin = () => {
   const [message, setMessage] = useState('Đang chuẩn bị xác thực thiết bị...');
   const [gps, setGps] = useState(null);
   const [distance, setDistance] = useState(null);
+  const [errorFlags, setErrorFlags] = useState({ isGpsFraud: false, isDeviceFraud: false });
 
   useEffect(() => {
     const performCheckin = async () => {
@@ -58,18 +59,27 @@ const StudentCheckin = () => {
             } catch (err) {
               setStatus('error');
               setMessage(err.response?.data?.message || err.message || 'Điểm danh thất bại!');
-              if (err.response?.data?.distance !== undefined) setDistance(err.response.data.distance);
+              const data = err.response?.data || {};
+              if (data.distance !== undefined) setDistance(data.distance);
+              
+              if (data.isGpsFraud !== undefined || data.isDeviceFraud !== undefined) {
+                 setErrorFlags({ isGpsFraud: !!data.isGpsFraud, isDeviceFraud: !!data.isDeviceFraud });
+              } else {
+                 setErrorFlags({ isGpsFraud: true, isDeviceFraud: false });
+              }
             }
           },
           () => {
             setStatus('error');
             setMessage('Không thể lấy vị trí. Vui lòng bật GPS cho trình duyệt!');
+            setErrorFlags({ isGpsFraud: true, isDeviceFraud: false });
           },
           { enableHighAccuracy: true, timeout: 8000 }
         );
       } catch (err) {
         setStatus('error');
         setMessage(err.message || 'Xác thực thiết bị thất bại.');
+        setErrorFlags({ isGpsFraud: false, isDeviceFraud: true });
       }
     };
 
@@ -121,17 +131,31 @@ const StudentCheckin = () => {
             <h4 className="fw-bold text-danger mb-3">Thất bại</h4>
             <p className="text-danger fw-medium px-3">{message}</p>
             
-            <div className="bg-danger bg-opacity-10 p-3 rounded-4 text-start mt-4 border border-danger border-opacity-25">
-              <div className="d-flex align-items-center">
-                <div className="bg-white p-2 rounded-circle me-3 shadow-sm"><FaMapMarkerAlt className="text-danger" /></div>
-                <div>
-                  <div className="small fw-bold text-dark">Lỗi xác thực không gian</div>
-                  <div className={`small fw-bold text-danger`}>
-                    {distance !== null ? `Bạn đang cách điểm quét ${distance} mét` : (gps ? 'Vị trí không hợp lệ' : 'Bị từ chối GPS')}
+            {errorFlags.isGpsFraud && (
+              <div className="bg-danger bg-opacity-10 p-3 rounded-4 text-start mt-4 border border-danger border-opacity-25">
+                <div className="d-flex align-items-center">
+                  <div className="bg-white p-2 rounded-circle me-3 shadow-sm"><FaMapMarkerAlt className="text-danger" /></div>
+                  <div>
+                    <div className="small fw-bold text-dark">Lỗi xác thực không gian</div>
+                    <div className="small fw-bold text-danger">
+                      {distance !== null ? `Bạn đang cách điểm quét ${distance} mét` : (gps ? 'Vị trí không hợp lệ' : 'Bị từ chối GPS')}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {errorFlags.isDeviceFraud && (
+              <div className="bg-danger bg-opacity-10 p-3 rounded-4 text-start mt-3 border border-danger border-opacity-25">
+                <div className="d-flex align-items-center">
+                  <div className="bg-white p-2 rounded-circle me-3 shadow-sm"><FaShieldAlt className="text-danger" /></div>
+                  <div>
+                    <div className="small fw-bold text-dark">Lỗi xác thực thiết bị</div>
+                    <div className="small fw-bold text-danger">Thiết bị không hợp lệ / Sai chữ ký</div>
+                  </div>
+                </div>
+              </div>
+            )}
             
             <button className="btn btn-primary mt-4 py-2 w-100 shadow-sm fw-bold rounded-pill" onClick={() => window.location.reload()}>
               Thử Lại Trực Tiếp Tại Lớp
