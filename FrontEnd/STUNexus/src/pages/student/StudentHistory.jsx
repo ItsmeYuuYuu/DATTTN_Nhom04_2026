@@ -142,11 +142,7 @@ const StudentHistory = () => {
                           <td className="px-4">{getStatusBadge(item.trangThai)}</td>
                           <td className="px-4 text-muted">{formatTime(item.thoiGianQuet)}</td>
                           <td className="px-4 text-muted fst-italic">
-                            {item.ghiChu ? (
-                               item.trangThai === 5 && item.ghiChu.includes('Gian lận') 
-                               ? 'Thiết bị lạ hoặc sai vị trí học' 
-                               : item.ghiChu
-                            ) : '-'}
+                            {item.ghiChu ? item.ghiChu.replace(/Gian lận/gi, 'Lỗi xác thực').replace(/Phát hiện/gi, 'Ghi nhận') : '-'}
                           </td>
                         </tr>
                       ))}
