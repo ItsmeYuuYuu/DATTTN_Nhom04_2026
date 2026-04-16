@@ -33,7 +33,8 @@ const ClassManagement = () => {
       setSubjectInfo(monRes.data);
 
       // Lấy danh sách lớp học -> filter theo mã môn
-      const lopRes = await axiosClient.get('/lophoc');
+      const gvParam = user?.role === 'lecturer' ? `?maGv=${user.MaGV || user.MaId}` : '';
+      const lopRes = await axiosClient.get(`/lophoc${gvParam}`);
       const allClasses = lopRes.data?.data || lopRes.data || [];
       setClasses(allClasses.filter(c => c.maMon === monId));
 

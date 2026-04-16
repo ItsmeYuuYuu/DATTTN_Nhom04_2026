@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { FaPlus, FaSearch, FaLayerGroup, FaEdit, FaTrash } from 'react-icons/fa';
 import axiosClient from '../../utils/axiosClient';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../context/AuthContext';
 
 const SubjectManagement = () => {
+  const { user } = useContext(AuthContext);
   const [searchTerm, setSearchTerm] = useState('');
   const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +17,8 @@ const SubjectManagement = () => {
 
   const fetchSubjects = async () => {
     try {
-      const res = await axiosClient.get('/monhocs');
+      const gvParam = user?.role === 'lecturer' ? `?maGv=${user.MaGV || user.MaId}` : '';
+      const res = await axiosClient.get(`/monhocs${gvParam}`);
       setSubjects(res.data || []);
     } catch (err) {
       console.error('Lỗi tải môn học:', err);
@@ -24,7 +27,7 @@ const SubjectManagement = () => {
     }
   };
 
-  useEffect(() => { fetchSubjects(); }, []);
+  useEffect(() => { fetchSubjects(); }, [user]);
 
   const handleSave = async (e) => {
     e.preventDefault();
