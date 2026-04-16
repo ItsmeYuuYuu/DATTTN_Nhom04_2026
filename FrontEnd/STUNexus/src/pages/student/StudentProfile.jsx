@@ -45,8 +45,41 @@ const StudentProfile = () => {
 
   const [message, setMessage] = useState({ text: '', type: '' });
 
-  const handleAvatarSelect = (e) => {
-    alert('Chức năng cập nhật ảnh đại diện hiện đang được bảo trì. Vui lòng quay lại sau.');
+  const handleAvatarSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Giới hạn kích thước file (ví dụ 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Kích thước ảnh quá lớn (tối đa 2MB).');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64Image = reader.result;
+      try {
+        const parts = user.HoTen.trim().split(' ');
+        const tenSv = parts.pop();
+        const hoLot = parts.join(' ');
+
+        await axiosClient.put(`/sinhvien/${user.MaSv || user.MaSV}`, {
+           hoLot: hoLot,
+           tenSv: tenSv,
+           lop: user.Lop || '',
+           email: formData.Email,
+           soDienThoai: formData.SoDienThoai,
+           anhDaiDien: base64Image
+        });
+
+        updateUserSession({ AnhDaiDien: base64Image });
+        setMessage({ text: 'Cập nhật ảnh đại diện thành công!', type: 'success' });
+      } catch (err) {
+        console.error("Lỗi upload ảnh:", err);
+        setMessage({ text: 'Không thể cập nhật ảnh đại diện.', type: 'danger' });
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const saveProfile = async (e) => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaUserPlus, FaSearch, FaArrowLeft, FaSync } from 'react-icons/fa';
+import { FaUserPlus, FaSearch, FaArrowLeft, FaSync, FaTrash } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
 import axiosClient from '../../utils/axiosClient';
 
@@ -165,6 +165,19 @@ const ClassStudents = () => {
     }
   };
 
+  const handleRemoveStudent = async (maSv, tenSv) => {
+    if (window.confirm(`⚠️ CẢNH BÁO: Bạn có chắc muốn rút sinh viên ${tenSv} (${maSv}) khỏi lớp này?\n\nHành động này cũng sẽ XÓA SẠCH toàn bộ kết quả điểm danh của sinh viên này trong riêng khuôn khổ lớp học hiện tại.\n\nNhấn OK để xóa vĩnh viễn!`)) {
+      try {
+        const res = await axiosClient.delete(`/lophoc/${maLop}/remove-student/${maSv}`);
+        alert(res.data.message || 'Đã xóa sinh viên khỏi lớp!');
+        fetchStudents(); // Tải lại danh sách
+      } catch (err) {
+        console.error(err);
+        alert(err.response?.data?.message || 'Lỗi khi xóa sinh viên khỏi lớp!');
+      }
+    }
+  };
+
   return (
     <div className="container-fluid">
       <div className="d-flex justify-content-between align-items-center mb-4 mt-2">
@@ -199,7 +212,7 @@ const ClassStudents = () => {
           ) : (
           <div className="table-responsive">
             <table className="table table-custom table-hover w-100 align-middle">
-              <thead><tr><th>Mã Sinh Viên</th><th>Họ Tên</th><th>Tài khoản cổng</th><th>Email liên hệ</th><th>SĐT</th></tr></thead>
+              <thead><tr><th>Mã Sinh Viên</th><th>Họ Tên</th><th>Tài khoản cổng</th><th>Email liên hệ</th><th>SĐT</th><th className="text-end pe-4">Hành động</th></tr></thead>
               <tbody>
                 {filtered.map(item => (
                   <tr key={item.maSv}>
@@ -224,9 +237,19 @@ const ClassStudents = () => {
                     <td><span className="font-monospace text-muted">{item.taiKhoan}</span></td>
                     <td><span className="text-muted">{item.email || 'N/A'}</span></td>
                     <td><span className="text-muted">{item.soDienThoai || 'N/A'}</span></td>
+                    <td className="text-end pe-4">
+                      <button 
+                         onClick={() => handleRemoveStudent(item.maSv, item.hoTen)}
+                         className="btn btn-outline-danger btn-sm rounded-circle d-inline-flex justify-content-center align-items-center bg-danger bg-opacity-10"
+                         style={{width: '32px', height: '32px', border: 'none'}}
+                         title="Rút sinh viên khỏi lớp"
+                      >
+                         <FaTrash size={12} />
+                      </button>
+                    </td>
                   </tr>
                 ))}
-                {filtered.length === 0 && <tr><td colSpan="5" className="text-center py-5 text-muted">Lớp học này chưa có sinh viên nào.</td></tr>}
+                {filtered.length === 0 && <tr><td colSpan="6" className="text-center py-5 text-muted">Lớp học này chưa có sinh viên nào.</td></tr>}
               </tbody>
             </table>
           </div>

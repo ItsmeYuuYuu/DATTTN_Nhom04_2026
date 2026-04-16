@@ -16,13 +16,13 @@ const StudentDashboard = () => {
         const res = await axiosClient.get(`/diemdanh/student/${user.MaSV}`);
         const history = res.data || [];
         
-        // Cần lấy đủ danh sách buổi học của các lớp SV tham gia để tính Vắng (Tạm thời tính trên lịch sử đã có)
-        const coMat = history.filter(a => a.trangThai === 1).length;
-        const diTre = history.filter(a => a.trangThai === 2).length;
-        const vang = history.filter(a => a.trangThai === 3 || a.trangThai === 4).length;
+        const total = history.length;
+        const presentOrLate = history.filter(a => a.trangThai === 1 || a.trangThai === 2).length;
+        const absent = history.filter(a => a.trangThai === 3 || a.trangThai === 4).length;
+        const issues = history.filter(a => a.trangThai === 5).length;
         
-        setStats({ coMat, vang, diTre, total: history.length || 1 });
-        setRecent(history.slice(0, 5)); // Lấy 5 buổi gần đây nhất
+        setStats({ total, presentOrLate, absent, issues });
+        setRecent(history.slice(0, 5));
       } catch (err) {
         console.error('Lỗi tải thống kê điểm danh:', err);
       }
@@ -31,7 +31,7 @@ const StudentDashboard = () => {
     fetchAttendance();
   }, [user]);
 
-  const percentage = Math.round((stats.coMat / stats.total) * 100);
+  const percentage = stats.total > 0 ? Math.round((stats.presentOrLate / stats.total) * 100) : 0;
 
   return (
     <div className="pb-4">
@@ -40,9 +40,6 @@ const StudentDashboard = () => {
           <h5 className="fw-bold mb-1">Xin chào, {user?.HoTen}</h5>
           <p className="mb-0 opacity-75 small">Mã SV: <span className="font-monospace fw-bold">{user?.MaSV}</span></p>
         </div>
-        {/* Abstract design elements */}
-        <div className="position-absolute end-0 top-0 bg-white opacity-10 rounded-circle" style={{width: '150px', height: '150px', transform: 'translate(40%, -40%)'}}></div>
-        <div className="position-absolute start-0 bottom-0 bg-white opacity-10 rounded-circle" style={{width: '80px', height: '80px', transform: 'translate(-30%, 30%)'}}></div>
       </div>
 
       <div className="row g-3 mb-4">
@@ -60,25 +57,29 @@ const StudentDashboard = () => {
           </div>
         </div>
 
-        <div className="col-4">
-          <div className="bg-success bg-opacity-10 rounded-4 p-3 text-center border border-success border-opacity-25 h-100 shadow-sm">
-            <FaCheckCircle className="text-success mb-2 fs-3" />
-            <h4 className="fw-bold text-success mb-0">{stats.coMat}</h4>
-            <span className="small text-muted fw-medium d-block mt-1" style={{fontSize: '0.7rem'}}>Có mặt</span>
+        {/* 4 Stats Cards */}
+        <div className="col-6">
+          <div className="bg-primary bg-opacity-10 rounded-4 p-3 text-center border border-primary border-opacity-25 shadow-sm">
+            <h6 className="text-primary fw-bold small mb-1">Tổng Số</h6>
+            <h4 className="fw-bold text-primary mb-0">{stats.total}</h4>
           </div>
         </div>
-        <div className="col-4">
-          <div className="bg-danger bg-opacity-10 rounded-4 p-3 text-center border border-danger border-opacity-25 h-100 shadow-sm">
-            <FaTimesCircle className="text-danger mb-2 fs-3" />
-            <h4 className="fw-bold text-danger mb-0">{stats.vang}</h4>
-            <span className="small text-muted fw-medium d-block mt-1" style={{fontSize: '0.7rem'}}>Vắng</span>
+        <div className="col-6">
+          <div className="bg-success bg-opacity-10 rounded-4 p-3 text-center border border-success border-opacity-25 shadow-sm">
+            <h6 className="text-success fw-bold small mb-1">Có Mặt / Trễ</h6>
+            <h4 className="fw-bold text-success mb-0">{stats.presentOrLate}</h4>
           </div>
         </div>
-        <div className="col-4">
-          <div className="bg-warning bg-opacity-10 rounded-4 p-3 text-center border border-warning border-opacity-25 h-100 shadow-sm">
-            <FaClock className="text-warning mb-2 fs-3" />
-            <h4 className="fw-bold text-warning mb-0">{stats.diTre}</h4>
-            <span className="small text-muted fw-medium d-block mt-1" style={{fontSize: '0.7rem'}}>Đi trễ</span>
+        <div className="col-6">
+          <div className="bg-danger bg-opacity-10 rounded-4 p-3 text-center border border-danger border-opacity-25 shadow-sm">
+            <h6 className="text-danger fw-bold small mb-1">Vắng Mặt</h6>
+            <h4 className="fw-bold text-danger mb-0">{stats.absent}</h4>
+          </div>
+        </div>
+        <div className="col-6">
+          <div className="bg-dark bg-opacity-10 rounded-4 p-3 text-center border border-dark border-opacity-25 shadow-sm">
+            <h6 className="text-dark fw-bold small mb-1">Lỗi Xác Thực</h6>
+            <h4 className="fw-bold text-dark mb-0">{stats.issues}</h4>
           </div>
         </div>
       </div>

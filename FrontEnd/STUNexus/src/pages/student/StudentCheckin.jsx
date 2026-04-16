@@ -116,7 +116,7 @@ const StudentCheckin = () => {
                 <div className="bg-white p-2 rounded-circle me-3 shadow-sm"><FaMapMarkerAlt className="text-success" /></div>
                 <div>
                   <div className="small fw-bold text-dark">Khoảng cách xác thực</div>
-                  <div className={`small fw-bold ${distance !== null && distance <= 60 ? 'text-success' : 'text-muted'}`}>
+                  <div className={`small fw-bold ${distance !== null && distance <= 30 ? 'text-success' : 'text-muted'}`}>
                     {distance !== null ? `${distance} mét` : 'Đã xác thực vị trí'}
                   </div>
                 </div>
