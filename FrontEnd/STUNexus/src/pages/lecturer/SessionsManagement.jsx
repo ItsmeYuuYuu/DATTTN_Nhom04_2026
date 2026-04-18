@@ -56,6 +56,25 @@ const SessionsManagement = () => {
     }
   };
 
+  const exportFullExcel = async () => {
+    try {
+      const res = await axiosClient.get(`/excel/class/${classId}`, {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `BaoCao_ToanKy_${classId}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error("Lỗi xuất excel:", err);
+      alert("Không thể xuất báo cáo toàn kỳ!");
+    }
+  };
+
   const openAdd = () => {
     setFormData({ ngayHoc: new Date().toISOString().split('T')[0], gioBatDau: '07:30', gioKetThuc: '09:30', ghiChu: 'Buoi hoc ly thuyet' });
     setShowModal(true);
@@ -68,9 +87,14 @@ const SessionsManagement = () => {
           <button className="btn btn-light rounded-circle shadow-sm" style={{ width: '40px', height: '40px' }} onClick={() => navigate(-1)}><FaArrowLeft /></button>
           <h3 className="m-0 fw-bold text-dark">Lịch trình Buổi học - <span className="text-primary">{classId}</span></h3>
         </div>
-        <button onClick={openAdd} className="btn btn-primary d-flex align-items-center gap-2 px-4 shadow-sm" style={{ borderRadius: '8px' }}>
-          <FaPlus /> Lên Lịch Buổi Mới
-        </button>
+        <div className="d-flex gap-2">
+          <button onClick={exportFullExcel} className="btn btn-outline-success d-flex align-items-center gap-2 px-3 shadow-sm border-2 fw-bold" style={{ borderRadius: '8px' }}>
+            <FaCalendarAlt /> Xuất Báo Cáo Toàn Kỳ
+          </button>
+          <button onClick={openAdd} className="btn btn-primary d-flex align-items-center gap-2 px-4 shadow-sm" style={{ borderRadius: '8px' }}>
+            <FaPlus /> Lên Lịch Buổi Mới
+          </button>
+        </div>
       </div>
 
       <div className="row g-4">

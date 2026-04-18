@@ -11,7 +11,8 @@ const StudentProfile = () => {
 
   const [formData, setFormData] = useState({
     Email: '',
-    SoDienThoai: ''
+    SoDienThoai: '',
+    Lop: ''          // Thêm Lop để dùng khi cập nhật ảnh
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -25,7 +26,8 @@ const StudentProfile = () => {
         if (res.data.success) {
            setFormData({
              Email: res.data.data.email || '',
-             SoDienThoai: res.data.data.soDienThoai || ''
+             SoDienThoai: res.data.data.soDienThoai || '',
+             Lop: res.data.data.lop || user.Lop || ''
            });
         }
       } catch (err) {
@@ -49,7 +51,6 @@ const StudentProfile = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Giới hạn kích thước file (ví dụ 2MB)
     if (file.size > 2 * 1024 * 1024) {
       alert('Kích thước ảnh quá lớn (tối đa 2MB).');
       return;
@@ -59,14 +60,14 @@ const StudentProfile = () => {
     reader.onload = async () => {
       const base64Image = reader.result;
       try {
-        const parts = user.HoTen.trim().split(' ');
+        const parts = (user.HoTen || '').trim().split(' ');
         const tenSv = parts.pop();
         const hoLot = parts.join(' ');
 
-        await axiosClient.put(`/sinhvien/${user.MaSv || user.MaSV}`, {
+        await axiosClient.put(`/sinhvien/${user.MaSV}`, {
            hoLot: hoLot,
            tenSv: tenSv,
-           lop: user.Lop || '',
+           lop: formData.Lop || user.Lop || 'N/A',  // Luôn gửi Lop thực từ dữ liệu đã tải
            email: formData.Email,
            soDienThoai: formData.SoDienThoai,
            anhDaiDien: base64Image
@@ -76,7 +77,8 @@ const StudentProfile = () => {
         setMessage({ text: 'Cập nhật ảnh đại diện thành công!', type: 'success' });
       } catch (err) {
         console.error("Lỗi upload ảnh:", err);
-        setMessage({ text: 'Không thể cập nhật ảnh đại diện.', type: 'danger' });
+        const errMsg = err.response?.data?.message || 'Không thể cập nhật ảnh đại diện.';
+        setMessage({ text: errMsg, type: 'danger' });
       }
     };
     reader.readAsDataURL(file);

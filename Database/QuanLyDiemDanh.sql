@@ -34,7 +34,7 @@ CREATE TABLE [dbo].[SinhVien] (
     [Email] VARCHAR(100) NULL,
     [SoDienThoai] VARCHAR(15) NULL,
     [MaThietBi] VARCHAR(255) NULL, -- Trusted Device Token (Ban đầu NULL)
-    [AnhDaiDien] NVARCHAR(500) NULL
+    [AnhDaiDien] NVARCHAR(MAX) NULL
 );
 
 -- =============================================
@@ -98,4 +98,23 @@ CREATE TABLE [dbo].[DiemDanh] (
     CONSTRAINT FK_DiemDanh_SinhVien FOREIGN KEY ([MaSV]) REFERENCES [SinhVien]([MaSV]),
     CONSTRAINT UQ_DiemDanh_1Lan UNIQUE ([MaBuoiHoc], [MaSV]) -- Ràng buộc: 1 Buổi SV chỉ quét 1 lần
 );
+
+-- =============================================
+-- 4. BẢNG PHẢN HỒI / KHIẾU NẠI ĐIỂM DANH
+-- =============================================
+CREATE TABLE [dbo].[PhanHoi] (
+    [MaPhanHoi]   INT IDENTITY(1,1) PRIMARY KEY,
+    [MaDiemDanh]  INT NOT NULL,                    -- Ràng buộc: gắn với 1 bản ghi điểm danh cụ thể
+    [NoiDung]     NVARCHAR(1000) NOT NULL,          -- Nội dung khiếu nại của sinh viên
+    [MinhChung]   NVARCHAR(MAX) NULL,               -- Ảnh minh chứng dạng Base64
+    [ThoiGianGui] DATETIME DEFAULT GETDATE(),       -- Thời điểm gửi
+    [PhanHoiGv]   NVARCHAR(1000) NULL,              -- Ghi chú / phản hồi của giảng viên
+    [TrangThai]   INT DEFAULT 0,                    -- 0: Chờ xử lý, 1: Đã duyệt, 2: Từ chối
+    CONSTRAINT FK_PhanHoi_DiemDanh FOREIGN KEY ([MaDiemDanh]) REFERENCES [DiemDanh]([MaDiemDanh])
+);
 GO
+
+-- =============================================
+-- Cập nhật cột AnhDaiDien (chạy nếu DB đã tồn tại)
+-- =============================================
+-- ALTER TABLE SinhVien ALTER COLUMN AnhDaiDien NVARCHAR(MAX);

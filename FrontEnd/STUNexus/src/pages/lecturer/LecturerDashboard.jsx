@@ -80,7 +80,8 @@ const LecturerDashboard = () => {
                     <th className="py-3 px-4 border-bottom-0">Mã SV</th>
                     <th className="py-3 px-4 border-bottom-0">Họ Tên</th>
                     <th className="py-3 px-4 border-bottom-0">Lớp</th>
-                    <th className="py-3 px-4 border-bottom-0 text-center">Tình Trạng (Vắng/Trễ)</th>
+                    <th className="py-3 px-4 border-bottom-0">Môn / Lớp HP</th>
+                    <th className="py-3 px-4 border-bottom-0 text-center">Tình Trạng (Vắng)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -89,10 +90,16 @@ const LecturerDashboard = () => {
                       <td className="px-4 fw-bold text-primary">{sv.maSv}</td>
                       <td className="px-4 fw-medium text-dark">{sv.hoTen}</td>
                       <td className="px-4"><span className="badge bg-secondary bg-opacity-10 text-dark border">{sv.lop}</span></td>
+                      <td className="px-4">
+                        <div className="fw-bold text-truncate" style={{maxWidth: '200px'}} title={sv.tenMon || sv.tenLop}>
+                           {sv.tenMon || sv.tenLop}
+                        </div>
+                        <div className="text-muted small">Mã: {sv.tenLop}</div>
+                      </td>
                       <td className="px-4 text-center">
-                         <span className="badge bg-danger rounded-pill px-3 py-2" style={{fontSize: '0.85rem'}}>
-                           {sv.soBuoiVang} buổi
-                         </span>
+                         <div className={`badge ${sv.tiLeVang >= 50 ? 'bg-danger' : 'bg-warning text-dark'} rounded-pill px-3 py-2`} style={{fontSize: '0.85rem'}}>
+                           {sv.soBuoiVang}/{sv.tongBuoi} ({sv.tiLeVang}%)
+                         </div>
                       </td>
                     </tr>
                   ))}

@@ -1,10 +1,24 @@
 import React, { useContext } from 'react';
 import { NavLink } from 'react-router-dom';
-import { FaUserGraduate, FaChartPie, FaBook, FaCalendarDay } from 'react-icons/fa';
+import { FaUserGraduate, FaChartPie, FaBook, FaCalendarDay, FaBell } from 'react-icons/fa';
 import { AuthContext } from '../context/AuthContext';
 
 const LecturerSidebar = () => {
   const { user } = useContext(AuthContext);
+  const [pendingCount, setPendingCount] = React.useState(0);
+
+  React.useEffect(() => {
+    const maGv = user?.MaGV || user?.MaId;
+    if (!maGv) return;
+    import('../utils/axiosClient').then(({ default: axiosClient }) => {
+      axiosClient.get(`/phanhoi/lecturer/${maGv}`)
+        .then(res => {
+          const pending = (res.data?.data || []).filter(a => a.trangThai === 0).length;
+          setPendingCount(pending);
+        })
+        .catch(() => {});
+    });
+  }, [user]);
 
   return (
     <div className="sidebar">
@@ -31,6 +45,13 @@ const LecturerSidebar = () => {
         <NavLink to="/lecturer/subjects" className={({isActive}) => `nav-item-link ${isActive ? 'active' : ''}`}>
           <FaBook />
           <span>Quản lý Môn / Lớp Học</span>
+        </NavLink>
+        <NavLink to="/lecturer/appeals" className={({isActive}) => `nav-item-link ${isActive ? 'active' : ''}`}>
+          <FaBell />
+          <span>Xử lý Khiếu Nại</span>
+          {pendingCount > 0 && (
+            <span className="badge bg-danger rounded-pill ms-auto" style={{fontSize:'0.65rem'}}>{pendingCount}</span>
+          )}
         </NavLink>
       </div>
     </div>

@@ -64,6 +64,27 @@ const ManualAttendance = () => {
     setStudents(prev => prev.map(s => s.maSv === id ? { ...s, ghiChu: newNote } : s));
   };
 
+  const exportExcel = async () => {
+    try {
+      const maBuoiHoc = parseInt(classId);
+      const res = await axiosClient.get(`/excel/session/${maBuoiHoc}`, {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      // Lấy tên file từ header nếu có, hoặc đặt tên mặc định
+      link.setAttribute('download', `DiemDanh_${sessionInfo.tenLop}_${sessionInfo.date}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error("Lỗi xuất excel:", err);
+      alert("Không thể xuất file Excel!");
+    }
+  };
+
   const saveAttendance = async () => {
     try {
       const maBuoiHoc = parseInt(classId);
@@ -91,9 +112,14 @@ const ManualAttendance = () => {
           <button className="btn btn-light rounded-circle shadow-sm" style={{width: '40px', height: '40px'}} onClick={() => navigate(-1)}><FaArrowLeft /></button>
           <h3 className="m-0 fw-bold text-dark">Sổ tay Điểm danh - {sessionInfo.tenLop}</h3>
         </div>
-        <button className="btn btn-primary d-flex align-items-center gap-2 px-4 shadow-sm" onClick={saveAttendance} style={{borderRadius: '8px'}}>
-          <FaSave /> Lưu Danh Sách
-        </button>
+        <div className="d-flex gap-2">
+          <button className="btn btn-outline-success d-flex align-items-center gap-2 px-3 shadow-sm border-2 fw-bold" onClick={exportExcel} style={{borderRadius: '8px'}}>
+            <FaSync /> Xuất Excel
+          </button>
+          <button className="btn btn-primary d-flex align-items-center gap-2 px-4 shadow-sm" onClick={saveAttendance} style={{borderRadius: '8px'}}>
+            <FaSave /> Lưu Danh Sách
+          </button>
+        </div>
       </div>
       
       <div className="card glass-panel border-0 shadow-sm mb-4">

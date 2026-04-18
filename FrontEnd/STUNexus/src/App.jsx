@@ -24,6 +24,7 @@ import SessionsManagement from './pages/lecturer/SessionsManagement';
 import QRAttendance from './pages/lecturer/QRAttendance';
 import ManualAttendance from './pages/lecturer/ManualAttendance';
 import LecturerProfile from './pages/lecturer/LecturerProfile';
+import LecturerAppeals from './pages/lecturer/LecturerAppeals';
 
 import StudentDashboard from './pages/student/StudentDashboard';
 import StudentCheckin from './pages/student/StudentCheckin';
@@ -70,6 +71,7 @@ function App() {
             <Route path="qr-attendance/:classId" element={<QRAttendance />} />
             <Route path="manual/:classId" element={<ManualAttendance />} />
             <Route path="profile" element={<LecturerProfile />} />
+            <Route path="appeals" element={<LecturerAppeals />} />
           </Route>
 
           {/* Student Routes */}
