@@ -85,8 +85,16 @@ export const AuthProvider = ({ children }) => {
 
         // Giải mã Token và set User session
         const userData = decodeAndSetUser(token, role);
-        
+
         if (userData) {
+          // Cập nhật thêm dữ liệu bổ sung từ response (không có trong JWT như AnhDaiDien)
+          const extraData = {};
+          if (response.data.data.anhDaiDien) extraData.AnhDaiDien = response.data.data.anhDaiDien;
+          if (Object.keys(extraData).length > 0) {
+            const merged = { ...userData, ...extraData };
+            setUser(merged);
+            localStorage.setItem('stu_user', JSON.stringify(merged));
+          }
           // Đăng ký thiết bị ngầm cho sinh viên
           if (userData.role === 'student' && userData.MaSV) {
             try {
