@@ -51,37 +51,32 @@ const StudentProfile = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      alert('Kích thước ảnh quá lớn (tối đa 2MB).');
+    // Validate nhanh ở FE (Kích thước 5MB khớp với BE)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Kích thước ảnh quá lớn (tối đa 5MB).');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const base64Image = reader.result;
-      try {
-        const parts = (user.HoTen || '').trim().split(' ');
-        const tenSv = parts.pop();
-        const hoLot = parts.join(' ');
+    const formDataUpload = new FormData();
+    formDataUpload.append('file', file);
 
-        await axiosClient.put(`/sinhvien/${user.MaSV}`, {
-           hoLot: hoLot,
-           tenSv: tenSv,
-           lop: formData.Lop || user.Lop || 'N/A',  // Luôn gửi Lop thực từ dữ liệu đã tải
-           email: formData.Email,
-           soDienThoai: formData.SoDienThoai,
-           anhDaiDien: base64Image
-        });
+    try {
+      setMessage({ text: 'Đang tải ảnh lên...', type: 'info' });
+      
+      const res = await axiosClient.post(`/sinhvien/${user.MaSV}/upload-avatar`, formDataUpload, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
 
-        updateUserSession({ AnhDaiDien: base64Image });
+      if (res.data.success) {
+        const newUrl = res.data.anhDaiDienUrl;
+        updateUserSession({ AnhDaiDien: newUrl });
         setMessage({ text: 'Cập nhật ảnh đại diện thành công!', type: 'success' });
-      } catch (err) {
-        console.error("Lỗi upload ảnh:", err);
-        const errMsg = err.response?.data?.message || 'Không thể cập nhật ảnh đại diện.';
-        setMessage({ text: errMsg, type: 'danger' });
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      console.error("Lỗi upload ảnh:", err);
+      const errMsg = err.response?.data?.message || 'Không thể cập nhật ảnh đại diện.';
+      setMessage({ text: errMsg, type: 'danger' });
+    }
   };
 
   const saveProfile = async (e) => {
