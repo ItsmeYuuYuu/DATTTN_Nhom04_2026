@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useRef, useCallback } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import axiosClient from '../utils/axiosClient';
 import { initDeviceKey } from '../utils/cryptoUtils';
@@ -8,6 +8,8 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const inactivityTimer = useRef(null);
+  const INACTIVITY_LIMIT_MS = 5 * 60 * 1000; // 5 phút
 
   // Hàm giải mã Token JWT -> lấy ra thông tin user
   const decodeAndSetUser = (token, role) => {
@@ -132,11 +134,37 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     localStorage.removeItem('stu_user');
     localStorage.removeItem('token');
-  };
+    if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+  }, []);
+
+  // Reset timer mỗi khi có tương tác
+  const resetInactivityTimer = useCallback(() => {
+    if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+    inactivityTimer.current = setTimeout(() => {
+      logout();
+      // Chuyển hướng về trang đăng nhập
+      window.location.href = '/login';
+    }, INACTIVITY_LIMIT_MS);
+  }, [logout, INACTIVITY_LIMIT_MS]);
+
+  // Bắt đầu / Dừng theo dõi khi user thay đổi
+  useEffect(() => {
+    if (!user) {
+      if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+      return;
+    }
+    const events = ['mousemove', 'keydown', 'scroll', 'click', 'touchstart'];
+    events.forEach(e => window.addEventListener(e, resetInactivityTimer));
+    resetInactivityTimer(); // khởi đầu timer ngay khi đăng nhập
+    return () => {
+      events.forEach(e => window.removeEventListener(e, resetInactivityTimer));
+      if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+    };
+  }, [user, resetInactivityTimer]);
 
   const updateUserSession = (newUserData) => {
     const updated = { ...user, ...newUserData };

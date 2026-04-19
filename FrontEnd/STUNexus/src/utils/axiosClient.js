@@ -23,10 +23,12 @@ axiosClient.interceptors.request.use(
 );
 
 // Interceptor: Xử lý response lỗi 401 (Token hết hạn) -> Tự động đá ra Login
+// Ngoại lệ: Không redirect khi 401 đến từ /auth/login (đó là sai mật khẩu, không phải token hết hạn)
 axiosClient.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response && error.response.status === 401) {
+        const isLoginEndpoint = error.config?.url?.includes('/auth/login');
+        if (error.response && error.response.status === 401 && !isLoginEndpoint) {
             localStorage.removeItem('token');
             localStorage.removeItem('stu_user');
             window.location.href = '/login';

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axiosClient from '../../utils/axiosClient';
-import { FaUsers, FaChalkboardTeacher, FaLayerGroup } from 'react-icons/fa';
+import { FaUsers, FaChalkboardTeacher, FaLayerGroup, FaBook } from 'react-icons/fa';
 
 const Dashboard = () => {
   const [data, setData] = useState(null);
@@ -48,10 +48,10 @@ const Dashboard = () => {
     <div className="container-fluid">
       <h3 className="mb-4 mt-2 fw-bold text-dark">Tổng Quan Hệ Thống</h3>
       
-      {/* 4 Stats Cards */}
+      {/* 5 Stats Cards */}
       <div className="row g-4 mb-4">
         {/* Card: Sinh viên */}
-        <div className="col-12 col-md-6 col-xl-3">
+        <div className="col-12 col-md-6 col-xl">
           <div className="card glass-panel border-0 border-start border-primary border-4 py-3 shadow-sm h-100" style={{borderRadius: '12px'}}>
             <div className="card-body">
               <div className="d-flex align-items-center justify-content-between">
@@ -68,7 +68,7 @@ const Dashboard = () => {
         </div>
         
         {/* Card: Giảng viên */}
-        <div className="col-12 col-md-6 col-xl-3">
+        <div className="col-12 col-md-6 col-xl">
           <div className="card glass-panel border-0 border-start border-success border-4 py-3 shadow-sm h-100" style={{borderRadius: '12px'}}>
             <div className="card-body">
               <div className="d-flex align-items-center justify-content-between">
@@ -84,8 +84,25 @@ const Dashboard = () => {
           </div>
         </div>
 
+        {/* Card: Môn học */}
+        <div className="col-12 col-md-6 col-xl">
+          <div className="card glass-panel border-0 border-start border-4 py-3 shadow-sm h-100" style={{borderRadius: '12px', borderColor: '#6f42c1 !important', borderLeftColor: '#6f42c1'}}>
+            <div className="card-body">
+              <div className="d-flex align-items-center justify-content-between">
+                <div>
+                  <div className="fw-bold text-uppercase mb-1" style={{fontSize: '0.75rem', letterSpacing: '0.5px', color: '#6f42c1'}}>Môn Học</div>
+                  <div className="h3 mb-0 fw-bold text-dark">{data?.totalSubjects || 0}</div>
+                </div>
+                <div className="p-3 rounded-circle" style={{backgroundColor: 'rgba(111,66,193,0.1)'}}>
+                  <FaBook size={24} style={{color: '#6f42c1'}} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Card: Lớp học */}
-        <div className="col-12 col-md-6 col-xl-3">
+        <div className="col-12 col-md-6 col-xl">
           <div className="card glass-panel border-0 border-start border-warning border-4 py-3 shadow-sm h-100" style={{borderRadius: '12px'}}>
             <div className="card-body">
               <div className="d-flex align-items-center justify-content-between">
@@ -102,7 +119,7 @@ const Dashboard = () => {
         </div>
 
         {/* Card: Điểm danh hôm nay */}
-        <div className="col-12 col-md-6 col-xl-3">
+        <div className="col-12 col-md-6 col-xl">
           <div className="card glass-panel border-0 border-start border-info border-4 py-3 shadow-sm h-100" style={{borderRadius: '12px'}}>
             <div className="card-body">
               <div className="d-flex align-items-center justify-content-between">
