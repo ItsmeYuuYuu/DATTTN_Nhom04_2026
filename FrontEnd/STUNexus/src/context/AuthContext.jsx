@@ -115,9 +115,15 @@ export const AuthProvider = ({ children }) => {
                   alert("🔐 Thiết bị này đã được liên kết với tài khoản của bạn bằng chữ ký số để phục vụ điểm danh.");
                 }, 1000); 
               } catch (regErr) {
-                // Nếu backend trả về 400 Bad Request, tức là DB ĐÃ có mã thiết bị (của máy này hoặc máy khác).
-                // Không báo lỗi, cho phép login. Nếu key không khớp lúc quét, backend sẽ bắt lỗi "Gian lận".
-                console.log('[Device] Server đã lưu khóa từ trước, bỏ qua đăng ký.');
+                // Backend trả về 400 nếu tài khoản đã có thiết bị khác liên kết
+                if (regErr.response && regErr.response.status === 400) {
+                  console.error('[Device] Đăng ký bị từ chối:', regErr.response.data.message);
+                  setTimeout(() => {
+                    alert("🚫 CẢNH BÁO: " + (regErr.response.data.message || "Tài khoản đã liên kết thiết bị khác. Vui lòng nhờ Giảng viên reset thiết bị để bắt đầu điểm danh điểm danh bằng máy này."));
+                  }, 1000);
+                } else {
+                  console.log('[Device] Server đã lưu khóa từ trước.');
+                }
               }
             } catch (initErr) {
                console.warn('[Device] Khởi tạo khóa thiết bị thất bại:', initErr.message);
