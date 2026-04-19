@@ -160,8 +160,9 @@ const ClassStudents = () => {
         alert(res.data.message || 'Đã reset thiết bị thành công!');
         fetchStudents(); // Refresh danh sách để cập nhật trạng thái
       } catch (err) {
-        console.error(err);
-        alert(err.response?.data?.message || 'Lỗi khi reset thiết bị!');
+        console.error('Reset device error:', err);
+        const errorMsg = err.response?.data?.message || `Lỗi hệ thống (${err.response?.status || 'Unknown'}). Vui lòng thử lại sau.`;
+        alert(errorMsg);
       }
     }
   };
