@@ -3,6 +3,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import axiosClient from '../../utils/axiosClient';
 import { AuthContext } from '../../context/AuthContext';
 import { signPayload } from '../../utils/cryptoUtils';
+import { getDeviceFingerprint } from '../../utils/browserUtils';
 import { FaMapMarkerAlt, FaCheckCircle, FaExclamationTriangle, FaShieldAlt, FaQrcode } from 'react-icons/fa';
 
 const StudentCheckin = () => {
@@ -33,10 +34,21 @@ const StudentCheckin = () => {
             setMessage('Đang ký xác thực thiết bị...');
 
             try {
-              // Tạo Payload gộm: maSv|maBuoiHoc|lat|long|timestamp
-              // Timestamp bị ràng buộc thời gian, chữ ký này chỉ dùng được 1 lần
+              // Lấy vân tay phần cứng hiện tại của thiết bị đang quét
+              const fingerprint = await getDeviceFingerprint();
+
+              // Tạo Payload dạng JSON chứa Fingerprint
+              // Thay vì chuỗi |, giờ dùng JSON để bảo toàn định dạng và tính mở rộng
               const timestamp = Date.now();
-              const rawPayload = `${maSv}|${classId}|${latitude.toFixed(6)}|${longitude.toFixed(6)}|${timestamp}`;
+              const payloadObj = {
+                  MaSv: maSv,
+                  MaBuoiHoc: parseInt(classId),
+                  Lat: parseFloat(latitude.toFixed(6)),
+                  Long: parseFloat(longitude.toFixed(6)),
+                  Timestamp: timestamp,
+                  Fingerprint: fingerprint
+              };
+              const rawPayload = JSON.stringify(payloadObj);
 
               // Ký payload bằng Private Key (khóa cứng trong thiết bị, không thể copy)
               const signature = await signPayload(maSv, rawPayload);

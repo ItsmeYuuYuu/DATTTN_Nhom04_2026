@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useRef, useCallback } from '
 import { jwtDecode } from 'jwt-decode';
 import axiosClient from '../utils/axiosClient';
 import { initDeviceKey } from '../utils/cryptoUtils';
+import { getDeviceFingerprint } from '../utils/browserUtils';
 
 export const AuthContext = createContext();
 
@@ -101,12 +102,14 @@ export const AuthProvider = ({ children }) => {
           if (userData.role === 'student' && userData.MaSV) {
             try {
               const { publicKeyBase64 } = await initDeviceKey(userData.MaSV);
+              const fingerprint = await getDeviceFingerprint();
               
               // Luôn thử đồng bộ Public Key lên Server mỗi khi đăng nhập
               try {
                 await axiosClient.post('/auth/register-device', {
                   maSv: userData.MaSV,
-                  publicKeyBase64: publicKeyBase64
+                  publicKeyBase64: publicKeyBase64,
+                  fingerprint: fingerprint
                 });
                 console.log('[Device] Đăng ký thiết bị thành công cho:', userData.MaSV);
                 
