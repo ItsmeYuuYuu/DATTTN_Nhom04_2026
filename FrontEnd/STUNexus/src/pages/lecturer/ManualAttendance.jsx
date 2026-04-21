@@ -150,7 +150,6 @@ const ManualAttendance = () => {
                 <tr>
                   <th>Mã SV</th>
                   <th>Họ Tên</th>
-                  <th style={{width: '160px'}}>Thiết Bị</th>
                   <th style={{width: '200px'}}>Xác Thực</th>
                   <th style={{width: '210px'}}>Trạng Thái Điểm Danh</th>
                   <th>Ghi Chú</th>
@@ -168,9 +167,7 @@ const ManualAttendance = () => {
                         <span className="fw-medium text-dark">{sv.hoTen}</span>
                       </div>
                     </td>
-                    <td>
-                      {sv.maThietBiLog ? <span className="font-monospace small bg-light p-1 px-2 rounded border text-muted" title={sv.maThietBiLog} style={{cursor: 'help'}}>{sv.maThietBiLog.substring(0, 8)}...</span> : <span className="text-muted small align-middle">-</span>}
-                    </td>
+
                     <td>
                       {sv.trangThai === 5 ? (
                         <span className="badge bg-danger p-2 w-100 d-flex align-items-center justify-content-center gap-1 shadow-sm" style={{borderRadius: '6px'}}>
