@@ -165,7 +165,8 @@ export const AuthProvider = ({ children }) => {
       return true;
     } catch (err) {
       console.warn('[WebAuthn] Đăng ký Passkey thất bại hoặc bị hủy:', err.message);
-      alert("❌ Lỗi thiết lập Passkey: " + (err.response?.data?.message || err.message));
+      alert("❌ Lỗi thiết lập Passkey: " + (err.response?.data?.message || err.message) + 
+            "\n\n💡 Mẹo: Bạn chỉ cần dùng vân tay/PIN của máy để xác nhận. Việc này hoàn toàn an toàn và KHÔNG ảnh hưởng đến cài đặt tài khoản Google/Email của bạn.");
       return false;
     }
   };
