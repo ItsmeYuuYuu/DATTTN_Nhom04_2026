@@ -145,8 +145,8 @@ const Dashboard = () => {
               <span className="badge bg-light text-dark fw-normal">Dữ liệu thời gian thực</span>
             </div>
             <div className="card-body p-0">
-              <div className="table-responsive">
-                <table className="table table-hover align-middle mb-0">
+              <div className="table-responsive border-0">
+                <table className="table table-hover align-middle mb-0 mobile-card-view">
                   <thead className="bg-light bg-opacity-50">
                     <tr>
                       <th className="px-4 py-3 border-0 small text-muted text-uppercase fw-bold">Sinh Viên</th>
@@ -158,9 +158,9 @@ const Dashboard = () => {
                   <tbody>
                     {data?.recentActivities?.map((act, index) => (
                       <tr key={index}>
-                        <td className="px-4 py-3">
+                        <td data-label="Sinh Viên" className="px-4 py-3">
                           <div className="d-flex align-items-center">
-                            <div className="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style={{width: '32px', height: '32px', fontSize: '0.8rem'}}>
+                            <div className="bg-light rounded-circle d-flex align-items-center justify-content-center me-3 d-none d-md-flex" style={{width: '32px', height: '32px', fontSize: '0.8rem'}}>
                               {act.studentName.charAt(0)}
                             </div>
                             <div>
@@ -169,14 +169,14 @@ const Dashboard = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3">
+                        <td data-label="Lớp / Môn" className="px-4 py-3">
                           <div className="fw-medium text-dark small">{act.subjectName}</div>
                           <div className="text-muted" style={{fontSize: '0.7rem'}}>ID Lớp: {act.classId}</div>
                         </td>
-                        <td className="px-4 py-3 text-center">
+                        <td data-label="Trạng Thái" className="px-4 py-3 text-center">
                           {getStatusBadge(act.status)}
                         </td>
-                        <td className="px-4 py-3 text-end text-muted small fw-medium">
+                        <td data-label="Thời Gian" className="px-4 py-3 text-end text-muted small fw-medium">
                           {formatTime(act.time)}
                         </td>
                       </tr>

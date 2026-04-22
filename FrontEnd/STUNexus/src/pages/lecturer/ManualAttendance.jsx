@@ -144,8 +144,8 @@ const ManualAttendance = () => {
               <p className="text-muted small mb-0">Danh sách điểm danh sẽ xuất hiện sau khi giảng viên mở phiên QR hoặc chốt sổ tay.</p>
             </div>
           ) : (
-          <div className="table-responsive">
-            <table className="table table-custom table-hover w-100 align-middle">
+          <div className="table-responsive border-0">
+            <table className="table table-custom table-hover w-100 align-middle mobile-card-view">
               <thead>
                 <tr>
                   <th>Mã SV</th>
@@ -158,17 +158,16 @@ const ManualAttendance = () => {
               <tbody>
                 {students.map((sv) => (
                   <tr key={sv.maSv}>
-                    <td className="fw-semibold text-primary">{sv.maSv}</td>
-                    <td>
+                    <td data-label="Mã SV" className="fw-semibold text-primary">{sv.maSv}</td>
+                    <td data-label="Họ Tên">
                       <div className="d-flex align-items-center py-1">
-                        <div className="me-3 bg-secondary bg-opacity-25 text-dark rounded-circle d-flex align-items-center justify-content-center shadow-sm" style={{width: '35px', height: '35px', fontWeight: 'bold'}}>
+                        <div className="me-3 bg-secondary bg-opacity-25 text-dark rounded-circle d-flex align-items-center justify-content-center shadow-sm d-none d-md-flex" style={{width: '35px', height: '35px', fontWeight: 'bold'}}>
                           {sv.hoTen?.charAt(0)}
                         </div>
                         <span className="fw-medium text-dark">{sv.hoTen}</span>
                       </div>
                     </td>
-
-                    <td>
+                    <td data-label="Xác Thực">
                       {sv.trangThai === 5 ? (
                         <span className="badge bg-danger p-2 w-100 d-flex align-items-center justify-content-center gap-1 shadow-sm" style={{borderRadius: '6px'}}>
                           <FaExclamationTriangle /> GIAN LẬN
@@ -183,7 +182,7 @@ const ManualAttendance = () => {
                         </span>
                       )}
                     </td>
-                    <td>
+                    <td data-label="Điểm danh">
                       <select 
                         className={`form-select form-select-sm fw-bold border-0 shadow-sm ${
                           sv.trangThai === 1 ? 'bg-success bg-opacity-10 text-success' : 
@@ -201,7 +200,7 @@ const ManualAttendance = () => {
                         {sv.trangThai === 5 && <option value="5">⚠️ Gian lận</option>}
                       </select>
                     </td>
-                    <td>
+                    <td data-label="Ghi chú">
                       <input 
                         type="text" 
                         className="form-control form-control-sm border-0 bg-light" 
