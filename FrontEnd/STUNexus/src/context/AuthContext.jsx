@@ -1,8 +1,7 @@
 import React, { createContext, useState, useEffect, useRef, useCallback } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import axiosClient from '../utils/axiosClient';
-import { initDeviceKey } from '../utils/cryptoUtils';
-import { getDeviceFingerprint } from '../utils/browserUtils';
+
 
 export const AuthContext = createContext();
 
@@ -98,38 +97,31 @@ export const AuthProvider = ({ children }) => {
             setUser(merged);
             localStorage.setItem('stu_user', JSON.stringify(merged));
           }
-          // Đăng ký thiết bị ngầm cho sinh viên
-          if (userData.role === 'student' && userData.MaSV) {
+          // Đăng ký Passkey cho sinh viên nếu chưa có
+          if (userData.role === 'student' && userData.MaSV && !response.data.data.hasPasskey) {
             try {
-              const { publicKeyBase64 } = await initDeviceKey(userData.MaSV);
-              const fingerprint = await getDeviceFingerprint();
+              const { startRegistration } = await import('@simplewebauthn/browser');
               
-              // Luôn thử đồng bộ Public Key lên Server mỗi khi đăng nhập
-              try {
-                await axiosClient.post('/auth/register-device', {
-                  maSv: userData.MaSV,
-                  publicKeyBase64: publicKeyBase64,
-                  fingerprint: fingerprint
-                });
-                console.log('[Device] Đăng ký thiết bị thành công cho:', userData.MaSV);
-                
-                // Hiển thị thông báo, nghĩa là DB trên server từ trạng thái TRỐNG đã cập nhật thành công khóa này
-                setTimeout(() => {
-                  alert("🔐 Thiết bị này đã được liên kết với tài khoản của bạn bằng chữ ký số để phục vụ điểm danh.");
-                }, 1000); 
-              } catch (regErr) {
-                // Backend trả về 400 nếu tài khoản đã có thiết bị khác liên kết
-                if (regErr.response && regErr.response.status === 400) {
-                  console.error('[Device] Đăng ký bị từ chối:', regErr.response.data.message);
-                  setTimeout(() => {
-                    alert("🚫 CẢNH BÁO: " + (regErr.response.data.message || "Tài khoản đã liên kết thiết bị khác. Vui lòng nhờ Giảng viên reset thiết bị để bắt đầu điểm danh điểm danh bằng máy này."));
-                  }, 1000);
-                } else {
-                  console.log('[Device] Server đã lưu khóa từ trước.');
-                }
-              }
-            } catch (initErr) {
-               console.warn('[Device] Khởi tạo khóa thiết bị thất bại:', initErr.message);
+              // 1. Xin server tạo Options đăng ký
+              const optRes = await axiosClient.get(`/webauthn/register-options?maSv=${userData.MaSV}`);
+              
+              // 2. Kích hoạt Popup của OS để quét Sinh trắc học
+              const attResp = await startRegistration(optRes.data);
+              
+              // 3. Gửi key về server verify và lưu lại
+              await axiosClient.post(`/webauthn/register-verify?maSv=${userData.MaSV}`, attResp);
+              
+              // Cập nhật session
+              const merged = { ...userData, ...extraData, hasPasskey: true };
+              setUser(merged);
+              localStorage.setItem('stu_user', JSON.stringify(merged));
+              
+              setTimeout(() => {
+                alert("🔐 Thiết lập Khóa truy cập Sinh trắc học (Passkeys) thành công!");
+              }, 1000);
+            } catch (err) {
+               console.warn('[WebAuthn] Đăng ký Passkey thất bại hoặc bị hủy:', err.message);
+               // Ghi chú: Nếu người dùng hủy popup, lần ĐĂNG NHẬP SAU hệ thống sẽ hỏi lại.
             }
           }
           return { success: true, role: userData.role };

@@ -8,12 +8,8 @@ const QRAttendance = () => {
   const { classId } = useParams();
   const navigate = useNavigate();
   const [token, setToken] = useState('');
-  const [timeLeft, setTimeLeft] = useState(15);
+  const [timeLeft, setTimeLeft] = useState(30);
   const [isActive, setIsActive] = useState(true);
-
-  const generateToken = () => {
-    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-  };
 
   useEffect(() => {
     const updateSessionStatus = async (lat = null, lng = null) => {
@@ -49,21 +45,36 @@ const QRAttendance = () => {
     }
 
     if (!isActive) return;
-    setToken(generateToken());
-    setTimeLeft(15);
+    
+    let localTimer;
+    const fetchToken = async () => {
+      try {
+        const res = await axiosClient.get(`/buoihoc/${classId}/qr-token`);
+        if (res.data && res.data.success) {
+          setToken(res.data.token);
+        }
+      } catch (err) {
+        console.error('Lỗi lấy mã điểm danh', err);
+      }
+    };
 
-    const timer = setInterval(() => {
+    // Lấy lần đầu khi mở
+    fetchToken();
+    setTimeLeft(30);
+
+    // Bắt đầu đếm ngược nội bộ
+    localTimer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          setToken(generateToken());
-          return 15;
+          fetchToken(); // Lấy mã mới từ Server
+          return 30;
         }
         return prev - 1;
       });
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, [isActive]);
+    return () => clearInterval(localTimer);
+  }, [isActive, classId]);
 
   const qrUrl = `${window.location.protocol}//${window.location.host}/student/checkin/${classId}?token=${token}`;
 

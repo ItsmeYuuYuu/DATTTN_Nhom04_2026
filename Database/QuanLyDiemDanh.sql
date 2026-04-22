@@ -33,7 +33,10 @@ CREATE TABLE [dbo].[SinhVien] (
     [Lop] VARCHAR(50) NOT NULL, -- Lớp sinh hoạt (VD: D10CQCN)
     [Email] VARCHAR(100) NULL,
     [SoDienThoai] VARCHAR(15) NULL,
-    [MaThietBi] VARCHAR(255) NULL, -- Trusted Device Token (Ban đầu NULL)
+    [PasskeyCredentialId] VARBINARY(MAX) NULL,
+    [PasskeyPublicKey] VARBINARY(MAX) NULL,
+    [PasskeySignCount] BIGINT NULL,
+    [PasskeyUserHandle] VARBINARY(MAX) NULL,
     [AnhDaiDien] NVARCHAR(MAX) NULL
 );
 
@@ -117,4 +120,13 @@ GO
 -- =============================================
 -- Cập nhật cột AnhDaiDien (chạy nếu DB đã tồn tại)
 -- =============================================
--- ALTER TABLE SinhVien ALTER COLUMN AnhDaiDien NVARCHAR(MAX);
+-- ALTER TABLE SinhVien ALTER COLUMN AnhDaiDien NVARCHAR(MAX);
+
+-- =============================================
+-- Cập nhật cột cho Passkeys (WebAuthn)
+-- =============================================
+-- ALTER TABLE SinhVien DROP COLUMN MaThietBi;
+-- ALTER TABLE SinhVien ADD PasskeyCredentialId VARBINARY(MAX) NULL;
+-- ALTER TABLE SinhVien ADD PasskeyPublicKey VARBINARY(MAX) NULL;
+-- ALTER TABLE SinhVien ADD PasskeySignCount BIGINT NULL;
+-- ALTER TABLE SinhVien ADD PasskeyUserHandle VARBINARY(MAX) NULL;

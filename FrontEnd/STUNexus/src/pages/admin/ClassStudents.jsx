@@ -157,7 +157,7 @@ const ClassStudents = () => {
     if (window.confirm(`Bạn có chắc chắn muốn reset thiết bị cho SV ${tenSv} (${maSv})?\n\nViệc này sẽ xóa liên kết thiết bị hiện tại, cho phép sinh viên dùng máy khác đăng nhập để nhận mã mới.`)) {
       try {
         const res = await axiosClient.post(`/auth/reset-device/${maSv}`);
-        alert(res.data.message || 'Đã reset thiết bị thành công!');
+        alert(res.data.message || 'Đã reset Passkey thành công!');
         fetchStudents(); // Refresh danh sách để cập nhật trạng thái
       } catch (err) {
         console.error(err);
@@ -213,7 +213,7 @@ const ClassStudents = () => {
           ) : (
           <div className="table-responsive">
             <table className="table table-custom table-hover w-100 align-middle">
-              <thead><tr><th>Mã Sinh Viên</th><th>Họ Tên</th><th>Tài khoản cổng</th><th>Trạng thái Thiết bị</th><th>SĐT</th><th className="text-end pe-4">Hành động</th></tr></thead>
+              <thead><tr><th>Mã Sinh Viên</th><th>Họ Tên</th><th>Tài khoản cổng</th><th>Xác thực Passkey</th><th>SĐT</th><th className="text-end pe-4">Hành động</th></tr></thead>
               <tbody>
                 {filtered.map(item => (
                   <tr key={item.maSv}>
@@ -230,19 +230,19 @@ const ClassStudents = () => {
                     </td>
                     <td><span className="font-monospace text-muted">{item.taiKhoan}</span></td>
                     <td>
-                      {item.maThietBi ? (
+                      {item.hasPasskey ? (
                         <div>
-                          <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-1">Đã liên kết</span>
+                          <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-1">Hợp lệ</span>
                           <button 
                               onClick={() => handleResetDevice(item.maSv, item.hoTen)}
                               className="btn btn-link p-0 text-decoration-none text-danger small d-block mt-1 d-flex align-items-center gap-1"
                               style={{fontSize: '0.75rem', opacity: 0.8}}
                           >
-                              <FaSync /> Reset thiết bị
+                              <FaSync /> Reset Passkey
                           </button>
                         </div>
                       ) : (
-                        <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-2 py-1">Chưa liên kết</span>
+                        <span className="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-2 py-1">Chưa đăng ký</span>
                       )}
                     </td>
                     <td><span className="text-muted">{item.soDienThoai || 'N/A'}</span></td>

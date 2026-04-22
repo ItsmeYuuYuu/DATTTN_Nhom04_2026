@@ -2,8 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import axiosClient from '../../utils/axiosClient';
 import { AuthContext } from '../../context/AuthContext';
-import { signPayload } from '../../utils/cryptoUtils';
-import { getDeviceFingerprint } from '../../utils/browserUtils';
 import { FaMapMarkerAlt, FaCheckCircle, FaExclamationTriangle, FaShieldAlt, FaQrcode } from 'react-icons/fa';
 
 const StudentCheckin = () => {
@@ -34,40 +32,36 @@ const StudentCheckin = () => {
             setMessage('Đang ký xác thực thiết bị...');
 
             try {
-              // Lấy vân tay phần cứng hiện tại của thiết bị đang quét
-              const fingerprint = await getDeviceFingerprint();
-
-              // Tạo Payload dạng JSON chứa Fingerprint
-              // Thay vì chuỗi |, giờ dùng JSON để bảo toàn định dạng và tính mở rộng
-              const timestamp = Date.now();
-              const payloadObj = {
-                  MaSv: maSv,
-                  MaBuoiHoc: parseInt(classId),
-                  Lat: parseFloat(latitude.toFixed(6)),
-                  Long: parseFloat(longitude.toFixed(6)),
-                  Timestamp: timestamp,
-                  Fingerprint: fingerprint
-              };
-              const rawPayload = JSON.stringify(payloadObj);
-
-              // Ký payload bằng Private Key (khóa cứng trong thiết bị, không thể copy)
-              const signature = await signPayload(maSv, rawPayload);
-
-              setMessage('Đang gửi lên máy chủ...');
-
-              // Gửi cả payload gốc + chữ ký lên Backend
-              const res = await axiosClient.post('/diemdanh/submit', {
-                maBuoiHoc: parseInt(classId),
-                maSv: maSv,
-                lat: latitude,
-                long: longitude,
-                rawPayload: rawPayload,
-                signature: signature
+              // GIAI ĐOẠN 1: Gửi GPS + QR Token lên BE để đối chiếu và lấy Options
+              setMessage('Đối chiếu thông tin và yêu cầu xác thực...');
+              
+              const optionsRes = await axiosClient.post('/webauthn/assertion-options', {
+                 maSv: maSv,
+                 maBuoiHoc: parseInt(classId),
+                 lat: parseFloat(latitude.toFixed(6)),
+                 long: parseFloat(longitude.toFixed(6)),
+                 qrToken: token
               });
+
+              // GIAI ĐOẠN 2: Hiển thị FaceID/Vân tay của trình duyệt
+              setMessage('Vui lòng xác thực sinh trắc học...');
+              const { startAuthentication } = await import('@simplewebauthn/browser');
+              
+              let assertionResp;
+              try {
+                  assertionResp = await startAuthentication(optionsRes.data);
+              } catch (authErr) {
+                  throw new Error('Bạn đã hủy hoặc xác thực Sinh trắc học thất bại!');
+              }
+
+              setMessage('Đang hoàn tất điểm danh...');
+
+              // GIAI ĐOẠN 3: Gửi kết quả chữ ký lên xác minh
+              const verifyRes = await axiosClient.post(`/webauthn/assertion-verify?maSv=${maSv}`, assertionResp);
 
               setStatus('success');
               setMessage('Điểm danh thành công!');
-              if (res.data.distance !== undefined) setDistance(res.data.distance);
+              if (verifyRes.data.distance !== undefined) setDistance(verifyRes.data.distance);
             } catch (err) {
               setStatus('error');
               setMessage(err.response?.data?.message || err.message || 'Điểm danh thất bại!');
