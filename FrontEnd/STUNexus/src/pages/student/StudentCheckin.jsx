@@ -8,7 +8,7 @@ const StudentCheckin = () => {
   const { classId } = useParams(); // classId is MaBuoiHoc
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
-  const { user } = useContext(AuthContext);
+  const { user, registerPasskey } = useContext(AuthContext);
   
   const [status, setStatus] = useState('checking');
   const [message, setMessage] = useState('Đang chuẩn bị xác thực thiết bị...');
@@ -163,9 +163,21 @@ const StudentCheckin = () => {
               </div>
             )}
             
-            <button className="btn btn-primary mt-4 py-2 w-100 shadow-sm fw-bold rounded-pill" onClick={() => window.location.reload()}>
-              Thử Lại Trực Tiếp Tại Lớp
-            </button>
+            {message === "Thiết bị chưa được đăng ký Passkey." ? (
+              <button 
+                className="btn btn-success mt-4 py-2 w-100 shadow-sm fw-bold rounded-pill d-flex align-items-center justify-content-center gap-2" 
+                onClick={async () => {
+                  const success = await registerPasskey(user?.MaSV || user?.MaId);
+                  if (success) window.location.reload();
+                }}
+              >
+                <FaShieldAlt /> Thiết lập Passkey ngay
+              </button>
+            ) : (
+              <button className="btn btn-primary mt-4 py-2 w-100 shadow-sm fw-bold rounded-pill" onClick={() => window.location.reload()}>
+                Thử Lại Trực Tiếp Tại Lớp
+              </button>
+            )}
           </div>
         )}
       </div>

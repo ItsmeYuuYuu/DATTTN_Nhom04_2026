@@ -99,30 +99,7 @@ export const AuthProvider = ({ children }) => {
           }
           // Đăng ký Passkey cho sinh viên nếu chưa có
           if (userData.role === 'student' && userData.MaSV && !response.data.data.hasPasskey) {
-            try {
-              const { startRegistration } = await import('@simplewebauthn/browser');
-              
-              // 1. Xin server tạo Options đăng ký
-              const optRes = await axiosClient.get(`/webauthn/register-options?maSv=${userData.MaSV}`);
-              
-              // 2. Kích hoạt Popup của OS để quét Sinh trắc học
-              const attResp = await startRegistration(optRes.data);
-              
-              // 3. Gửi key về server verify và lưu lại
-              await axiosClient.post(`/webauthn/register-verify?maSv=${userData.MaSV}`, attResp);
-              
-              // Cập nhật session
-              const merged = { ...userData, ...extraData, hasPasskey: true };
-              setUser(merged);
-              localStorage.setItem('stu_user', JSON.stringify(merged));
-              
-              setTimeout(() => {
-                alert("🔐 Thiết lập Khóa truy cập Sinh trắc học (Passkeys) thành công!");
-              }, 1000);
-            } catch (err) {
-               console.warn('[WebAuthn] Đăng ký Passkey thất bại hoặc bị hủy:', err.message);
-               // Ghi chú: Nếu người dùng hủy popup, lần ĐĂNG NHẬP SAU hệ thống sẽ hỏi lại.
-            }
+            registerPasskey(userData.MaSV);
           }
           return { success: true, role: userData.role };
         }
@@ -167,6 +144,31 @@ export const AuthProvider = ({ children }) => {
     };
   }, [user, resetInactivityTimer]);
 
+  // Hàm đăng ký Passkey (Dùng chung cho Login, Profile, Checkin)
+  const registerPasskey = async (maSv) => {
+    try {
+      const { startRegistration } = await import('@simplewebauthn/browser');
+      
+      // 1. Xin server tạo Options đăng ký
+      const optRes = await axiosClient.get(`/webauthn/register-options?maSv=${maSv}`);
+      
+      // 2. Kích hoạt Popup của OS để quét Sinh trắc học
+      const attResp = await startRegistration(optRes.data);
+      
+      // 3. Gửi key về server verify và lưu lại
+      await axiosClient.post(`/webauthn/register-verify?maSv=${maSv}`, attResp);
+      
+      // Cập nhật session
+      updateUserSession({ hasPasskey: true });
+      
+      alert("🔐 Thiết lập Khóa truy cập Sinh trắc học (Passkeys) thành công!");
+      return true;
+    } catch (err) {
+      console.warn('[WebAuthn] Đăng ký Passkey thất bại hoặc bị hủy:', err.message);
+      return false;
+    }
+  };
+
   const updateUserSession = (newUserData) => {
     const updated = { ...user, ...newUserData };
     setUser(updated);
@@ -174,7 +176,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateUserSession, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, registerPasskey, updateUserSession, loading }}>
       {children}
     </AuthContext.Provider>
   );

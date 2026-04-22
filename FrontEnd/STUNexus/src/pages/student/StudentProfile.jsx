@@ -6,7 +6,7 @@ import { FaCamera, FaSave, FaKey, FaShieldAlt } from 'react-icons/fa';
 // Kết nối trực tiếp tới Backend API
 
 const StudentProfile = () => {
-  const { user, updateUserSession } = useContext(AuthContext);
+  const { user, updateUserSession, registerPasskey } = useContext(AuthContext);
   const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
@@ -218,6 +218,39 @@ const StudentProfile = () => {
             <FaKey /> Đổi Mật Khẩu
           </button>
         </form>
+      </div>
+      
+      {/* Box 4: Quản lý Passkey (Sinh trắc học) */}
+      <div className="card border-0 shadow-sm rounded-4 mb-4 bg-white p-4">
+        <div className="d-flex align-items-center gap-2 mb-3">
+          <FaShieldAlt className="text-success fs-5"/>
+          <h6 className="fw-bold text-dark mb-0">Xác thực Sinh trắc học (Passkeys)</h6>
+        </div>
+        <div className="alert alert-light border-0 small mb-4 py-3">
+          Sử dụng vân tay, khuôn mặt (FaceID/TouchID) hoặc mã PIN thiết bị để điểm danh an toàn và chống gian lận.
+        </div>
+        
+        <div className="d-flex justify-content-between align-items-center mb-4 p-3 bg-light rounded-4">
+            <div className="d-flex flex-column">
+                <span className="small text-muted">Trạng thái xác thực</span>
+                <span className={`fw-bold ${user.hasPasskey ? 'text-success' : 'text-danger'}`}>
+                    {user.hasPasskey ? '● Đã kích hoạt' : '○ Chưa thiết lập'}
+                </span>
+            </div>
+            {user.hasPasskey && (
+                <div className="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill border border-success border-opacity-25">
+                    Hợp lệ
+                </div>
+            )}
+        </div>
+
+        <button 
+            type="button" 
+            className={`btn ${user.hasPasskey ? 'btn-outline-primary' : 'btn-primary'} w-100 fw-bold rounded-pill py-2 shadow-sm d-flex align-items-center justify-content-center gap-2`}
+            onClick={() => registerPasskey(user.MaSV)}
+        >
+            <FaShieldAlt /> {user.hasPasskey ? 'Cập nhật / Đăng ký lại Passkey' : 'Thiết lập Passkey ngay'}
+        </button>
       </div>
     </div>
   );
