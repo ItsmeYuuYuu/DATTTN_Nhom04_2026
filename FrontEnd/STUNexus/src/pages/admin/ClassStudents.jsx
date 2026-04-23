@@ -154,10 +154,10 @@ const ClassStudents = () => {
   );
 
   const handleResetDevice = async (maSv, tenSv) => {
-    if (window.confirm(`Bạn có chắc chắn muốn reset thiết bị cho SV ${tenSv} (${maSv})?\n\nViệc này sẽ xóa liên kết thiết bị hiện tại, cho phép sinh viên dùng máy khác đăng nhập để nhận mã mới.`)) {
+    if (window.confirm(`Bạn có chắc chắn muốn reset thiết bị cho SV ${tenSv} (${maSv})?\n\nViệc này sẽ xóa liên kết thiết bị hiện tại, cho phép sinh viên đăng ký lại Passkey ở máy mới.`)) {
       try {
-        const res = await axiosClient.post(`/auth/reset-device/${maSv}`);
-        alert(res.data.message || 'Đã reset Passkey thành công!');
+        const res = await axiosClient.post(`/giangvien/${maSv}/reset-device`);
+        alert(res.data.message || 'Đã reset Passkey & thiết bị thành công!');
         fetchStudents(); // Refresh danh sách để cập nhật trạng thái
       } catch (err) {
         console.error(err);

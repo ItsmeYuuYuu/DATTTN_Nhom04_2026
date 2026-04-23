@@ -37,6 +37,7 @@ CREATE TABLE [dbo].[SinhVien] (
     [PasskeyPublicKey] VARBINARY(MAX) NULL,
     [PasskeySignCount] BIGINT NULL,
     [PasskeyUserHandle] VARBINARY(MAX) NULL,
+    [DeviceUUID] NVARCHAR(100) NULL,
     [AnhDaiDien] NVARCHAR(MAX) NULL
 );
 
@@ -129,4 +130,4 @@ GO
 -- ALTER TABLE SinhVien ADD PasskeyCredentialId VARBINARY(MAX) NULL;
 -- ALTER TABLE SinhVien ADD PasskeyPublicKey VARBINARY(MAX) NULL;
 -- ALTER TABLE SinhVien ADD PasskeySignCount BIGINT NULL;
--- ALTER TABLE SinhVien ADD PasskeyUserHandle VARBINARY(MAX) NULL;
+-- ALTER TABLE SinhVien ADD PasskeyUserHandle VARBINARY(MAX) NULL;

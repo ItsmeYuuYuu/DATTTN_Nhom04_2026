@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fingerprintjs/fingerprintjs": "^5.2.0",
     "@simplewebauthn/browser": "^13.3.0",
     "axios": "^1.14.0",
     "bootstrap": "^5.3.8",

@@ -99,25 +99,26 @@ export const AuthProvider = ({ children }) => {
         // Cất Token vào két sắt localStorage
         localStorage.setItem('token', token);
 
-        // Giải mã Token và set User session
-        const userData = decodeAndSetUser(token, role);
-
-        if (userData) {
-          // Cập nhật thêm dữ liệu bổ sung từ response (không có trong JWT như AnhDaiDien)
-          // FIX: Luôn lưu hasPasskey vào session để tránh mất sau khi logout/login lại
-          const extraData = { hasPasskey: !!response.data.data.hasPasskey };
-          if (response.data.data.anhDaiDien) extraData.AnhDaiDien = response.data.data.anhDaiDien;
-          const merged = { ...userData, ...extraData };
-          setUser(merged);
-          localStorage.setItem('stu_user', JSON.stringify(merged));
-
-          // Đăng ký Passkey cho sinh viên nếu chưa có
-          if (userData.role === 'student' && userData.MaSV && !response.data.data.hasPasskey) {
-            // Chờ người dùng thực hiện xong (hoặc hủy) rồi mới cho đi tiếp
-            await registerPasskey(userData.MaSV);
+          // Giải mã Token và set User session
+          const userData = decodeAndSetUser(token, role);
+  
+          if (userData) {
+            // Cập nhật thêm dữ liệu bổ sung từ response (như AnhDaiDien, hasPasskey)
+            const extraData = { 
+              hasPasskey: !!response.data.data.hasPasskey,
+              AnhDaiDien: response.data.data.anhDaiDien
+            };
+            
+            const merged = { ...userData, ...extraData };
+            setUser(merged);
+            localStorage.setItem('stu_user', JSON.stringify(merged));
+  
+            // Đăng ký Passkey cho sinh viên nếu chưa có
+            if (userData.role === 'student' && userData.MaSV && !response.data.data.hasPasskey) {
+              await registerPasskey(userData.MaSV);
+            }
+            return { success: true, role: userData.role };
           }
-          return { success: true, role: userData.role };
-        }
       }
       return { success: false, message: response.data?.message || 'Đăng nhập thất bại' };
     } catch (err) {
