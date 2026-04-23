@@ -70,6 +70,20 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  // Helper: Tạo hoặc lấy DeviceUUID vĩnh viễn từ localStorage (không bị xóa khi logout)
+  const getOrCreateDeviceUUID = () => {
+    let uuid = localStorage.getItem('device_uuid');
+    if (!uuid) {
+      uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+      localStorage.setItem('device_uuid', uuid);
+    }
+    return uuid;
+  };
+
   // Hàm Login: Gọi API thật từ Backend C#
   const login = async (username, password) => {
     try {
@@ -90,13 +104,13 @@ export const AuthProvider = ({ children }) => {
 
         if (userData) {
           // Cập nhật thêm dữ liệu bổ sung từ response (không có trong JWT như AnhDaiDien)
-          const extraData = {};
+          // FIX: Luôn lưu hasPasskey vào session để tránh mất sau khi logout/login lại
+          const extraData = { hasPasskey: !!response.data.data.hasPasskey };
           if (response.data.data.anhDaiDien) extraData.AnhDaiDien = response.data.data.anhDaiDien;
-          if (Object.keys(extraData).length > 0) {
-            const merged = { ...userData, ...extraData };
-            setUser(merged);
-            localStorage.setItem('stu_user', JSON.stringify(merged));
-          }
+          const merged = { ...userData, ...extraData };
+          setUser(merged);
+          localStorage.setItem('stu_user', JSON.stringify(merged));
+
           // Đăng ký Passkey cho sinh viên nếu chưa có
           if (userData.role === 'student' && userData.MaSV && !response.data.data.hasPasskey) {
             registerPasskey(userData.MaSV);
@@ -149,8 +163,11 @@ export const AuthProvider = ({ children }) => {
     try {
       const { startRegistration } = await import('@simplewebauthn/browser');
       
-      // 1. Xin server tạo Options đăng ký
-      const optRes = await axiosClient.get(`/webauthn/register-options?maSv=${maSv}`);
+      // Lấy DeviceUUID vĩnh viễn của trình duyệt này
+      const deviceUuid = getOrCreateDeviceUUID();
+
+      // 1. Xin server tạo Options đăng ký (Gửi kèm DeviceUUID để BE kiểm tra)
+      const optRes = await axiosClient.get(`/webauthn/register-options?maSv=${maSv}&deviceUuid=${deviceUuid}`);
       
       // 2. Kích hoạt Popup của OS để quét Sinh trắc học
       const attResp = await startRegistration(optRes.data);
@@ -165,8 +182,10 @@ export const AuthProvider = ({ children }) => {
       return true;
     } catch (err) {
       console.warn('[WebAuthn] Đăng ký Passkey thất bại hoặc bị hủy:', err.message);
-      alert("❌ Lỗi thiết lập Passkey: " + (err.response?.data?.message || err.message) + 
-            "\n\n💡 Mẹo: Bạn chỉ cần dùng vân tay/PIN của máy để xác nhận. Việc này hoàn toàn an toàn và KHÔNG ảnh hưởng đến cài đặt tài khoản Google/Email của bạn.");
+      const errMsg = err.response?.data?.message || err.message;
+      // Nếu backend chặn do đã đăng ký hoặc máy bị xí, hiển thị thông báo rõ ràng
+      alert("❌ " + errMsg + 
+            "\n\n💡 Mẹo: Bạn chỉ cần dùng vân tay/PIN của máy để xác nhận. Việc này hoàn toàn an toàn và KHÔNG ảnh hưởng đến tài khoản Google/Email.");
       return false;
     }
   };

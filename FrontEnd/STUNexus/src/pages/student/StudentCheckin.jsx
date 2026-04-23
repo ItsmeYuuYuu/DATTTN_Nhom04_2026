@@ -15,6 +15,24 @@ const StudentCheckin = () => {
   const [gps, setGps] = useState(null);
   const [distance, setDistance] = useState(null);
   const [errorFlags, setErrorFlags] = useState({ isGpsFraud: false, isDeviceFraud: false });
+  const [browserWarning, setBrowserWarning] = useState(null);
+
+  // Kiểm tra trình duyệt khi tải trang
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua);
+    const isAndroid = /Android/.test(ua);
+    
+    if (!isIOS && isAndroid) {
+      // Chỉ cảnh báo trên Android - các trình duyệt không tương thích
+      const isCocCoc = ua.includes('coccoc') || ua.includes('CocCoc');
+      const isInAppZaloFB = ua.includes('FBAN') || ua.includes('FBAV') || ua.includes('ZaloApp') || ua.includes('Instagram');
+      
+      if (isCocCoc || isInAppZaloFB) {
+        setBrowserWarning('Trình duyệt này có thể không hỗ trợ Passkey trên Android. Nếu gặp lỗi, vui lòng nhấn "⋮" góc trên phải → "Mở bằng Chrome" để thiết lập Passkey.');
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const performCheckin = async () => {
@@ -102,6 +120,14 @@ const StudentCheckin = () => {
           <h4 className="fw-bold text-dark mb-1">Check-in Lớp {classId}</h4>
           <p className="text-muted small">Token xác minh: <span className="text-primary font-monospace">{token?.substring(0,8)}</span></p>
         </div>
+
+        {/* Cảnh báo trình duyệt không tương thích (chỉ hiện trên Android + Cốc Cốc / Zalo) */}
+        {browserWarning && (
+          <div className="alert alert-warning border-0 rounded-3 small py-2 px-3 mb-3 d-flex align-items-start gap-2">
+            <span>⚠️</span>
+            <span>{browserWarning}</span>
+          </div>
+        )}
 
         {status === 'checking' && (
           <div className="text-center py-5">
