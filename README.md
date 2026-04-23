@@ -1,45 +1,170 @@
-# 🎓 Hệ thống Quản lý Điểm danh Sinh viên chống gian lận (DATTTN - Nhóm 04 - 2026)
+# 🎓 STUNexus — Hệ thống Điểm danh Sinh viên Chống gian lận
+### ĐATN Nhóm 04 — 2026
 
-[![.NET](https://img.shields.io/badge/.NET-8.0%20%7C%209.0-512BD4?logo=dotnet&logoColor=white)](#)
+[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet&logoColor=white)](#)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](#)
 [![SQL Server](https://img.shields.io/badge/SQL_Server-CC2927?logo=microsoft-sql-server&logoColor=white)](#)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)](#)
-[![Swagger](https://img.shields.io/badge/Swagger-85EA2D?logo=swagger&logoColor=black)](#)
+[![WebAuthn](https://img.shields.io/badge/WebAuthn-FIDO2-blue?logo=webauthn&logoColor=white)](#)
+[![Vercel](https://img.shields.io/badge/Deployed-Vercel-black?logo=vercel&logoColor=white)](#)
 
-Một giải pháp toàn diện giúp tự động hóa và minh bạch hóa quy trình điểm danh tại giảng đường. Hệ thống sử dụng công nghệ quét mã QR động kết hợp với định vị GPS và nhận diện thiết bị (Device ID) để ngăn chặn tuyệt đối các hành vi gian lận (điểm danh hộ, điểm danh từ xa).
+Giải pháp tự động hóa và minh bạch hóa quy trình điểm danh tại giảng đường. Hệ thống kết hợp **mã QR động (TOTP 30s)** + **GPS bán kính 60m** + **Passkey sinh trắc học (FIDO2/WebAuthn)** để ngăn chặn tuyệt đối các hành vi gian lận như điểm danh hộ, điểm danh từ xa, hay mượn thiết bị.
 
 ---
 
 ## 🌟 Tính năng nổi bật
 
 ### 👨‍🏫 Dành cho Giảng viên
-* **Quản lý Lịch học Tự động (Auto-Scheduling):** Thiết lập tham số (ngày bắt đầu, số buổi) để hệ thống tự động sinh ra toàn bộ lịch học của học kỳ.
-* **Mở phiên Điểm danh (Dynamic QR):** Trình chiếu mã QR động lên màn hình lớp học (tự động làm mới mỗi 30 giây).
-* **Theo dõi Real-time:** Nhận thông báo và cập nhật trạng thái điểm danh của sinh viên ngay lập tức thông qua WebSockets (SignalR) mà không cần tải lại trang.
-* **Xử lý Ngoại lệ:** Dễ dàng báo nghỉ, xếp lịch học bù, hoặc can thiệp điểm danh thủ công cho các trường hợp đặc biệt.
-* **Import Dữ liệu:** Hỗ trợ nhập danh sách sinh viên hàng loạt bằng file Excel.
-* **Thống kê & Báo cáo:** Xem biểu đồ chuyên cần trực quan của từng lớp.
+- **Lịch học Tự động (Auto-Scheduling):** Thiết lập tham số đầu kỳ (ngày bắt đầu, số buổi, thứ trong tuần), hệ thống tự sinh toàn bộ lịch học kỳ.
+- **Phiên Điểm danh (Dynamic QR):** Trình chiếu mã QR **tự động làm mới mỗi 30 giây** lên màn hình lớp học.
+- **Theo dõi Real-time:** Cập nhật trạng thái điểm danh sinh viên ngay lập tức không cần tải lại trang (WebSocket / SignalR).
+- **Xử lý Ngoại lệ:** Báo nghỉ, xếp lịch học bù, can thiệp điểm danh thủ công.
+- **Import Hàng loạt:** Nhập danh sách sinh viên bằng file Excel (`.xlsx`).
+- **Thống kê & Báo cáo:** Biểu đồ chuyên cần trực quan theo từng lớp, từng buổi.
+- **Reset Thiết bị:** Giải phóng khóa thiết bị cho sinh viên đổi điện thoại.
 
 ### 👨‍🎓 Dành cho Sinh viên
-* **Điểm danh Nhanh chóng:** Quét mã QR trên màn hình của giảng viên thông qua ứng dụng di động.
-* **Tra cứu Lịch sử:** Xem lại chi tiết lịch trình và trạng thái đi học của bản thân qua từng tuần.
-* **Khiếu nại Trực tuyến:** Gửi yêu cầu phản hồi trực tiếp đến giảng viên nếu phát hiện sai sót dữ liệu.
+- **Điểm danh bằng QR:** Quét mã QR trên màn hình giảng viên bằng điện thoại.
+- **Xác thực Sinh trắc học (Passkey):** Dùng **vân tay / FaceID / Windows Hello** để xác nhận danh tính trong quá trình điểm danh — không cần nhập mật khẩu.
+- **Tra cứu Lịch sử:** Xem chi tiết trạng thái đi học từng buổi học.
+- **Khiếu nại Trực tuyến:** Gửi phản hồi đến giảng viên nếu phát hiện sai sót.
 
-### 🛡️ Cơ chế Chống gian lận (Anti-Cheat 3 Lớp)
-1. **Lớp 1 - Mã QR Động:** QR Code chứa mã thông báo (Token) có thời gian sống ngắn, vô hiệu hóa việc sinh viên chụp ảnh gửi cho bạn bè.
-2. **Lớp 2 - Xác thực Tọa độ (GPS):** So sánh khoảng cách (Haversine formula) giữa thiết bị của sinh viên và tọa độ phòng học.
-3. **Lớp 3 - Định danh Thiết bị (Device ID):** Khóa tài khoản sinh viên với một thiết bị di động duy nhất (Trusted Device), ngăn chặn việc dùng một điện thoại quét cho nhiều người.
+### 🖥️ Dành cho Quản trị viên
+- **Dashboard Thông minh:** Bộ lọc nhanh hoạt động điểm danh **"Nghi vấn gian lận"** nổi bật màu đỏ tức thì.
+- **Quản lý toàn hệ thống:** Sinh viên, Giảng viên, Môn học, Lớp học.
+- **Giám sát Bảo mật:** Xem log điểm danh, xử lý các ca nghi vấn.
+
+---
+
+## 🛡️ Cơ chế Chống gian lận 3 Lớp
+
+| Lớp | Tên | Mô tả |
+|-----|-----|--------|
+| **1** | 🔲 **QR Động (TOTP)** | Token thay đổi mỗi 30 giây — vô hiệu hóa việc chụp ảnh QR gửi bạn bè. |
+| **2** | 📍 **GPS Bán kính 60m** | Tính khoảng cách Haversine giữa thiết bị sinh viên và tọa độ phòng học — chặn điểm danh từ xa. |
+| **3** | 🔐 **Passkey (FIDO2/WebAuthn)** | Khóa cứng 1 tài khoản — 1 thiết bị vật lý duy nhất bằng chip bảo mật phần cứng. Không thể sao chép hay giả mạo. |
+
+### Cơ chế khóa thiết bị chi tiết (Lớp 3)
+- Khi sinh viên đăng ký Passkey lần đầu, hệ thống ghi nhận **DeviceUUID** của trình duyệt và lưu cả **Credential FIDO2** vào chip bảo mật của thiết bị.
+- **Chốt chặn 1 — Chống ghi đè tài khoản:** Nếu tài khoản đã có Passkey, mọi yêu cầu đăng ký mới bị từ chối. Sinh viên phải yêu cầu Giảng viên "Reset" nếu đổi máy.
+- **Chốt chặn 2 — Chống mượn máy:** Nếu một DeviceUUID đã được gắn với tài khoản khác, hệ thống chặn ngay, không cho đăng ký thêm.
+- **Xác thực phần cứng:** Khi điểm danh, trình duyệt yêu cầu chip TPM/Secure Enclave **ký số** bản xác nhận. Không thể làm giả chữ ký này dù đã biết DeviceUUID.
 
 ---
 
 ## 🛠️ Công nghệ sử dụng
 
-* **Backend:** C# / ASP.NET Core Web API (.NET 8.0)
-* **Database:** Microsoft SQL Server (Entity Framework Core)
-* **Real-time Communication:** SignalR
-* **Authentication:** JSON Web Tokens (JWT)
-* **Deployment:** Vercel / Render / IIS (SmarterASP)
-* **Frontend/Mobile:** ReactJS / React Native
+### Backend
+| Công nghệ | Mục đích |
+|-----------|----------|
+| **C# / ASP.NET Core Web API (.NET 8)** | Framework chính xây dựng REST API |
+| **Entity Framework Core** | ORM — tương tác với SQL Server |
+| **Microsoft SQL Server** | Cơ sở dữ liệu quan hệ |
+| **JWT (JSON Web Token)** | Xác thực & phân quyền (Admin / Lecturer / Student) |
+| **Fido2NetLib** | Thư viện xử lý WebAuthn/FIDO2 phía Server |
+| **SignalR** | Real-time WebSocket cho cập nhật điểm danh trực tiếp |
+| **Cloudinary** | Lưu trữ ảnh đại diện sinh viên |
+
+### Frontend
+| Công nghệ | Mục đích |
+|-----------|----------|
+| **React 19 + Vite 8** | Framework UI và build tool |
+| **@simplewebauthn/browser** | Thư viện WebAuthn phía Client (đăng ký & xác thực Passkey) |
+| **React Router v7** | Điều hướng & phân quyền theo role |
+| **Axios** | HTTP Client gọi Backend API |
+| **Bootstrap 5** | CSS framework giao diện |
+| **html5-qrcode** | Quét mã QR bằng camera điện thoại |
+| **qrcode.react** | Sinh mã QR hiển thị cho giảng viên |
+| **xlsx** | Đọc & xuất file Excel |
+| **react-icons** | Bộ icon giao diện |
+
+### Triển khai
+| Môi trường | Dịch vụ |
+|------------|---------|
+| **Frontend** | Vercel (CDN toàn cầu) |
+| **Backend API** | SmarterASP / Render / IIS |
+| **Database** | SQL Server trên Cloud |
 
 ---
 
+## 📂 Cấu trúc dự án
 
+```
+DATTTN_NHOM04_2026/
+├── BackEnd/
+│   └── DiemDanhLopHoc/
+│       ├── Controllers/
+│       │   ├── AuthController.cs       # Đăng nhập, đổi mật khẩu
+│       │   ├── WebAuthnController.cs   # Đăng ký & xác thực Passkey (FIDO2)
+│       │   ├── GiangVienController.cs  # Quản lý GV + Reset thiết bị SV
+│       │   ├── SinhVienController.cs   # Quản lý Sinh viên
+│       │   ├── LopHocController.cs     # Quản lý Lớp học & Buổi học
+│       │   ├── DiemDanhController.cs   # Logic điểm danh (QR + GPS + Passkey)
+│       │   └── AdminController.cs      # Dashboard & thống kê Admin
+│       ├── Models/                     # Entity models (SinhVien, BuoiHoc, DiemDanh...)
+│       ├── DTOs/                       # Data Transfer Objects
+│       ├── Data/
+│       │   └── AppDbContext.cs         # EF Core DbContext
+│       └── Utils/
+│           └── TimeUtils.cs            # Tiện ích múi giờ Việt Nam (UTC+7)
+│
+└── FrontEnd/
+    └── STUNexus/
+        └── src/
+            ├── context/
+            │   └── AuthContext.jsx     # Session JWT + Passkey registration
+            ├── layouts/
+            │   ├── AdminLayout.jsx
+            │   ├── LecturerLayout.jsx
+            │   └── StudentLayout.jsx
+            ├── components/
+            │   ├── Header.jsx
+            │   ├── Sidebar.jsx          # Admin sidebar
+            │   ├── LecturerSidebar.jsx
+            │   └── StudentSidebar.jsx
+            └── pages/
+                ├── admin/
+                ├── lecturer/
+                └── student/
+                    ├── StudentDashboard.jsx
+                    ├── StudentCheckin.jsx   # Trang xác thực QR + GPS + Passkey
+                    └── StudentProfile.jsx   # Quản lý Passkey cá nhân
+```
+
+---
+
+## 🚀 Hướng dẫn chạy dự án
+
+### Yêu cầu
+- .NET 8 SDK
+- Node.js 18+
+- SQL Server (LocalDB hoặc Express)
+
+### Backend
+```bash
+cd BackEnd/DiemDanhLopHoc
+# Cập nhật chuỗi kết nối trong appsettings.json
+dotnet run
+# API chạy tại: https://localhost:7xxx
+```
+
+### Cập nhật Database (lần đầu hoặc sau khi thêm cột mới)
+```sql
+-- Chạy trong SQL Server Management Studio (SSMS)
+ALTER TABLE [dbo].[SinhVien] ADD [DeviceUUID] NVARCHAR(100) NULL;
+```
+
+### Frontend
+```bash
+cd FrontEnd/STUNexus
+npm install
+npm run dev
+# Ứng dụng chạy tại: http://localhost:5173
+```
+
+> ⚠️ **Lưu ý:** WebAuthn (Passkey) **bắt buộc phải chạy trên HTTPS** hoặc `localhost`. Trên Android, sinh viên cần dùng trình duyệt **Chrome** hoặc **Safari** (iOS) — các trình duyệt bên thứ ba như Cốc Cốc, Zalo In-app có thể không hỗ trợ.
+
+---
+
+## 👥 Nhóm thực hiện
+
+**Nhóm 04 — Đồ án Tốt nghiệp 2026**
