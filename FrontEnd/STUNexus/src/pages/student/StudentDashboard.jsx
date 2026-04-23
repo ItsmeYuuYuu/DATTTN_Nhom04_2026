@@ -14,12 +14,12 @@ const StudentDashboard = () => {
     const fetchAttendance = async () => {
       try {
         const res = await axiosClient.get(`/diemdanh/student/${user.MaSV}`);
-        const history = res.data || [];
+        const history = Array.isArray(res.data) ? res.data : [];
         
         const total = history.length;
-        const presentOrLate = history.filter(a => a.trangThai === 1 || a.trangThai === 2).length;
-        const absent = history.filter(a => a.trangThai === 3 || a.trangThai === 4).length;
-        const issues = history.filter(a => a.trangThai === 5).length;
+        const presentOrLate = history.filter(a => a?.trangThai === 1 || a?.trangThai === 2).length;
+        const absent = history.filter(a => a?.trangThai === 3 || a?.trangThai === 4).length;
+        const issues = history.filter(a => a?.trangThai === 5).length;
         
         setStats({ total, presentOrLate, absent, issues });
         setRecent(history.slice(0, 5));

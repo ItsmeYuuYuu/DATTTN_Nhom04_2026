@@ -113,7 +113,8 @@ export const AuthProvider = ({ children }) => {
 
           // Đăng ký Passkey cho sinh viên nếu chưa có
           if (userData.role === 'student' && userData.MaSV && !response.data.data.hasPasskey) {
-            registerPasskey(userData.MaSV);
+            // Chờ người dùng thực hiện xong (hoặc hủy) rồi mới cho đi tiếp
+            await registerPasskey(userData.MaSV);
           }
           return { success: true, role: userData.role };
         }
