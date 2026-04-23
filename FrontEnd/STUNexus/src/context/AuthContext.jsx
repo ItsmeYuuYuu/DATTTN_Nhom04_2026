@@ -192,9 +192,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUserSession = (newUserData) => {
-    const updated = { ...user, ...newUserData };
-    setUser(updated);
-    localStorage.setItem('stu_user', JSON.stringify(updated));
+    setUser(prevUser => {
+      // Ưu tiên lấy dữ liệu từ state cũ (prevUser), nếu không có thì lấy từ localStorage
+      const baseData = prevUser || JSON.parse(localStorage.getItem('stu_user') || '{}');
+      const updated = { ...baseData, ...newUserData };
+      
+      // Lưu vào localStorage để đồng bộ
+      localStorage.setItem('stu_user', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   return (
