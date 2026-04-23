@@ -5,6 +5,7 @@ import { FaUsers, FaChalkboardTeacher, FaLayerGroup, FaBook } from 'react-icons/
 const Dashboard = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState('all'); // all, fraud, success
 
   const fetchStats = async () => {
     try {
@@ -37,6 +38,21 @@ const Dashboard = () => {
     return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
   };
 
+  const getFilteredActivities = () => {
+    if (!data?.recentActivities) return [];
+    let list = [...data.recentActivities];
+    
+    if (activeFilter === 'fraud') {
+      list = list.filter(a => a.status === 5);
+    } else if (activeFilter === 'success') {
+      list = list.filter(a => a.status === 1 || a.status === 2);
+    }
+    
+    return list.slice(0, 15); // Chỉ hiện 15 hoạt động mới nhất
+  };
+
+  const filteredActs = getFilteredActivities();
+
   if (loading) return (
     <div className="text-center py-5">
       <div className="spinner-border text-primary" role="status"></div>
@@ -46,7 +62,7 @@ const Dashboard = () => {
 
   return (
     <div className="container-fluid">
-      <h3 className="mb-4 mt-2 fw-bold text-dark">Tổng Quan Hệ Thống</h3>
+      <h3 className="mb-4 mt-2 fw-bold text-dark text-center text-md-start">Tổng Quan Hệ Thống</h3>
       
       {/* 5 Stats Cards */}
       <div className="row g-4 mb-4">
@@ -140,9 +156,29 @@ const Dashboard = () => {
       <div className="row">
         <div className="col-12">
           <div className="card glass-panel border-0 shadow-sm" style={{borderRadius: '16px'}}>
-            <div className="card-header bg-transparent border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+            <div className="card-header bg-transparent border-bottom py-3 px-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
               <h6 className="m-0 fw-bold text-dark">Hoạt Động Gần Đây</h6>
-              <span className="badge bg-light text-dark fw-normal">Dữ liệu thời gian thực</span>
+              
+              <div className="d-flex bg-light p-1 rounded-3" style={{width: 'fit-content'}}>
+                <button 
+                  className={`btn btn-sm px-3 border-0 rounded-2 ${activeFilter === 'all' ? 'bg-white shadow-sm fw-bold text-primary' : 'text-muted'}`}
+                  onClick={() => setActiveFilter('all')}
+                >
+                  Tất cả
+                </button>
+                <button 
+                  className={`btn btn-sm px-3 border-0 rounded-2 ${activeFilter === 'fraud' ? 'bg-white shadow-sm fw-bold text-danger' : 'text-muted'}`}
+                  onClick={() => setActiveFilter('fraud')}
+                >
+                  Nghi vấn ({data?.recentActivities?.filter(a => a.status === 5).length || 0})
+                </button>
+                <button 
+                  className={`btn btn-sm px-3 border-0 rounded-2 ${activeFilter === 'success' ? 'bg-white shadow-sm fw-bold text-success' : 'text-muted'}`}
+                  onClick={() => setActiveFilter('success')}
+                >
+                  Thành công
+                </button>
+              </div>
             </div>
             <div className="card-body p-0">
               <div className="table-responsive border-0">
@@ -156,15 +192,15 @@ const Dashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {data?.recentActivities?.map((act, index) => (
-                      <tr key={index}>
+                    {filteredActs.map((act, index) => (
+                      <tr key={index} className={act.status === 5 ? 'table-danger table-opacity-5' : ''}>
                         <td data-label="Sinh Viên" className="px-4 py-3">
                           <div className="d-flex align-items-center">
-                            <div className="bg-light rounded-circle d-flex align-items-center justify-content-center me-3 d-none d-md-flex" style={{width: '32px', height: '32px', fontSize: '0.8rem'}}>
+                            <div className={`rounded-circle d-flex align-items-center justify-content-center me-3 d-none d-md-flex text-white fw-bold ${act.status === 5 ? 'bg-danger' : 'bg-light text-dark'}`} style={{width: '32px', height: '32px', fontSize: '0.8rem'}}>
                               {act.studentName.charAt(0)}
                             </div>
                             <div>
-                              <div className="fw-bold text-dark small">{act.studentName}</div>
+                              <div className={`fw-bold small ${act.status === 5 ? 'text-danger' : 'text-dark'}`}>{act.studentName}</div>
                               <div className="text-muted" style={{fontSize: '0.7rem'}}>{act.studentId}</div>
                             </div>
                           </div>
@@ -181,10 +217,10 @@ const Dashboard = () => {
                         </td>
                       </tr>
                     ))}
-                    {(!data?.recentActivities || data?.recentActivities.length === 0) && (
+                    {filteredActs.length === 0 && (
                       <tr>
                         <td colSpan="4" className="text-center py-5 text-muted">
-                          Chưa ghi nhận hoạt động nào trong thời gian gần đây.
+                          Không tìm thấy hoạt động nào phù hợp với bộ lọc.
                         </td>
                       </tr>
                     )}
