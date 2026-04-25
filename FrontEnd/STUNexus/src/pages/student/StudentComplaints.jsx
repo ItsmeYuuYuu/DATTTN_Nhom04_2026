@@ -41,10 +41,24 @@ const StudentComplaints = () => {
           axiosClient.get(`/diemdanh/student/${maSv}`),
           axiosClient.get(`/phanhoi/student/${maSv}`)
         ]);
-        // Chỉ cho phép khiếu nại các buổi bị vắng (3,4,5)
-        const filterable = (recRes.data || []).filter(r => r.trangThai >= 3);
+
+        const phanHoiList = histRes.data?.data || [];
+
+        // Tập hợp các MaDiemDanh đã được GV duyệt (trangThai=1) hoặc đang chờ (trangThai=0)
+        // → Ẩn khỏi dropdown để tránh gửi trùng và tránh rối
+        const dauDaXuLy = new Set(
+          phanHoiList
+            .filter(p => p.trangThai === 0 || p.trangThai === 1)
+            .map(p => p.maDiemDanh)
+        );
+
+        // Chỉ hiện: buổi bị vắng/lỗi (trangThai >= 3) VÀ chưa gửi phản hồi / chưa được duyệt
+        const filterable = (recRes.data || []).filter(
+          r => r.trangThai >= 3 && !dauDaXuLy.has(r.maDiemDanh)
+        );
+
         setRecords(filterable);
-        setHistory(histRes.data?.data || []);
+        setHistory(phanHoiList);
       } catch (err) {
         console.error(err);
       } finally {
@@ -152,7 +166,7 @@ const StudentComplaints = () => {
                 ))}
               </select>
               {records.length === 0 && (
-                <p className="text-muted small mt-1">Không có buổi học nào cần khiếu nại (chỉ hiển thị các buổi bị vắng).</p>
+                <p className="text-muted small mt-1">Không có buổi học nào cần khiếu nại — các buổi đã gửi phản hồi hoặc đã được xác nhận sẽ không hiển thị ở đây.</p>
               )}
             </div>
 

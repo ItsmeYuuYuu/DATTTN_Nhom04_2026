@@ -23,6 +23,7 @@ const LecturerAppeals = () => {
   const [filter, setFilter] = useState('all');  // 'all' | 'pending' | 'resolved'
   const [resolving, setResolving] = useState(null);
   const [resolveForm, setResolveForm] = useState({ phanHoiGv: '' });
+  const [processing, setProcessing] = useState(false); // Trạng thái đang xử lý nút Xác nhận
 
   // Modal minh chứng
   const [previewImg, setPreviewImg] = useState(null);
@@ -44,16 +45,24 @@ const LecturerAppeals = () => {
   useEffect(() => { loadAppeals(); }, [maGv]);
 
   const handleResolve = async (id, trangThai) => {
+    setProcessing(true);
     try {
-      await axiosClient.put(`/phanhoi/${id}/resolve`, {
+      const res = await axiosClient.put(`/phanhoi/${id}/resolve`, {
         trangThai,
         phanHoiGv: resolveForm.phanHoiGv
       });
+      // ✅ Optimistic update: cập nhật state ngay không cần gọi lại API
+      setAppeals(prev => prev.map(a =>
+        a.maPhanHoi === id
+          ? { ...a, trangThai, phanHoiGv: resolveForm.phanHoiGv }
+          : a
+      ));
       setResolving(null);
       setResolveForm({ phanHoiGv: '' });
-      await loadAppeals();
     } catch (err) {
       alert(err.response?.data?.message || 'Xử lý thất bại.');
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -69,9 +78,23 @@ const LecturerAppeals = () => {
   const pendingCount = appeals.filter(a => a.trangThai === 0).length;
 
   if (loading) {
+    // Skeleton loading — giữ bố cục, không bị trắng trang
     return (
-      <div className="d-flex justify-content-center align-items-center py-5">
-        <div className="spinner-border text-primary" /><span className="ms-3 text-muted">Đang tải...</span>
+      <div className="pb-4 pt-2">
+        <div className="d-flex align-items-center justify-content-between mb-1 px-2 mb-3">
+          <div className="bg-secondary bg-opacity-10 rounded" style={{height: '24px', width: '240px'}} />
+        </div>
+        {[1, 2, 3].map(i => (
+          <div key={i} className="card border-0 shadow-sm rounded-4 p-4 mb-3">
+            <div className="d-flex justify-content-between mb-3">
+              <div className="bg-secondary bg-opacity-10 rounded" style={{height: '18px', width: '160px'}} />
+              <div className="bg-secondary bg-opacity-10 rounded-pill" style={{height: '22px', width: '80px'}} />
+            </div>
+            <div className="bg-secondary bg-opacity-10 rounded-3 mb-3" style={{height: '64px'}} />
+            <div className="bg-secondary bg-opacity-10 rounded mb-2" style={{height: '14px', width: '80%'}} />
+            <div className="bg-secondary bg-opacity-10 rounded" style={{height: '14px', width: '40%'}} />
+          </div>
+        ))}
       </div>
     );
   }
@@ -199,9 +222,12 @@ const LecturerAppeals = () => {
                       <div className="d-flex gap-2">
                         <button
                           onClick={() => handleResolve(a.maPhanHoi, resolving === a.maPhanHoi ? 1 : 2)}
-                          className={`btn btn-sm rounded-pill ${resolving === a.maPhanHoi ? 'btn-success' : 'btn-danger'}`}
+                          disabled={processing}
+                          className={`btn btn-sm rounded-pill d-flex align-items-center gap-2 ${resolving === a.maPhanHoi ? 'btn-success' : 'btn-danger'}`}
                         >
-                          Xác nhận
+                          {processing ? (
+                            <><div className="spinner-border spinner-border-sm" role="status" style={{width:'12px',height:'12px'}} /> Đang xử lý...</>
+                          ) : 'Xác nhận'}
                         </button>
                         <button onClick={() => setResolving(null)} className="btn btn-sm btn-light rounded-pill">
                           Huỷ

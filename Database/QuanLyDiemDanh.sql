@@ -33,11 +33,11 @@ CREATE TABLE [dbo].[SinhVien] (
     [Lop] VARCHAR(50) NOT NULL, -- Lớp sinh hoạt (VD: D10CQCN)
     [Email] VARCHAR(100) NULL,
     [SoDienThoai] VARCHAR(15) NULL,
-    [PasskeyCredentialId] VARBINARY(MAX) NULL,
+    [PasskeyCredentialId] VARBINARY(900) NULL,  -- FIDO2 Credential ID (max 1023 bytes theo spec, thực tế < 100 bytes)
     [PasskeyPublicKey] VARBINARY(MAX) NULL,
     [PasskeySignCount] BIGINT NULL,
     [PasskeyUserHandle] VARBINARY(MAX) NULL,
-    [DeviceUUID] NVARCHAR(100) NULL,
+    [DeviceUUID] NVARCHAR(100) NULL,        -- Định danh thiết bị vật lý (1 máy = 1 SV)
     [AnhDaiDien] NVARCHAR(MAX) NULL
 );
 
@@ -124,10 +124,71 @@ GO
 -- ALTER TABLE SinhVien ALTER COLUMN AnhDaiDien NVARCHAR(MAX);
 
 -- =============================================
--- Cập nhật cột cho Passkeys (WebAuthn)
+-- Cập nhật cột cho Passkeys (WebAuthn) + DeviceUUID
+-- (Chạy từng lệnh nếu DB đã tồn tại, bỏ qua nếu cột đã có)
 -- =============================================
 -- ALTER TABLE SinhVien DROP COLUMN MaThietBi;
--- ALTER TABLE SinhVien ADD PasskeyCredentialId VARBINARY(MAX) NULL;
--- ALTER TABLE SinhVien ADD PasskeyPublicKey VARBINARY(MAX) NULL;
--- ALTER TABLE SinhVien ADD PasskeySignCount BIGINT NULL;
--- ALTER TABLE SinhVien ADD PasskeyUserHandle VARBINARY(MAX) NULL;
+-- ALTER TABLE SinhVien ADD PasskeyCredentialId VARBINARY(900) NULL; -- Dùng VARBINARY(900) để hỗ trợ Index
+-- ALTER TABLE SinhVien ADD PasskeyPublicKey    VARBINARY(MAX) NULL;
+-- ALTER TABLE SinhVien ADD PasskeySignCount    BIGINT NULL;
+-- ALTER TABLE SinhVien ADD PasskeyUserHandle   VARBINARY(MAX) NULL;
+-- ALTER TABLE SinhVien ADD DeviceUUID          NVARCHAR(100)  NULL;
+GO
+
+-- =============================================
+-- INDEXES — Tối ưu hóa tốc độ truy vấn
+-- =============================================
+
+-- [SinhVien] Tìm nhanh theo DeviceUUID khi kiểm tra "1 máy - 1 SV"
+-- Dùng bởi: WebAuthnController -> MakeCredentialOptions (Chốt chặn 2)
+CREATE NONCLUSTERED INDEX [IX_SinhVien_DeviceUUID]
+    ON [dbo].[SinhVien] ([DeviceUUID])
+    WHERE [DeviceUUID] IS NOT NULL;
+GO
+
+-- [SinhVien] Tìm nhanh theo PasskeyCredentialId khi xác thực sinh trắc học
+-- Dùng bởi: WebAuthnController -> MakeAssertionResult (mỗi lần điểm danh)
+CREATE NONCLUSTERED INDEX [IX_SinhVien_PasskeyCredentialId]
+    ON [dbo].[SinhVien] ([PasskeyCredentialId])
+    WHERE [PasskeyCredentialId] IS NOT NULL;
+GO
+
+-- [DiemDanh] Tìm nhanh lịch sử điểm danh theo sinh viên
+-- Dùng bởi: DiemDanhController -> GET /diemdanh/student/{maSv} (Student Dashboard)
+CREATE NONCLUSTERED INDEX [IX_DiemDanh_MaSV]
+    ON [dbo].[DiemDanh] ([MaSV])
+    INCLUDE ([TrangThai], [ThoiGianQuet]);
+GO
+
+-- [DiemDanh] Tìm nhanh theo buổi học (cho trang điểm danh real-time của GV)
+-- Dùng bởi: DiemDanhController -> GET /diemdanh/buoi/{maBuoiHoc}
+CREATE NONCLUSTERED INDEX [IX_DiemDanh_MaBuoiHoc]
+    ON [dbo].[DiemDanh] ([MaBuoiHoc])
+    INCLUDE ([MaSV], [TrangThai], [ThoiGianQuet]);
+GO
+
+-- [BuoiHoc] Tìm nhanh buổi học theo lớp và ngày học (Auto-scheduling & QR validation)
+CREATE NONCLUSTERED INDEX [IX_BuoiHoc_MaLop_NgayHoc]
+    ON [dbo].[BuoiHoc] ([MaLop], [NgayHoc])
+    INCLUDE ([TrangThaiBH], [GioBatDau], [GioKetThuc]);
+GO
+
+-- [LopHoc] Tìm nhanh lớp theo giảng viên — WHERE trong query khiếu nại
+-- Dùng bởi: PhanHoiController -> GetByLecturer (JOIN path: PhanHoi→DiemDanh→BuoiHoc→LopHoc WHERE MaGV)
+CREATE NONCLUSTERED INDEX [IX_LopHoc_MaGV]
+    ON [dbo].[LopHoc] ([MaGV])
+    INCLUDE ([MaLop], [TenLop], [MaMon]);
+GO
+
+-- [PhanHoi] Tìm nhanh phản hồi theo bản ghi điểm danh — cột JOIN chính
+-- Dùng bởi: PhanHoiController -> Create (kiểm tra trùng) và GetByStudent/GetByLecturer
+CREATE NONCLUSTERED INDEX [IX_PhanHoi_MaDiemDanh]
+    ON [dbo].[PhanHoi] ([MaDiemDanh])
+    INCLUDE ([TrangThai], [ThoiGianGui]);
+GO
+
+-- [PhanHoi] Tìm nhanh phản hồi chưa xử lý (TrangThai=0) — query phổ biến nhất
+CREATE NONCLUSTERED INDEX [IX_PhanHoi_TrangThai]
+    ON [dbo].[PhanHoi] ([TrangThai])
+    WHERE [TrangThai] = 0;
+GO

@@ -10,6 +10,8 @@ const StudentManagement = () => {
   const [uploading, setUploading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 50;
   
   const [formData, setFormData] = useState({ 
     maSv: '', 
@@ -140,10 +142,27 @@ const StudentManagement = () => {
     setShowModal(true);
   };
 
-  const filtered = students.filter(item => 
-    (item.hoTen || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (item.maSv || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Lọc theo từ khóa tìm kiếm
+  const filtered = students
+    .filter(item =>
+      (item.hoTen || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.maSv || '').toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    // Sắp xếp A-Z theo Tên (chữ cuối trong HoTen)
+    .sort((a, b) => {
+      const tenA = (a.hoTen || '').trim().split(' ').pop().toLowerCase();
+      const tenB = (b.hoTen || '').trim().split(' ').pop().toLowerCase();
+      return tenA.localeCompare(tenB, 'vi');
+    });
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  // Reset về trang 1 khi người dùng tìm kiếm
+  const handleSearch = (val) => {
+    setSearchTerm(val);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="container-fluid">
@@ -166,7 +185,7 @@ const StudentManagement = () => {
             <div className="col-md-6 col-lg-4">
               <div className="input-group overflow-hidden shadow-sm" style={{borderRadius: '8px'}}>
                 <span className="input-group-text bg-white border-0 text-muted"><FaSearch /></span>
-                <input type="text" className="form-control border-0 bg-white" placeholder="Tra cứu sinh viên theo tên/MSSV..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                <input type="text" className="form-control border-0 bg-white" placeholder="Tra cứu sinh viên theo tên/MSSV..." value={searchTerm} onChange={(e) => handleSearch(e.target.value)} />
               </div>
             </div>
           </div>
@@ -178,7 +197,7 @@ const StudentManagement = () => {
             <table className="table table-custom table-hover w-100 align-middle">
               <thead><tr><th>Mã Sinh Viên</th><th>Họ Tên</th><th>Lớp</th><th>Email liên hệ</th><th>Tài khoản cổng</th><th className="text-end">Tác vụ</th></tr></thead>
               <tbody>
-                {filtered.map(item => (
+                {paginated.map(item => (
                   <tr key={item.maSv}>
                     <td className="fw-semibold text-primary">{item.maSv}</td>
                     <td>
@@ -198,10 +217,51 @@ const StudentManagement = () => {
                     </td>
                   </tr>
                 ))}
-                {filtered.length === 0 && <tr><td colSpan="5" className="text-center py-5 text-muted">Không tìm thấy sinh viên nào.</td></tr>}
+                {filtered.length === 0 && <tr><td colSpan="6" className="text-center py-5 text-muted">Không tìm thấy sinh viên nào.</td></tr>}
               </tbody>
             </table>
           </div>
+          )}
+
+          {/* Phân trang */}
+          {totalPages > 1 && (
+            <div className="d-flex justify-content-between align-items-center pt-3 mt-2 border-top">
+              <span className="text-muted small">
+                Hiển thị <strong>{(currentPage - 1) * PAGE_SIZE + 1}</strong>–<strong>{Math.min(currentPage * PAGE_SIZE, filtered.length)}</strong> / <strong>{filtered.length}</strong> sinh viên
+              </span>
+              <nav>
+                <ul className="pagination pagination-sm mb-0 gap-1">
+                  <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                    <button className="page-link rounded-2 border-0 bg-light" onClick={() => setCurrentPage(p => p - 1)}>‹</button>
+                  </li>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 2)
+                    .reduce((acc, p, idx, arr) => {
+                      if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
+                      acc.push(p);
+                      return acc;
+                    }, [])
+                    .map((p, idx) =>
+                      p === '...' ? (
+                        <li key={`ellipsis-${idx}`} className="page-item disabled">
+                          <span className="page-link border-0 bg-transparent">…</span>
+                        </li>
+                      ) : (
+                        <li key={p} className={`page-item ${currentPage === p ? 'active' : ''}`}>
+                          <button
+                            className={`page-link rounded-2 border-0 ${currentPage === p ? 'bg-primary text-white' : 'bg-light text-dark'}`}
+                            onClick={() => setCurrentPage(p)}
+                          >{p}</button>
+                        </li>
+                      )
+                    )
+                  }
+                  <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                    <button className="page-link rounded-2 border-0 bg-light" onClick={() => setCurrentPage(p => p + 1)}>›</button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
           )}
         </div>
       </div>
