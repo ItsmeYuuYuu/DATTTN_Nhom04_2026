@@ -15,7 +15,7 @@ const SessionsManagement = () => {
 
   const fetchSessions = async () => {
     try {
-      const res = await axiosClient.get(`/buoihoc/class/${classId}`);
+      const res = await axiosClient.get(`/buoihoc/class/${classId}?t=${Date.now()}`);
       const data = Array.isArray(res.data) ? res.data : (res.data?.data || []);
       setSessions(data);
     } catch (err) {
@@ -138,9 +138,15 @@ const SessionsManagement = () => {
                 </div>
                 <p className="text-muted small mb-4 bg-light p-2 rounded-3 border-start border-4 border-warning">{b.ghiChu}</p>
                 <div className="d-flex gap-2 mt-auto">
-                  <button onClick={() => navigate(`/lecturer/qr-attendance/${b.maBuoiHoc}`)} className="btn btn-primary flex-grow-1 d-flex justify-content-center align-items-center gap-2 fw-semibold shadow-sm">
-                    <FaQrcode /> Khởi chạy QR
-                  </button>
+                  {b.trangThaiBh === 2 ? (
+                    <button className="btn btn-secondary flex-grow-1 d-flex justify-content-center align-items-center gap-2 fw-semibold shadow-sm" disabled>
+                      <FaQrcode /> Đã kết thúc
+                    </button>
+                  ) : (
+                    <button onClick={() => navigate(`/lecturer/qr-attendance/${b.maBuoiHoc}`)} className="btn btn-primary flex-grow-1 d-flex justify-content-center align-items-center gap-2 fw-semibold shadow-sm">
+                      <FaQrcode /> Khởi chạy QR
+                    </button>
+                  )}
                   <button onClick={() => navigate(`/lecturer/manual/${b.maBuoiHoc}`)} className="btn btn-outline-secondary flex-grow-1 d-flex justify-content-center align-items-center gap-2 fw-semibold bg-white shadow-sm">
                     <FaListUl /> Sổ tay
                   </button>

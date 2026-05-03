@@ -39,19 +39,19 @@ const AttendanceToday = () => {
     if (!maGv) return;
     setLoading(true);
     try {
-      // Lấy tất cả buổi học của GV hôm nay
-      const res = await axiosClient.get(`/buoihoc/today/${maGv}`);
+      // Lấy tất cả buổi học của GV hôm nay với cache-buster
+      const res = await axiosClient.get(`/buoihoc/today/${maGv}?t=${Date.now()}`);
       let data = res.data?.data || [];
 
       // Nếu người dùng chọn ngày khác hôm nay, lọc qua tất cả lớp của GV
       if (selectedDate !== new Date().toISOString().split("T")[0]) {
         // Lấy tất cả lớp của GV rồi lọc buổi theo ngày đã chọn
-        const lopRes = await axiosClient.get("/lophoc");
+        const lopRes = await axiosClient.get(`/lophoc?t=${Date.now()}`);
         const allClasses = (lopRes.data?.data || []).filter(
           (c) => c.maGv === maGv,
         );
         const sessionPromises = allClasses.map((c) =>
-          axiosClient.get(`/buoihoc/class/${c.maLop}`),
+          axiosClient.get(`/buoihoc/class/${c.maLop}?t=${Date.now()}`),
         );
         const results = await Promise.all(sessionPromises);
         const allSessions = results.flatMap((r) => r.data || []);
@@ -82,7 +82,7 @@ const AttendanceToday = () => {
   }, [maGv, selectedDate]);
 
   const getStatusBadge = (trangThai) => {
-    if (trangThai === 1)
+    if (trangThai === 2)
       return (
         <span
           className="badge d-flex align-items-center gap-1 px-3 py-2"
@@ -93,6 +93,19 @@ const AttendanceToday = () => {
           }}
         >
           <FaCheckCircle /> Đã điểm danh
+        </span>
+      );
+    if (trangThai === 1)
+      return (
+        <span
+          className="badge d-flex align-items-center gap-1 px-3 py-2"
+          style={{
+            background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+            borderRadius: "20px",
+            fontSize: "0.78rem",
+          }}
+        >
+          <FaSync className="fa-spin" /> Đang mở QR
         </span>
       );
     return (
@@ -174,9 +187,9 @@ const AttendanceToday = () => {
           >
             <div className="card-body p-3 text-white">
               <div className="fs-2 fw-bold">
-                {sessions.filter((s) => s.trangThaiBh === 1).length}
+                {sessions.filter((s) => s.trangThaiBh === 1 || s.trangThaiBh === 2).length}
               </div>
-              <div className="small opacity-75">Đã điểm danh</div>
+              <div className="small opacity-75">Đã / Đang điểm danh</div>
             </div>
           </div>
         </div>
@@ -190,7 +203,7 @@ const AttendanceToday = () => {
           >
             <div className="card-body p-3 text-white">
               <div className="fs-2 fw-bold">
-                {sessions.filter((s) => s.trangThaiBh !== 1).length}
+                {sessions.filter((s) => !s.trangThaiBh || s.trangThaiBh === 0).length}
               </div>
               <div className="small opacity-75">Chưa điểm danh</div>
             </div>
@@ -245,8 +258,10 @@ const AttendanceToday = () => {
                 style={{
                   borderRadius: "16px",
                   borderLeft:
-                    session.trangThaiBh === 1
+                    session.trangThaiBh === 2
                       ? "4px solid #10b981"
+                      : session.trangThaiBh === 1
+                      ? "4px solid #3b82f6"
                       : "4px solid #f59e0b",
                   transition: "transform 0.2s, box-shadow 0.2s",
                 }}
@@ -266,8 +281,8 @@ const AttendanceToday = () => {
                     {getStatusBadge(session.trangThaiBh)}
                     {session.loaiBuoiHoc === 1 && (
                       <span
-                        className="badge bg-info bg-opacity-15 text-info border border-info border-opacity-25 px-2 py-1 rounded-pill"
-                        style={{ fontSize: "0.7rem" }}
+                        className="badge bg-warning text-dark px-2 py-1 rounded-pill shadow-sm"
+                        style={{ fontSize: "0.75rem" }}
                       >
                         Học bù
                       </span>
@@ -301,33 +316,28 @@ const AttendanceToday = () => {
 
                   {/* Nút điểm danh */}
                   <div className="d-flex gap-2">
-                    <button
-                      className="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-semibold py-2 rounded-pill shadow-sm"
-                      onClick={() =>
-                        navigate(
-                          `/lecturer/qr-attendance/${session.maBuoiHoc}`,
-                          {
-                            state: { maLop: session.maLop },
-                          },
-                        )
-                      }
-                    >
-                      <FaQrcode /> Điểm danh QR
-                    </button>
-                    <button
-                      className="btn btn-outline-secondary d-flex align-items-center justify-content-center gap-2 fw-semibold py-2 px-3 rounded-pill shadow-sm"
-                      title="Điểm danh thủ công"
-                      onClick={() =>
-                        navigate(
-                          `/lecturer/qr-attendance/${session.maBuoiHoc}`,
-                          {
-                            state: { maLop: session.maLop },
-                          },
-                        )
-                      }
-                    >
-                      <FaClipboardList />
-                    </button>
+                    {session.trangThaiBh === 2 ? (
+                      <button
+                        className="btn btn-secondary flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-semibold py-2 rounded-pill shadow-sm"
+                        disabled
+                      >
+                        <FaQrcode /> Đã kết thúc
+                      </button>
+                    ) : (
+                      <button
+                        className="btn btn-primary flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-semibold py-2 rounded-pill shadow-sm"
+                        onClick={() =>
+                          navigate(
+                            `/lecturer/qr-attendance/${session.maBuoiHoc}`,
+                            {
+                              state: { maLop: session.maLop },
+                            },
+                          )
+                        }
+                      >
+                        <FaQrcode /> Điểm danh QR
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
