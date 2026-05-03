@@ -119,23 +119,6 @@ CREATE TABLE [dbo].[PhanHoi] (
 GO
 
 -- =============================================
--- Cập nhật cột AnhDaiDien (chạy nếu DB đã tồn tại)
--- =============================================
--- ALTER TABLE SinhVien ALTER COLUMN AnhDaiDien NVARCHAR(MAX);
-
--- =============================================
--- Cập nhật cột cho Passkeys (WebAuthn) + DeviceUUID
--- (Chạy từng lệnh nếu DB đã tồn tại, bỏ qua nếu cột đã có)
--- =============================================
--- ALTER TABLE SinhVien DROP COLUMN MaThietBi;
--- ALTER TABLE SinhVien ADD PasskeyCredentialId VARBINARY(900) NULL; -- Dùng VARBINARY(900) để hỗ trợ Index
--- ALTER TABLE SinhVien ADD PasskeyPublicKey    VARBINARY(MAX) NULL;
--- ALTER TABLE SinhVien ADD PasskeySignCount    BIGINT NULL;
--- ALTER TABLE SinhVien ADD PasskeyUserHandle   VARBINARY(MAX) NULL;
--- ALTER TABLE SinhVien ADD DeviceUUID          NVARCHAR(100)  NULL;
-GO
-
--- =============================================
 -- INDEXES — Tối ưu hóa tốc độ truy vấn
 -- =============================================
 
