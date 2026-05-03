@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaPlus, FaQrcode, FaListUl, FaCalendarAlt, FaTrash } from 'react-icons/fa';
+import { FaArrowLeft, FaPlus, FaQrcode, FaListUl, FaCalendarAlt, FaTrash, FaCheckCircle, FaBroadcastTower, FaClock } from 'react-icons/fa';
 import axiosClient from '../../utils/axiosClient';
 
 // Kết nối trực tiếp tới BuoiHocController của Backend C#
@@ -80,6 +80,27 @@ const SessionsManagement = () => {
     setShowModal(true);
   };
 
+  const SessionStatusBadge = ({ status }) => {
+    if (status === 2) return (
+      <span className="badge d-inline-flex align-items-center gap-1 px-2 py-1 rounded-pill"
+        style={{ backgroundColor: '#d1fae5', color: '#065f46', fontSize: '0.72rem' }}>
+        <FaCheckCircle /> Đã điểm danh
+      </span>
+    );
+    if (status === 1) return (
+      <span className="badge d-inline-flex align-items-center gap-1 px-2 py-1 rounded-pill"
+        style={{ backgroundColor: '#dbeafe', color: '#1d4ed8', fontSize: '0.72rem' }}>
+        <FaBroadcastTower /> Đang mở
+      </span>
+    );
+    return (
+      <span className="badge d-inline-flex align-items-center gap-1 px-2 py-1 rounded-pill"
+        style={{ backgroundColor: '#fef3c7', color: '#92400e', fontSize: '0.72rem' }}>
+        <FaClock /> Chưa điểm danh
+      </span>
+    );
+  };
+
   return (
     <div className="container-fluid">
       <div className="d-flex justify-content-between align-items-center mb-4 mt-2">
@@ -104,11 +125,14 @@ const SessionsManagement = () => {
               <button onClick={() => handleDelete(b.maBuoiHoc)} className="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle shadow d-flex justify-content-center align-items-center" style={{ zIndex: 10, width: '30px', height: '30px', padding: 0 }} title="Hủy Buổi Học này"><FaTrash /></button>
               <div className="card-body p-4 pt-5">
                 <div className="d-flex align-items-center mb-3">
-                  <div className="bg-primary bg-opacity-10 text-primary p-3 rounded-3 me-3">
+                  <div className="bg-primary bg-opacity-10 text-primary p-3 rounded-3 me-3 flex-shrink-0">
                     <FaCalendarAlt className="fs-3" />
                   </div>
-                  <div>
-                    <h6 className="fw-bold mb-0 text-dark">Ngày: {b.ngayHoc}</h6>
+                  <div className="flex-grow-1">
+                    <div className="d-flex justify-content-between align-items-start gap-2">
+                      <h6 className="fw-bold mb-0 text-dark">Ngày: {b.ngayHoc}</h6>
+                      <SessionStatusBadge status={b.trangThaiBh} />
+                    </div>
                     <span className="text-muted fw-medium small">{b.gioBatDau} - {b.gioKetThuc}</span>
                   </div>
                 </div>
