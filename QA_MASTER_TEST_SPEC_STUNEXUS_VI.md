@@ -214,6 +214,119 @@
 | DB-INT-004 | Quan hệ phản hồi | Xóa attendance có phản hồi | Đúng theo FK/cascade |
 | DB-INT-005 | Unique logic DeviceUUID | Bind 1 device cho 2 SV qua API | Lần 2 bị chặn |
 
+### 11.1 Chi tiết bắt buộc cho TC-DB-001 .. TC-DB-005
+
+#### TC-DB-001: Unique `DiemDanh(MaBuoiHoc, MaSV)` hoạt động
+- Mục tiêu:
+  - Đảm bảo 1 sinh viên chỉ có tối đa 1 bản ghi điểm danh cho 1 buổi học.
+- Preconditions:
+  - Có sẵn `BuoiHoc` hợp lệ: `@MaBuoiHoc`.
+  - Có sẵn `SinhVien` hợp lệ: `@MaSV`.
+- Dữ liệu test:
+  - `TrangThai=1`, `ThoiGianQuet=GETDATE()` cho insert lần 1.
+  - Insert lần 2 dùng cùng cặp `(@MaBuoiHoc, @MaSV)`, khác trạng thái.
+- Steps (SQL):
+  1. Insert bản ghi điểm danh lần 1 vào `DiemDanh`.
+  2. Insert bản ghi điểm danh lần 2 với cùng `MaBuoiHoc` + `MaSV`.
+  3. Query đếm số dòng theo cặp khóa.
+- Expected:
+  - Bước 1: thành công.
+  - Bước 2: thất bại do vi phạm unique constraint `UQ_DiemDanh_1Lan`.
+  - Bước 3: kết quả đếm = 1.
+- Pass criteria:
+  - DB trả lỗi unique đúng loại và không phát sinh dòng thứ 2.
+
+#### TC-DB-002: FK `LopHoc -> MonHoc/GiangVien` hoạt động
+- Mục tiêu:
+  - Đảm bảo không thể tạo lớp với `MaMon`/`MaGV` không tồn tại.
+  - Đảm bảo không thể xóa `MonHoc` hoặc `GiangVien` đang được tham chiếu.
+- Preconditions:
+  - Có một `MonHoc` và một `GiangVien` hợp lệ.
+- Dữ liệu test:
+  - Case A: `MaMon='MON_KHONG_TON_TAI'`.
+  - Case B: `MaGV='GV_KHONG_TON_TAI'`.
+  - Case C: bản ghi `MonHoc`/`GiangVien` đang được 1 `LopHoc` dùng.
+- Steps (SQL):
+  1. Thử insert `LopHoc` với `MaMon` không tồn tại.
+  2. Thử insert `LopHoc` với `MaGV` không tồn tại.
+  3. Tạo `LopHoc` hợp lệ tham chiếu `MonHoc`/`GiangVien` thật.
+  4. Thử delete `MonHoc`/`GiangVien` đang bị tham chiếu.
+- Expected:
+  - Bước 1,2: bị chặn bởi FK.
+  - Bước 3: thành công.
+  - Bước 4: bị chặn bởi FK.
+- Pass criteria:
+  - Không có orphan row trong `LopHoc`.
+
+#### TC-DB-003: FK `DiemDanh -> BuoiHoc/SinhVien` hoạt động
+- Mục tiêu:
+  - Đảm bảo điểm danh chỉ ghi nhận cho buổi học và sinh viên tồn tại.
+- Preconditions:
+  - Có `BuoiHoc` và `SinhVien` hợp lệ cho case dương tính.
+- Dữ liệu test:
+  - Case A: `MaBuoiHoc` không tồn tại.
+  - Case B: `MaSV` không tồn tại.
+  - Case C: cả 2 tồn tại.
+- Steps (SQL):
+  1. Insert `DiemDanh` với `MaBuoiHoc` không tồn tại.
+  2. Insert `DiemDanh` với `MaSV` không tồn tại.
+  3. Insert `DiemDanh` hợp lệ.
+- Expected:
+  - Bước 1: lỗi FK `FK_DiemDanh_BuoiHoc`.
+  - Bước 2: lỗi FK `FK_DiemDanh_SinhVien`.
+  - Bước 3: thành công.
+- Pass criteria:
+  - Chỉ case C tồn tại trong DB.
+
+#### TC-DB-004: FK `PhanHoi -> DiemDanh` cascade đúng
+- Mục tiêu:
+  - Xác nhận hành vi cascade khi xóa bản ghi `DiemDanh` có `PhanHoi` liên quan.
+- Preconditions:
+  - Có 1 `DiemDanh` hợp lệ và ít nhất 1 `PhanHoi` gắn với `MaDiemDanh`.
+- Dữ liệu test:
+  - `PhanHoi.TrangThai=0` hoặc `1`.
+- Steps (SQL):
+  1. Insert 1 bản ghi `PhanHoi` cho `MaDiemDanh` mục tiêu.
+  2. Verify tồn tại cả `DiemDanh` và `PhanHoi`.
+  3. Delete bản ghi `DiemDanh` cha.
+  4. Query lại `PhanHoi` theo `MaDiemDanh`.
+- Expected:
+  - Sau bước 3, bản ghi `PhanHoi` con tự động bị xóa theo `ON DELETE CASCADE`.
+  - Query bước 4 trả 0 dòng.
+- Pass criteria:
+  - Không còn orphan `PhanHoi`.
+- Lưu ý:
+  - Nếu luồng ứng dụng chủ động xóa `PhanHoi` trước, vẫn cần test DB thuần để chứng minh ràng buộc cascade hoạt động độc lập.
+
+#### TC-DB-005: Index theo `DeviceUUID`, `PasskeyCredentialId` hoạt động với volume lớn
+- Mục tiêu:
+  - Đảm bảo truy vấn chống gian lận/đăng ký passkey vẫn nhanh khi dữ liệu lớn.
+- Preconditions:
+  - Dùng DB test riêng (không phải production).
+  - Có script tạo dữ liệu tải lớn.
+- Dữ liệu test khuyến nghị:
+  - `SinhVien`: 100,000 bản ghi.
+  - Trong đó:
+    - 70,000 bản ghi có `DeviceUUID` khác nhau.
+    - 70,000 bản ghi có `PasskeyCredentialId` (VARBINARY).
+  - `DeviceUUID` và `PasskeyCredentialId` được phân bố đủ để có hit/miss.
+- Steps:
+  1. Nạp dữ liệu lớn vào `SinhVien`.
+  2. Chạy truy vấn lookup theo `DeviceUUID` (hit và miss), bật `SET STATISTICS IO, TIME ON`.
+  3. Chạy truy vấn lookup theo `PasskeyCredentialId` (hit và miss), bật `SET STATISTICS IO, TIME ON`.
+  4. Kiểm tra execution plan.
+  5. So sánh với trường hợp tắt index (chỉ trên DB sandbox, không làm trên môi trường dùng chung).
+- Expected:
+  - Execution plan dùng `IX_SinhVien_DeviceUUID` cho truy vấn `WHERE DeviceUUID = ...`.
+  - Execution plan dùng `IX_SinhVien_PasskeyCredentialId` cho truy vấn `WHERE PasskeyCredentialId = ...`.
+  - Logical reads và thời gian truy vấn thấp hơn rõ rệt so với full scan.
+- Ngưỡng pass khuyến nghị (điều chỉnh theo phần cứng):
+  - Lookup đơn lẻ theo key: P95 < 100ms trên DB test cỡ 100k SV.
+  - Logical reads không tăng tuyến tính theo toàn bảng.
+- Pass criteria:
+  - Có bằng chứng execution plan + thống kê IO/TIME cho cả hit và miss.
+  - Không timeout ở các truy vấn lookup anti-fraud chính.
+
 ## 12) Test bảo mật
 | ID | Loại | Mục tiêu | Bước | Kỳ vọng |
 |---|---|---|---|---|
@@ -255,4 +368,3 @@
 - Bộ bằng chứng API (request/response log).
 - Script kiểm tra DB + snapshot trước/sau.
 - Danh sách lỗi có bước tái hiện rõ ràng.
-

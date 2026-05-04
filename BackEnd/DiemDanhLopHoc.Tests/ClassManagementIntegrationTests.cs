@@ -13,19 +13,17 @@ public class ClassManagementIntegrationTests : BaseIntegrationTest
     }
 
     [Fact]
-    public async Task GetAll_ReturnsSuccessAndData()
+    public async Task GetAll_WithoutToken_ReturnsUnauthorized()
     {
         // Act
         var response = await Client.GetAsync("/api/lophoc");
 
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var result = await response.Content.ReadFromJsonAsync<dynamic>();
-        // Check success property (as per LopHocController implementation)
+        // Assert - Chắc chắn trả về 401 vì đã có [Authorize]
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
     [Fact]
-    public async Task Create_WithMissingData_ReturnsBadRequest()
+    public async Task Create_WithoutToken_ReturnsUnauthorized()
     {
         // Arrange
         var request = new TaoLopHocDto { MaLop = "" }; // Missing required fields
@@ -34,7 +32,6 @@ public class ClassManagementIntegrationTests : BaseIntegrationTest
         var response = await Client.PostAsJsonAsync("/api/lophoc", request);
 
         // Assert
-        // The controller uses try-catch around creation, so it might return 400 with exception message
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 }
