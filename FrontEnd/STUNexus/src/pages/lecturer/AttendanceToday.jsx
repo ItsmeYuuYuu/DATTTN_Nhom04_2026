@@ -9,6 +9,7 @@ import {
   FaClock,
   FaCheckCircle,
   FaHourglassHalf,
+  FaCalendarTimes
 } from "react-icons/fa";
 import axiosClient from "../../utils/axiosClient";
 import { AuthContext } from "../../context/AuthContext";
@@ -81,7 +82,20 @@ const AttendanceToday = () => {
     fetchSessions();
   }, [maGv, selectedDate]);
 
-  const getStatusBadge = (trangThai) => {
+  const getStatusBadge = (trangThai, loai) => {
+    if (loai === 2)
+      return (
+        <span
+          className="badge d-flex align-items-center gap-1 px-3 py-2"
+          style={{
+            background: "linear-gradient(135deg, #ef4444, #b91c1c)",
+            borderRadius: "20px",
+            fontSize: "0.78rem",
+          }}
+        >
+          <FaCalendarTimes /> Đã báo nghỉ
+        </span>
+      );
     if (trangThai === 2)
       return (
         <span
@@ -203,7 +217,7 @@ const AttendanceToday = () => {
           >
             <div className="card-body p-3 text-white">
               <div className="fs-2 fw-bold">
-                {sessions.filter((s) => !s.trangThaiBh || s.trangThaiBh === 0).length}
+                {sessions.filter((s) => s.loaiBuoiHoc !== 2 && (!s.trangThaiBh || s.trangThaiBh === 0)).length}
               </div>
               <div className="small opacity-75">Chưa điểm danh</div>
             </div>
@@ -278,7 +292,7 @@ const AttendanceToday = () => {
                 <div className="card-body p-4">
                   {/* Badge trạng thái */}
                   <div className="d-flex justify-content-between align-items-start mb-3">
-                    {getStatusBadge(session.trangThaiBh)}
+                    {getStatusBadge(session.trangThaiBh, session.loaiBuoiHoc)}
                     {session.loaiBuoiHoc === 1 && (
                       <span
                         className="badge bg-warning text-dark px-2 py-1 rounded-pill shadow-sm"
@@ -316,12 +330,12 @@ const AttendanceToday = () => {
 
                   {/* Nút điểm danh */}
                   <div className="d-flex gap-2">
-                    {session.trangThaiBh === 2 ? (
+                    {session.trangThaiBh === 2 || session.loaiBuoiHoc === 2 ? (
                       <button
                         className="btn btn-secondary flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-semibold py-2 rounded-pill shadow-sm"
                         disabled
                       >
-                        <FaQrcode /> Đã kết thúc
+                        <FaQrcode /> {session.loaiBuoiHoc === 2 ? "Đã báo nghỉ" : "Đã kết thúc"}
                       </button>
                     ) : (
                       <button

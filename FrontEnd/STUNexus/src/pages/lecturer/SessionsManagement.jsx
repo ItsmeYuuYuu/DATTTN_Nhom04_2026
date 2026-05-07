@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaPlus, FaQrcode, FaListUl, FaCalendarAlt, FaTrash, FaCheckCircle, FaBroadcastTower, FaClock } from 'react-icons/fa';
+import { FaArrowLeft, FaPlus, FaQrcode, FaListUl, FaCalendarAlt, FaTrash, FaCheckCircle, FaBroadcastTower, FaClock, FaCalendarTimes } from 'react-icons/fa';
 import axiosClient from '../../utils/axiosClient';
 
 // Kết nối trực tiếp tới BuoiHocController của Backend C#
@@ -44,14 +44,14 @@ const SessionsManagement = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Cảnh báo: Việc huỷ lịch buổi học sẽ xóa bỏ toàn bộ dữ liệu điểm danh tương ứng. Bạn có chắc chắn?')) {
+  const handleReportAbsence = async (id) => {
+    if (window.confirm('Xác nhận báo nghỉ cho buổi học này? Hệ thống sẽ không cho phép điểm danh và không tính buổi này vào thống kê chuyên cần.')) {
       try {
-        await axiosClient.delete(`/buoihoc/${id}`);
-        alert('Đã xóa buổi học thành công.');
+        await axiosClient.put(`/buoihoc/${id}/cancel`);
+        alert('Đã báo nghỉ thành công.');
         fetchSessions();
       } catch (err) {
-        alert(err.response?.data?.message || 'Lỗi khi xóa.');
+        alert(err.response?.data?.message || 'Lỗi khi báo nghỉ.');
       }
     }
   };
@@ -80,7 +80,13 @@ const SessionsManagement = () => {
     setShowModal(true);
   };
 
-  const SessionStatusBadge = ({ status }) => {
+  const SessionStatusBadge = ({ status, loai }) => {
+    if (loai === 2) return (
+      <span className="badge d-inline-flex align-items-center gap-1 px-2 py-1 rounded-pill"
+        style={{ backgroundColor: '#fee2e2', color: '#b91c1c', fontSize: '0.72rem' }}>
+        <FaCalendarTimes /> Đã báo nghỉ
+      </span>
+    );
     if (status === 2) return (
       <span className="badge d-inline-flex align-items-center gap-1 px-2 py-1 rounded-pill"
         style={{ backgroundColor: '#d1fae5', color: '#065f46', fontSize: '0.72rem' }}>
@@ -121,8 +127,10 @@ const SessionsManagement = () => {
       <div className="row g-4">
         {sessions.length > 0 ? sessions.map(b => (
           <div className="col-12 col-md-6 col-xl-4" key={b.maBuoiHoc}>
-            <div className="card glass-panel border-0 shadow-sm h-100 position-relative overflow-hidden" style={{ borderRadius: '12px' }}>
-              <button onClick={() => handleDelete(b.maBuoiHoc)} className="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle shadow d-flex justify-content-center align-items-center" style={{ zIndex: 10, width: '30px', height: '30px', padding: 0 }} title="Hủy Buổi Học này"><FaTrash /></button>
+            <div className="card glass-panel border-0 shadow-sm h-100 position-relative overflow-hidden" style={{ borderRadius: '12px', opacity: b.loaiBuoiHoc === 2 ? 0.8 : 1 }}>
+              {b.loaiBuoiHoc !== 2 && (
+                <button onClick={() => handleReportAbsence(b.maBuoiHoc)} className="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2 rounded-circle shadow d-flex justify-content-center align-items-center bg-white" style={{ zIndex: 10, width: '30px', height: '30px', padding: 0 }} title="Báo Nghỉ Buổi Học"><FaCalendarTimes /></button>
+              )}
               <div className="card-body p-4 pt-5">
                 <div className="d-flex align-items-center mb-3">
                   <div className="bg-primary bg-opacity-10 text-primary p-3 rounded-3 me-3 flex-shrink-0">
@@ -131,23 +139,23 @@ const SessionsManagement = () => {
                   <div className="flex-grow-1">
                     <div className="d-flex justify-content-between align-items-start gap-2">
                       <h6 className="fw-bold mb-0 text-dark">Ngày: {b.ngayHoc}</h6>
-                      <SessionStatusBadge status={b.trangThaiBh} />
+                      <SessionStatusBadge status={b.trangThaiBh} loai={b.loaiBuoiHoc} />
                     </div>
                     <span className="text-muted fw-medium small">{b.gioBatDau} - {b.gioKetThuc}</span>
                   </div>
                 </div>
                 <p className="text-muted small mb-4 bg-light p-2 rounded-3 border-start border-4 border-warning">{b.ghiChu}</p>
-                <div className="d-flex gap-2 mt-auto">
-                  {b.trangThaiBh === 2 ? (
+                 <div className="d-flex gap-2 mt-auto">
+                  {b.trangThaiBh === 2 || b.loaiBuoiHoc === 2 ? (
                     <button className="btn btn-secondary flex-grow-1 d-flex justify-content-center align-items-center gap-2 fw-semibold shadow-sm" disabled>
-                      <FaQrcode /> Đã kết thúc
+                      <FaQrcode /> {b.loaiBuoiHoc === 2 ? 'Đã báo nghỉ' : 'Đã kết thúc'}
                     </button>
                   ) : (
                     <button onClick={() => navigate(`/lecturer/qr-attendance/${b.maBuoiHoc}`)} className="btn btn-primary flex-grow-1 d-flex justify-content-center align-items-center gap-2 fw-semibold shadow-sm">
                       <FaQrcode /> Khởi chạy QR
                     </button>
                   )}
-                  <button onClick={() => navigate(`/lecturer/manual/${b.maBuoiHoc}`)} className="btn btn-outline-secondary flex-grow-1 d-flex justify-content-center align-items-center gap-2 fw-semibold bg-white shadow-sm">
+                  <button onClick={() => navigate(`/lecturer/manual/${b.maBuoiHoc}`)} className="btn btn-outline-secondary flex-grow-1 d-flex justify-content-center align-items-center gap-2 fw-semibold bg-white shadow-sm" disabled={b.loaiBuoiHoc === 2}>
                     <FaListUl /> Sổ tay
                   </button>
                 </div>

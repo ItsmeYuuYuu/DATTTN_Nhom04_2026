@@ -14,10 +14,29 @@ const QRAttendance = () => {
   const [token, setToken] = useState("");
   const [timeLeft, setTimeLeft] = useState(30);
   const [isActive, setIsActive] = useState(true);
+  const [session, setSession] = useState(null);
 
   const hasShownGpsWarning = useRef(false);
 
   useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const res = await axiosClient.get(`/buoihoc/${buoiHocId}`);
+        if (res.data.loaiBuoiHoc === 2) {
+          alert("Buổi học này đã báo nghỉ. Không thể điểm danh!");
+          navigate(-1);
+        }
+        setSession(res.data);
+      } catch (err) {
+        console.error("Lỗi tải thông tin buổi học:", err);
+      }
+    };
+    fetchSession();
+  }, [buoiHocId]);
+
+  useEffect(() => {
+    if (session?.loaiBuoiHoc === 2) return;
+
     const updateSessionStatus = async (lat = null, lng = null) => {
       try {
         await axiosClient.put(`/buoihoc/${buoiHocId}/status`, {
