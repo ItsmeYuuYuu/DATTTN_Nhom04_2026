@@ -82,14 +82,18 @@ const StudentCheckin = () => {
               if (verifyRes.data.distance !== undefined) setDistance(verifyRes.data.distance);
             } catch (err) {
               setStatus('error');
-              setMessage(err.response?.data?.message || err.message || 'Điểm danh thất bại!');
+              const errMsg = err.response?.data?.message || err.message || 'Điểm danh thất bại!';
+              setMessage(errMsg);
+              
               const data = err.response?.data || {};
               if (data.distance !== undefined) setDistance(data.distance);
               
               if (data.isGpsFraud !== undefined || data.isDeviceFraud !== undefined) {
                  setErrorFlags({ isGpsFraud: !!data.isGpsFraud, isDeviceFraud: !!data.isDeviceFraud });
               } else {
-                 setErrorFlags({ isGpsFraud: true, isDeviceFraud: false });
+                 // Nếu là lỗi sinh trắc học thì không bật cờ lỗi GPS
+                 const isBiometricError = errMsg.includes('Sinh trắc học');
+                 setErrorFlags({ isGpsFraud: !isBiometricError, isDeviceFraud: false });
               }
             }
           },
