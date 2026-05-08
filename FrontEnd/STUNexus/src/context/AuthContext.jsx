@@ -108,7 +108,8 @@ export const AuthProvider = ({ children }) => {
             // Cập nhật thêm dữ liệu bổ sung từ response (như AnhDaiDien, hasPasskey)
             const extraData = { 
               hasPasskey: !!response.data.data.hasPasskey,
-              AnhDaiDien: response.data.data.anhDaiDien
+              AnhDaiDien: response.data.data.anhDaiDien,
+              isDifferentDevice: !!response.data.data.isDifferentDevice
             };
             
             const merged = { ...userData, ...extraData };
@@ -119,7 +120,11 @@ export const AuthProvider = ({ children }) => {
             if (userData.role === 'student' && userData.MaSV && !response.data.data.hasPasskey) {
               await registerPasskey(userData.MaSV);
             }
-            return { success: true, role: userData.role };
+            return { 
+              success: true, 
+              role: userData.role,
+              isDifferentDevice: !!response.data.data.isDifferentDevice
+            };
           }
       }
       return { success: false, message: response.data?.message || 'Đăng nhập thất bại' };

@@ -22,6 +22,10 @@ const Login = () => {
     try {
       const result = await login(username, password);
       if (result.success) {
+        if (result.role === 'student' && result.isDifferentDevice) {
+           alert("🛡️ Thông báo Bảo mật: Bạn đang đăng nhập từ một thiết bị khác với máy dùng để điểm danh. Bạn vẫn có thể xem thông tin, nhưng sẽ KHÔNG THỂ thực hiện điểm danh QR trên máy này!");
+        }
+
         if (result.role === 'admin') navigate('/admin/dashboard');
         else if (result.role === 'lecturer') navigate('/lecturer/dashboard');
         else if (result.role === 'student') navigate('/student/dashboard');
