@@ -87,9 +87,11 @@ export const AuthProvider = ({ children }) => {
   // Hàm Login: Gọi API thật từ Backend C#
   const login = async (username, password) => {
     try {
+      const deviceUuid = getOrCreateDeviceUUID();
       const response = await axiosClient.post('/auth/login', {
         taiKhoan: username,
-        matKhau: password
+        matKhau: password,
+        deviceUuid: deviceUuid
       });
 
       if (response.data && response.data.success) {
