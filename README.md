@@ -91,43 +91,83 @@ Giải pháp tự động hóa và minh bạch hóa quy trình điểm danh tạ
 ```
 DATTTN_NHOM04_2026/
 ├── BackEnd/
-│   └── DiemDanhLopHoc/
-│       ├── Controllers/
-│       │   ├── AuthController.cs       # Đăng nhập, đổi mật khẩu
-│       │   ├── WebAuthnController.cs   # Đăng ký & xác thực Passkey (FIDO2)
-│       │   ├── GiangVienController.cs  # Quản lý GV + Reset thiết bị SV
-│       │   ├── SinhVienController.cs   # Quản lý Sinh viên
-│       │   ├── LopHocController.cs     # Quản lý Lớp học & Buổi học
-│       │   ├── DiemDanhController.cs   # Logic điểm danh (QR + GPS + Passkey)
-│       │   └── AdminController.cs      # Dashboard & thống kê Admin
-│       ├── Models/                     # Entity models (SinhVien, BuoiHoc, DiemDanh...)
-│       ├── DTOs/                       # Data Transfer Objects
-│       ├── Data/
-│       │   └── AppDbContext.cs         # EF Core DbContext
-│       └── Utils/
-│           └── TimeUtils.cs            # Tiện ích múi giờ Việt Nam (UTC+7)
+│   ├── DiemDanhLopHoc/
+│   │   ├── Controllers/
+│   │   │   ├── AdminController.cs         # Dashboard + thống kê Admin
+│   │   │   ├── AuthController.cs          # Đăng nhập, đổi mật khẩu (JWT + hash)
+│   │   │   ├── BuoiHocController.cs       # Quản lý buổi học, trạng thái, báo nghỉ, QR token
+│   │   │   ├── DiemDanhController.cs      # Lịch sử/ thống kê/ bulk update điểm danh
+│   │   │   ├── ExcelExportController.cs   # Xuất Excel theo buổi & toàn kỳ
+│   │   │   ├── GiangVienController.cs     # Quản lý giảng viên + reset thiết bị SV
+│   │   │   ├── LopHocController.cs        # Quản lý lớp, thêm/xóa SV trong lớp
+│   │   │   ├── MonHocsController.cs       # Quản lý môn học
+│   │   │   ├── PhanHoiController.cs       # Khiếu nại điểm danh
+│   │   │   ├── SinhVienController.cs      # Quản lý sinh viên + avatar + lớp của SV
+│   │   │   └── WebAuthnController.cs      # Đăng ký & xác thực Passkey (FIDO2)
+│   │   ├── Data/
+│   │   │   └── AppDbContext.cs
+│   │   ├── DTOs/
+│   │   ├── Models/
+│   │   ├── Services/
+│   │   │   └── UploadService.cs           # Upload avatar (Cloudinary)
+│   │   ├── Utils/
+│   │   │   ├── PasswordUtils.cs           # BCrypt hash/verify
+│   │   │   ├── QrUtils.cs                 # QR token động + validate
+│   │   │   └── TimeUtils.cs               # Múi giờ VN
+│   │   ├── Program.cs
+│   │   ├── appsettings.json
+│   │   └── appsettings.Development.json
+│   └── DiemDanhLopHoc.Tests/              # Integration tests
 │
-└── FrontEnd/
-    └── STUNexus/
-        └── src/
-            ├── context/
-            │   └── AuthContext.jsx     # Session JWT + Passkey registration
-            ├── layouts/
-            │   ├── AdminLayout.jsx
-            │   ├── LecturerLayout.jsx
-            │   └── StudentLayout.jsx
-            ├── components/
-            │   ├── Header.jsx
-            │   ├── Sidebar.jsx          # Admin sidebar
-            │   ├── LecturerSidebar.jsx
-            │   └── StudentSidebar.jsx
-            └── pages/
-                ├── admin/
-                ├── lecturer/
-                └── student/
-                    ├── StudentDashboard.jsx
-                    ├── StudentCheckin.jsx   # Trang xác thực QR + GPS + Passkey
-                    └── StudentProfile.jsx   # Quản lý Passkey cá nhân
+├── FrontEnd/
+│   └── STUNexus/
+│       └── src/
+│           ├── components/
+│           │   ├── Header.jsx
+│           │   ├── ProtectedRoute.jsx
+│           │   ├── Sidebar.jsx
+│           │   ├── LecturerSidebar.jsx
+│           │   └── StudentSidebar.jsx
+│           ├── context/
+│           │   └── AuthContext.jsx
+│           ├── layouts/
+│           │   ├── AdminLayout.jsx
+│           │   ├── LecturerLayout.jsx
+│           │   └── StudentLayout.jsx
+│           ├── pages/
+│           │   ├── auth/
+│           │   │   └── Login.jsx
+│           │   ├── admin/
+│           │   │   ├── Dashboard.jsx
+│           │   │   ├── StudentManagement.jsx
+│           │   │   ├── LecturerManagement.jsx
+│           │   │   ├── SubjectManagement.jsx
+│           │   │   ├── ClassManagement.jsx
+│           │   │   └── ClassStudents.jsx
+│           │   ├── lecturer/
+│           │   │   ├── LecturerDashboard.jsx
+│           │   │   ├── LecturerClasses.jsx
+│           │   │   ├── AttendanceToday.jsx
+│           │   │   ├── SessionsManagement.jsx
+│           │   │   ├── QRAttendance.jsx
+│           │   │   ├── ManualAttendance.jsx
+│           │   │   ├── LecturerAppeals.jsx
+│           │   │   └── LecturerProfile.jsx
+│           │   └── student/
+│           │       ├── StudentDashboard.jsx
+│           │       ├── StudentScanner.jsx
+│           │       ├── StudentCheckin.jsx
+│           │       ├── StudentClasses.jsx
+│           │       ├── StudentHistory.jsx
+│           │       ├── StudentComplaints.jsx
+│           │       └── StudentProfile.jsx
+│           ├── utils/
+│           │   └── axiosClient.js
+│           ├── App.jsx
+│           └── main.jsx
+│
+├── Database/
+│   └── QuanLyDiemDanh.sql
 ```
 
 ---
@@ -135,9 +175,9 @@ DATTTN_NHOM04_2026/
 ## 🚀 Hướng dẫn chạy dự án
 
 ### Yêu cầu
-- .NET 8 SDK
-- Node.js 18+
-- SQL Server (LocalDB hoặc Express)
+- SQL Server + SSMS; .NET 8 SDK; Node.js 18+
+- Visual Studio 2022 (có workload ASP.NET and web development)
+- VS Code
 
 ### Backend
 ```bash
