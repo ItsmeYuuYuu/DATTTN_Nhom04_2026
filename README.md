@@ -160,7 +160,7 @@ Nhấn F5 (hoặc IIS Express) để chạy.
 → Backend thường chạy ở https://localhost:7xxx hoặc http://localhost:5xxx. Ghi lại port này.
 ```
 
-### Cập nhật Database (lần đầu hoặc sau khi thêm cột mới)
+### Cập nhật Database
 ```bash
 Mở SSMS, kết nối với SQL Server (LocalDB hoặc Express).
 Vào folder Database trong repo.
@@ -181,7 +181,7 @@ Tìm file config (thường trong src/config.js, env, hoặc axios instance).
 ```
 
 > ⚠️ **Lưu ý:** WebAuthn (Passkey) **bắt buộc phải chạy trên HTTPS** hoặc `localhost`. Trên Android, sinh viên cần dùng trình duyệt **Chrome** hoặc **Safari** (iOS) — các trình duyệt bên thứ ba như Cốc Cốc, Zalo In-app có thể không hỗ trợ.
-## #Thứ tự chạy khuyến nghị:
+### Thứ tự chạy khuyến nghị:
 - Chạy Database trước (SSMS).
 - Chạy Backend (Visual Studio) → kiểm tra API bằng Swagger (thường là /swagger).
 - Chạy Frontend (VS Code).
