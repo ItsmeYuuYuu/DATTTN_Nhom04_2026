@@ -145,24 +145,46 @@ cd BackEnd/DiemDanhLopHoc
 # Cập nhật chuỗi kết nối trong appsettings.json
 dotnet run
 # API chạy tại: https://localhost:7xxx
+Hoặc
+Mở folder BackEnd → double click file DiemDanhLopHoc.sln để mở bằng Visual Studio.
+Trong Solution Explorer, tìm file appsettings.json (trong project DiemDanhLopHoc).
+Sửa ConnectionStrings cho đúng:
+JSON
+"ConnectionStrings": {
+  "DefaultConnection": "Server=.;Database= QuanLyDiemDanh.sql;Trusted_Connection=True;TrustServerCertificate=True;"
+}
+Server=. hoặc (localdb)\MSSQLLocalDB nếu dùng LocalDB.
+Thay tên QuanLyDiemDanh.sql bằng tên DB vừa tạo.
+Build solution (Ctrl + Shift + B). Nếu lỗi package thì Restore NuGet Packages.
+Nhấn F5 (hoặc IIS Express) để chạy.
+→ Backend thường chạy ở https://localhost:7xxx hoặc http://localhost:5xxx. Ghi lại port này.
 ```
 
-### Cập nhật Database (lần đầu hoặc sau khi thêm cột mới)
-```sql
--- Chạy trong SQL Server Management Studio (SSMS)
-ALTER TABLE [dbo].[SinhVien] ADD [DeviceUUID] NVARCHAR(100) NULL;
+### Cập nhật Database
+```bash
+Mở SSMS, kết nối với SQL Server (LocalDB hoặc Express).
+Vào folder Database trong repo.
+Tìm file script SQL QuanLyDiemDanh.sql.
+Mở file đó trong SSMS → Execute (F5) toàn bộ để tạo database + tables + data mẫu.
 ```
 
 ### Frontend
 ```bash
-cd FrontEnd/STUNexus
+Mở VS Code, mở folder FrontEnd/STUNexus.
+Mở terminal trong VS Code (`Ctrl + ``) và chạy lần lượt:
 npm install
 npm run dev
-# Ứng dụng chạy tại: http://localhost:5173
+→ FE sẽ chạy ở http://localhost:5173 (Vite mặc định).
+Config API URL:
+Tìm file config (thường trong src/config.js, env, hoặc axios instance).
+Đổi baseURL thành địa chỉ Backend vừa chạy (ví dụ: https://localhost:7123 hoặc port tương ứng).
 ```
 
 > ⚠️ **Lưu ý:** WebAuthn (Passkey) **bắt buộc phải chạy trên HTTPS** hoặc `localhost`. Trên Android, sinh viên cần dùng trình duyệt **Chrome** hoặc **Safari** (iOS) — các trình duyệt bên thứ ba như Cốc Cốc, Zalo In-app có thể không hỗ trợ.
-
+### Thứ tự chạy khuyến nghị:
+- Chạy Database trước (SSMS).
+- Chạy Backend (Visual Studio) → kiểm tra API bằng Swagger (thường là /swagger).
+- Chạy Frontend (VS Code).
 ---
 
 ## 👥 Nhóm thực hiện
