@@ -227,6 +227,7 @@ Tìm file config (thường trong src/config.js, env, hoặc axios instance).
 - Chạy Frontend (VS Code).
 ---
 
+### Link Demo: https://quanlydiemdanh.vercel.app
 ## 👥 Nhóm thực hiện
 
 **Nhóm 04 — Đồ án Tốt nghiệp 2026**
